@@ -90,3 +90,24 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             --title "$GITHUB_REF_NAME" \
             --notes-file /tmp/release-notes.md
+
+      - name: Generate and upload checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # GitHub auto-creates source tarballs — download it
+          VERSION="${GITHUB_REF_NAME#v}"
+          TARBALL="beads-superpowers-${VERSION}.tar.gz"
+          gh release download "$GITHUB_REF_NAME" \
+            --pattern "*.tar.gz" \
+            --output "$TARBALL" 2>/dev/null || \
+          curl -fsSL "https://github.com/${{ github.repository }}/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz" \
+            -o "$TARBALL"
+
+          # Generate checksums
+          sha256sum "$TARBALL" > checksums.txt
+          echo "Generated checksums.txt:"
+          cat checksums.txt
+
+          # Upload as release asset
+          gh release upload "$GITHUB_REF_NAME" checksums.txt --clobber
