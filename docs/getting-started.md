@@ -63,9 +63,9 @@ codex_hooks = true
 
 ```bash
 npx skills add DollarDill/beads-superpowers --all -y -g
+# npx installs skills only — no hooks. Run the setup skill in your
+# chosen agentic terminal to configure the SessionStart hook.
 ```
-
-After installing, tell your agent: **"Run the setup skill"** — this configures the SessionStart hook.
 
 ## First project setup
 
