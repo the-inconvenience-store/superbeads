@@ -43,6 +43,8 @@ FLAG_TEST=false
 FLAG_VERSION=""
 UPGRADING=false
 HAS_BEADS=false
+HAS_CODEX=false
+HAS_OPENCODE=false
 VERSION=""
 agent_count=0
 
@@ -166,6 +168,13 @@ detect_beads() {
   if command -v bd >/dev/null 2>&1; then HAS_BEADS=true; fi
 }
 
+detect_clis() {
+  HAS_CODEX=false
+  HAS_OPENCODE=false
+  command -v codex    >/dev/null 2>&1 && HAS_CODEX=true
+  command -v opencode >/dev/null 2>&1 && HAS_OPENCODE=true
+}
+
 # --- Phase 2: Consent ---
 print_consent() {
   echo
@@ -180,6 +189,12 @@ print_consent() {
   echo "  • Create SessionStart hook at $HOOK_SCRIPT"
   echo "  • Create UserPromptSubmit hook at $REMINDER_SCRIPT"
   echo "  • Register both hooks in $SETTINGS_FILE (backup created first)"
+  if [ "$HAS_CODEX" = true ]; then
+    echo "  • Install skills to ~/.codex/skills/ (Codex CLI detected)"
+  fi
+  if [ "$HAS_OPENCODE" = true ]; then
+    echo "  • Install skills + plugin to ~/.config/opencode/ (OpenCode detected)"
+  fi
   echo
 }
 
@@ -189,6 +204,74 @@ wait_for_consent() {
   fi
   printf "Press Enter to continue (or Ctrl+C to cancel)... "
   read -r
+}
+
+install_codex_support() {
+  local extract_dir="$1"
+  local codex_skills="$HOME/.codex/skills"
+  mkdir -p "$codex_skills"
+  local installed=0
+  for skill in "${KNOWN_SKILLS[@]}"; do
+    if [ -d "$extract_dir/skills/$skill" ]; then
+      cp -rf "$extract_dir/skills/$skill" "$codex_skills/$skill"
+      installed=$((installed + 1))
+    fi
+  done
+  success "Codex: installed $installed skills to $codex_skills/"
+  info "Codex: enable hooks with: [features] codex_hooks = true in ~/.codex/config.toml"
+}
+
+install_opencode_support() {
+  local extract_dir="$1"
+  local oc_skills="$HOME/.config/opencode/skills"
+  mkdir -p "$oc_skills"
+  local installed=0
+  for skill in "${KNOWN_SKILLS[@]}"; do
+    if [ -d "$extract_dir/skills/$skill" ]; then
+      cp -rf "$extract_dir/skills/$skill" "$oc_skills/$skill"
+      installed=$((installed + 1))
+    fi
+  done
+  success "OpenCode: installed $installed skills to $oc_skills/"
+
+  local oc_plugins="$HOME/.config/opencode/plugins"
+  mkdir -p "$oc_plugins"
+  if [ -f "$extract_dir/opencode/beads-superpowers-plugin.ts" ]; then
+    cp -f "$extract_dir/opencode/beads-superpowers-plugin.ts" "$oc_plugins/"
+    success "OpenCode: installed plugin to $oc_plugins/"
+  else
+    warn "OpenCode plugin not found in release tarball — skipping"
+  fi
+}
+
+uninstall_codex_support() {
+  local codex_skills="$HOME/.codex/skills"
+  local removed=0
+  for skill in "${KNOWN_SKILLS[@]}"; do
+    if [ -d "$codex_skills/$skill" ]; then
+      rm -rf "${codex_skills:?}/$skill"
+      removed=$((removed + 1))
+    fi
+  done
+  [ $removed -gt 0 ] && success "Codex: removed $removed skills from $codex_skills/"
+}
+
+uninstall_opencode_support() {
+  local oc_skills="$HOME/.config/opencode/skills"
+  local removed=0
+  for skill in "${KNOWN_SKILLS[@]}"; do
+    if [ -d "$oc_skills/$skill" ]; then
+      rm -rf "${oc_skills:?}/$skill"
+      removed=$((removed + 1))
+    fi
+  done
+  [ $removed -gt 0 ] && success "OpenCode: removed $removed skills from $oc_skills/"
+
+  local oc_plugin="$HOME/.config/opencode/plugins/beads-superpowers-plugin.ts"
+  if [ -f "$oc_plugin" ]; then
+    rm -f "$oc_plugin"
+    success "OpenCode: removed plugin"
+  fi
 }
 
 # --- Phase 3: Install ---
@@ -234,6 +317,15 @@ do_install() {
       warn "Agent not found in release tarball: $agent.md"
     fi
   done
+
+  # Multi-CLI support
+  detect_clis
+  if [ "$HAS_CODEX" = true ]; then
+    install_codex_support "$tmpdir/extracted"
+  fi
+  if [ "$HAS_OPENCODE" = true ]; then
+    install_opencode_support "$tmpdir/extracted"
+  fi
 
   info "Creating SessionStart hook..."
   write_hook_script
@@ -405,6 +497,18 @@ print_next_steps() {
     echo "       npm install -g @beads/bd   # any platform (npm)"
     echo "  4. In each project: bd init"
   fi
+  if [ "$HAS_CODEX" = true ]; then
+    echo
+    printf '  %bCodex CLI:%b\n' "${BOLD}" "${NC}"
+    echo "    Add to ~/.codex/config.toml:"
+    echo "      [features]"
+    echo "      codex_hooks = true"
+  fi
+  if [ "$HAS_OPENCODE" = true ]; then
+    echo
+    printf '  %bOpenCode:%b\n' "${BOLD}" "${NC}"
+    echo "    Plugin installed — skills and hooks are active automatically."
+  fi
   echo
 }
 
@@ -456,6 +560,9 @@ PYEOF
     info "Removed hooks from settings.json"
   fi
 
+  uninstall_codex_support
+  uninstall_opencode_support
+
   rm -f "$VERSION_FILE"
   success "beads-superpowers uninstalled"
 }
@@ -473,6 +580,12 @@ print_dry_run() {
   echo "  5. Backup $SETTINGS_FILE"
   echo "  6. Register SessionStart hook in settings.json"
   echo "  7. Write version marker to $VERSION_FILE"
+  if [ "$HAS_CODEX" = true ]; then
+    echo "  8. Install skills to ~/.codex/skills/ (Codex CLI detected)"
+  fi
+  if [ "$HAS_OPENCODE" = true ]; then
+    echo "  9. Install skills + plugin to ~/.config/opencode/ (OpenCode detected)"
+  fi
   echo
   echo "No files were modified."
 }
@@ -583,6 +696,7 @@ main() {
 
   detect_upstream_conflict
   resolve_version
+  detect_clis
 
   # Handle dry-run before existing-install detection (which may exit 0)
   if [ "$FLAG_DRY_RUN" = true ]; then
