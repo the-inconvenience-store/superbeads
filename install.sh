@@ -58,6 +58,8 @@ HAS_WGET=0
 HAS_PYTHON3=0
 # shellcheck disable=SC2034  # INSTALL_TIER used in later install tiers
 INSTALL_TIER=""
+# shellcheck disable=SC2034  # STAGING_DIR used in later install tiers
+STAGING_DIR=""
 VERSION=""
 agent_count=0
 
@@ -135,6 +137,46 @@ verify_checksum() {
   fi
 
   success "Checksum verified (SHA-256)"
+  return 0
+}
+
+# --- Staging helpers ---
+create_staging() {
+  # Clean up any previous staging dir (prevents leak when tiers cascade)
+  [ -n "${STAGING_DIR:-}" ] && rm -rf "$STAGING_DIR"
+  STAGING_DIR=$(mktemp -d)
+  trap 'rm -rf "${STAGING_DIR:-}"' EXIT
+}
+
+# Move staged skills to final destinations. Primary target (Claude Code) is required;
+# secondary targets (Codex, OpenCode) warn on failure.
+promote_staging() {
+  local source_skills="$1"
+  local count=0
+
+  mkdir -p "$SKILLS_DIR"
+  for skill in "${KNOWN_SKILLS[@]}"; do
+    if [ -d "$source_skills/$skill" ]; then
+      rm -rf "${SKILLS_DIR:?}/$skill"
+      mv -f "$source_skills/$skill" "$SKILLS_DIR/$skill"
+      count=$((count + 1))
+    fi
+  done
+
+  if [ "$count" -lt 20 ]; then
+    warn "Only $count skills found (expected 22)"
+    return 1
+  fi
+
+  # Secondary CLIs — warn on failure, don't rollback primary
+  if [ "$HAS_CODEX" = 1 ]; then
+    install_codex_from "$SKILLS_DIR" || warn "Codex skill install failed — Claude Code install succeeded"
+  fi
+  if [ "$HAS_OPENCODE" = 1 ]; then
+    install_opencode_from "$SKILLS_DIR" "$source_skills" || warn "OpenCode install failed — Claude Code install succeeded"
+  fi
+
+  success "Installed $count skills"
   return 0
 }
 
@@ -354,6 +396,94 @@ uninstall_opencode_support() {
     rm -f "$oc_plugin"
     success "OpenCode: removed plugin"
   fi
+}
+
+install_codex_from() {
+  local source_dir="$1"
+  local codex_skills="$HOME/.codex/skills"
+  mkdir -p "$codex_skills"
+  local installed=0
+  for skill in "${KNOWN_SKILLS[@]}"; do
+    if [ -d "$source_dir/$skill" ]; then
+      cp -rf "$source_dir/$skill" "$codex_skills/$skill"
+      installed=$((installed + 1))
+    fi
+  done
+  success "Codex: installed $installed skills to $codex_skills/"
+}
+
+install_opencode_from() {
+  local source_dir="$1"
+  local extract_dir="${2:-}"
+  local oc_skills="$HOME/.config/opencode/skills"
+  mkdir -p "$oc_skills"
+  local installed=0
+  for skill in "${KNOWN_SKILLS[@]}"; do
+    if [ -d "$source_dir/$skill" ]; then
+      cp -rf "$source_dir/$skill" "$oc_skills/$skill"
+      installed=$((installed + 1))
+    fi
+  done
+  success "OpenCode: installed $installed skills to $oc_skills/"
+
+  # Copy TS plugin if available from extract dir
+  if [ -n "$extract_dir" ]; then
+    local oc_plugins="$HOME/.config/opencode/plugins"
+    mkdir -p "$oc_plugins"
+    if [ -f "$extract_dir/opencode/beads-superpowers-plugin.ts" ]; then
+      cp -f "$extract_dir/opencode/beads-superpowers-plugin.ts" "$oc_plugins/"
+      success "OpenCode: installed plugin to $oc_plugins/"
+    fi
+  fi
+}
+
+setup_hooks() {
+  local extract_dir="${1:-}"
+
+  if [ "$HAS_PYTHON3" = 0 ]; then
+    warn "python3 not found — cannot register hooks in settings.json"
+    warn "Run the 'setup' skill in your first Claude Code session to configure hooks"
+    return 1
+  fi
+
+  mkdir -p "$HOOKS_DIR"
+
+  info "Creating SessionStart hook..."
+  write_hook_script
+
+  info "Creating UserPromptSubmit hook..."
+  if [ -n "$extract_dir" ] && [ -f "$extract_dir/hooks/superpowers-reminder.sh" ]; then
+    cp -f "$extract_dir/hooks/superpowers-reminder.sh" "$REMINDER_SCRIPT"
+    chmod +x "$REMINDER_SCRIPT"
+  else
+    write_reminder_fallback
+  fi
+
+  if [ -f "$SETTINGS_FILE" ]; then
+    local backup
+    backup="${SETTINGS_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
+    cp -f "$SETTINGS_FILE" "$backup"
+    info "Settings backup: ${backup/$HOME/\~}"
+  fi
+
+  info "Registering hooks in settings.json..."
+  register_hook
+
+  return 0
+}
+
+write_reminder_fallback() {
+  cat > "$REMINDER_SCRIPT" << 'REMINDEREOF'
+#!/usr/bin/env bash
+set -euo pipefail
+MSG="SUPERPOWERS REMINDER: Before responding, check if any beads-superpowers skill applies to this task."
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || [ -n "${CODEX_PLUGIN_ROOT:-}" ]; then
+  printf '{"hookSpecificOutput":{"additionalContext":"%s"}}\n' "$MSG"
+else
+  printf '{"additionalContext":"%s"}\n' "$MSG"
+fi
+REMINDEREOF
+  chmod +x "$REMINDER_SCRIPT"
 }
 
 # --- Phase 3: Install ---
