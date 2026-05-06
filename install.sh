@@ -14,7 +14,7 @@ set -euo pipefail
 
 # --- Configuration ---
 REPO="DollarDill/beads-superpowers"
-FALLBACK_VERSION="0.5.2"
+FALLBACK_VERSION="0.5.3"
 SKILLS_DIR="${BEADS_SUPERPOWERS_SKILLS_DIR:-$HOME/.claude/skills}"
 HOOKS_DIR="$HOME/.claude/hooks"
 SETTINGS_FILE="$HOME/.claude/settings.json"
@@ -899,8 +899,9 @@ do_test() {
   info "Test mode: installing to $test_home/"
   echo
 
-  # Re-run ourselves with overridden HOME and --yes
-  BEADS_SUPERPOWERS_SKILLS_DIR="$test_home/skills" HOME="$test_home" bash "$0" --yes
+  # Re-run ourselves with overridden HOME, --yes, and --version to force Tier 3 (tarball).
+  # --version skips Tiers 1-2, which don't install to $SKILLS_DIR (plugin goes to cache).
+  BEADS_SUPERPOWERS_SKILLS_DIR="$test_home/skills" HOME="$test_home" bash "$0" --yes --version "$FALLBACK_VERSION"
 
   echo
   info "Running verification checks..."
