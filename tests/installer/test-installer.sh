@@ -131,8 +131,10 @@ assert_output_contains() {
 
 assert_no_skills_installed() {
   local name="$1"
-  local count
-  count=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+  local count=0
+  if [ -d "$HOME/.claude/skills" ]; then
+    count=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+  fi
   if [ "$count" -eq 0 ]; then
     echo "  [PASS] $name (0 skills)"; pass=$((pass + 1))
   else
@@ -317,11 +319,9 @@ bash /src/install.sh --uninstall 2>/dev/null || true
 rm -rf "$HOME/.claude/skills"
 
 # 4b: Corrupted tarball fails with checksum error
-cp -f /src/release.tar.gz /tmp/release.tar.gz
-# Corrupt the tarball — flip byte at offset 100
-printf '\xff' | dd of=/tmp/release.tar.gz bs=1 seek=100 count=1 conv=notrunc 2>/dev/null
-
+# Start server first (copies clean tarball), then corrupt it in-place
 start_http_server
+printf '\xff' | dd of=/tmp/release.tar.gz bs=1 seek=100 count=1 conv=notrunc 2>/dev/null
 output=$(BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" \
 BEADS_SUPERPOWERS_CHECKSUMS_URL="http://localhost:8888/checksums.txt" \
   bash /src/install.sh --yes --version "$VERSION" 2>&1) || true
