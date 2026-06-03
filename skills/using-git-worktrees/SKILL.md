@@ -33,6 +33,8 @@ Raw `git worktree add` misses `.gitignore` setup and safety checks — while bea
 | Remove worktree | `bd worktree remove <name>` | ~~`git worktree remove`~~ |
 | Worktree info | `bd worktree info` | ~~(no equivalent)~~ |
 
+> **Note:** Claude Code provides a native `EnterWorktree` tool for worktree management. For non-beads projects, this is a viable alternative. For beads-integrated projects, `bd worktree create` remains mandatory — it handles database sharing and `.gitignore` management that `EnterWorktree` does not provide.
+
 ## Directory Selection
 
 `bd worktree create <name>` handles directory selection automatically:
@@ -52,6 +54,42 @@ git check-ignore -q <worktree-path> 2>/dev/null
 ```
 
 **If NOT ignored** (edge case — `bd worktree create` should have handled this): add the path to `.gitignore` and commit.
+
+## Pre-Flight Checks
+
+Run these checks BEFORE creating any worktree.
+
+### Detect Existing Worktree Isolation
+
+Check whether you are already inside a worktree:
+
+```bash
+GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
+GIT_COMMON=$(git rev-parse --git-common-dir 2>/dev/null)
+if [ "$GIT_DIR" != "$GIT_COMMON" ]; then
+  echo "WARNING: Already inside a worktree."
+fi
+```
+
+If already in a worktree, warn and use `AskUserQuestion` to ask whether to proceed (creating a nested worktree) or abort.
+
+### Submodule Guard
+
+Check whether you are inside a git submodule:
+
+```bash
+SUPERPROJECT=$(git rev-parse --show-superproject-working-tree 2>/dev/null)
+if [ -n "$SUPERPROJECT" ]; then
+  echo "WARNING: Inside a git submodule. Worktrees behave unpredictably here."
+fi
+```
+
+If inside a submodule, warn and **stop**. Do NOT create worktrees inside submodules.
+
+### Consent Flow
+
+- **User-initiated** (manual worktree creation): Use `AskUserQuestion` before creating — "I'd like to create a worktree at `<path>`. Proceed?"
+- **Dispatched by subagent-driven-development**: Consent is implicit — the orchestrator authorized worktree creation. Skip the prompt.
 
 ## Creation Steps
 
