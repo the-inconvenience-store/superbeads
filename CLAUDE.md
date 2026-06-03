@@ -110,7 +110,7 @@ A plugin for Claude Code, Codex, and OpenCode that merges [Superpowers](https://
 ## Common Gotchas
 
 - **Embedded Dolt mode** — This project uses embedded Dolt (`.beads/metadata.json` `dolt_mode: embedded`). `bd dolt push/pull/status/show` all fail. No remote configured.
-- **`export.git-add` pollutes branches** — `bd config set export.git-add false` BEFORE starting branch work. Default is `true`, which auto-stages `issues.jsonl` on every commit.
+- **`export.git-add` pollutes branches (v1.0.2 and earlier)** — In beads v1.0.2 and earlier, `export.git-add` defaulted to `true`, auto-staging `issues.jsonl` on every commit. Workaround: `bd config set export.git-add false` before branch work. In **v1.0.4+**, auto-export is opt-in by default — no workaround needed. Check with `bd config show`.
 - **DCI only works in SKILL.md** — The `!` backtick syntax (Dynamic Context Injection) only works in `SKILL.md` and `.claude/commands/*.md`. NOT in agent `.md` files, `CLAUDE.md`, or rules files.
 - **Never run `npx skills add` from inside this repo** — It replaces real skill files in `skills/` with symlinks to `.agents/skills/`, destroying the source. Use `-g` flag from `/tmp` or another directory.
 - **Never chain `open` after `bd` commands** — `open <file>` hangs when chained in the same Bash invocation with `bd` commands. Always run `open` as a standalone call.
