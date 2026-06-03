@@ -28,6 +28,9 @@
 | `bd update <id> --claim` | Claim as in-progress |
 | `bd close <id> --reason "..."` | Complete with evidence |
 | `bd dep add <child> <depends-on>` | Add dependency |
+| `bd batch` (stdin or `-f`) | Atomic multi-op transactions (close, dep, update) |
+| `bd -C <path> <command>` | Run bd against another directory without cd |
+| `bd ready --explain` | Show why tasks are/aren't ready |
 
 ### Memory
 
