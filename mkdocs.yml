@@ -1,5 +1,10 @@
 site_name: beads-superpowers
-site_url: https://dollardill.github.io/beads-superpowers
+site_url: https://dollardill.github.io/beads-superpowers/
+site_description: >-
+  22 composable skills for AI coding agents — TDD, systematic debugging,
+  two-stage code review, and persistent task memory via Beads. Works with
+  Claude Code, Codex CLI, and OpenCode.
+site_author: Dillon Frawley
 site_dir: site
 repo_url: https://github.com/DollarDill/beads-superpowers
 repo_name: DollarDill/beads-superpowers
@@ -33,6 +38,7 @@ theme:
 
 plugins:
   - search
+  - social
   - git-revision-date-localized:
       enable_creation_date: true
       type: date
