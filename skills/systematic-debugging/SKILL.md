@@ -68,6 +68,7 @@ You MUST complete each phase before proceeding to the next.
    - Git diff, recent commits
    - New dependencies, config changes
    - Environmental differences
+   - For workflow-level issues (blocked beads, stuck execution): `bd ready --explain` shows dependency reasoning
 
 4. **Gather Evidence in Multi-Component Systems**
 

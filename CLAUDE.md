@@ -193,6 +193,7 @@ This plugin uses `bd` (beads) for ALL task tracking.
 | Claim work | `bd update <id> --claim` |
 | Complete work | `bd close <id> --reason "description"` |
 | Check remaining | `bd ready --parent <epic-id>` |
+| Explain ready/blocked | `bd ready --explain` |
 | Show blocked | `bd blocked` |
 | Epic status | `bd epic status <id>` |
 | Add dependency | `bd dep add <child> <depends-on>` |
