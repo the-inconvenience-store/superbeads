@@ -11,11 +11,11 @@ echo "=== Test: requesting-code-review — Security Bug Detection ==="
 echo ""
 
 # Create isolated temp directory for the test repo
-TMPDIR=$(mktemp -d)
-trap 'rm -rf "$TMPDIR"' EXIT
+TEST_REPO=$(mktemp -d)
+trap 'rm -rf "$TEST_REPO"' EXIT
 
 # Plant security bugs in test files
-cat > "$TMPDIR/db.py" <<'EOF'
+cat > "$TEST_REPO/db.py" <<'EOF'
 import sqlite3
 
 def get_user(username):
@@ -27,7 +27,7 @@ def get_user(username):
     return cursor.fetchone()
 EOF
 
-cat > "$TMPDIR/auth.py" <<'EOF'
+cat > "$TEST_REPO/auth.py" <<'EOF'
 import json
 
 def register_user(username, password):
@@ -38,7 +38,7 @@ def register_user(username, password):
     return True
 EOF
 
-cat > "$TMPDIR/api_client.py" <<'EOF'
+cat > "$TEST_REPO/api_client.py" <<'EOF'
 import requests
 
 def fetch_data(api_key, endpoint):
@@ -48,18 +48,21 @@ def fetch_data(api_key, endpoint):
     return response.json()
 EOF
 
-# Initialize a real git repo with the planted bugs
-cd "$TMPDIR"
+# Initialize a real git repo with the planted bugs.
+# Use an empty initial commit so the planted files form a real second commit,
+# giving git diff a non-empty range to analyze.
+cd "$TEST_REPO"
 git init --quiet
 git config user.email "test@test.com"
 git config user.name "Test User"
+git commit --allow-empty -m "Initial commit" --quiet
 git add .
 git commit -m "Add database, auth, and API client modules" --quiet
 
-BASE_SHA=$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)
+BASE_SHA=$(git rev-parse HEAD~1)
 HEAD_SHA=$(git rev-parse HEAD)
 
-echo "Test repo: $TMPDIR"
+echo "Test repo: $TEST_REPO"
 echo "Planted 3 security bugs: SQL injection, plaintext passwords, credential logging"
 echo ""
 echo "Running code reviewer..."
@@ -79,9 +82,9 @@ PLAN_OR_REQUIREMENTS: Implement user lookup, registration, and API access with s
 BASE_SHA: $BASE_SHA
 HEAD_SHA: $HEAD_SHA
 
-The git repo to review is at: $TMPDIR
+The git repo to review is at: $TEST_REPO
 
-Run: cd $TMPDIR && git diff $BASE_SHA..$HEAD_SHA
+Run: cd $TEST_REPO && git diff $BASE_SHA..$HEAD_SHA
 
 Apply the code-reviewer.md template to identify Critical security issues in the diff."
 
