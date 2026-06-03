@@ -1,3 +1,8 @@
+---
+title: beads-superpowers — Process Discipline and Persistent Memory for AI Coding Agents
+description: 22 skills enforce TDD, debugging, and code review for AI agents. Dolt-backed task memory persists across sessions. Supports Claude Code, Codex, and OpenCode.
+---
+
 # beads-superpowers
 
 A plugin for Claude Code, Codex, and OpenCode with **{{ skill_count }}** skills that enforce development practices — TDD, systematic debugging, design-before-code, two-stage code review — and a persistent issue tracker that remembers context across sessions.

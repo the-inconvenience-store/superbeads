@@ -1,3 +1,7 @@
+---
+description: Quick-reference bd command cheat sheet, skill routing table, troubleshooting guide for common issues, and upstream version tracking for superpowers and beads.
+---
+
 # Tips & Tricks
 
 ## Beads cheat sheet

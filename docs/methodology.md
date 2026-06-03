@@ -1,3 +1,7 @@
+---
+description: Bright-line rules and anti-rationalization tables enforce agent discipline. Dolt-backed beads track every task across sessions through a 10-state lifecycle.
+---
+
 # Methodology
 
 ## The problem

@@ -1,3 +1,7 @@
+---
+description: An 11-state FSM orchestrator routes requests through triage, research, planning, TDD implementation, a 4-check review gate, and parallel batch mode for speed.
+---
+
 # Example Workflow
 
 How beads-superpowers skills orchestrate a development lifecycle through an 11-state FSM.

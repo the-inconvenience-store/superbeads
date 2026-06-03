@@ -1,3 +1,7 @@
+---
+description: Complete reference for 22 composable skills with trigger map, category breakdown, bd command usage, and chaining diagrams showing how skills invoke each other.
+---
+
 # Skills Reference
 
 beads-superpowers ships {{ skill_count }} composable skills loaded on demand via the `Skill` tool. The bootstrap skill `using-superpowers` loads at every session start and routes to the right skill for the current task. Skills are mandatory — when one applies, the agent must invoke it.
