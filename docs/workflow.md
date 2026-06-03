@@ -91,9 +91,11 @@ Write an ADR in `decisions/` — context, decision, consequences, alternatives c
 
 Code runs in an isolated worktree under TDD (red-green-refactor). The orchestrator creates an epic bead with task children and dependency chains, then dispatches implementer subagents.
 
+Before creating the worktree, the skill runs pre-flight checks: it verifies the agent isn't already inside a worktree and isn't in a submodule, and asks for consent when the creation is user-initiated rather than SDD-automated.
+
 When multiple tasks are unblocked, **parallel batch mode** runs up to 5 concurrently, each in its own worktree. Sequential mode runs one at a time when tasks have dependencies.
 
-Every subagent result passes through the [review gate](#review-gate) before being accepted.
+Every subagent result passes through the [review gate](#review-gate) before being accepted. Dependency chains between tasks use `bd batch` for atomic wiring — if any dependency fails to register, the whole batch rolls back rather than leaving orphaned state.
 
 ### S8 — Verify
 
