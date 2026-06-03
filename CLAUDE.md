@@ -78,7 +78,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 A plugin for Claude Code, Codex, and OpenCode that merges [Superpowers](https://github.com/obra/superpowers) skills (v5.1.0) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.0.4). It gives AI coding agents 22 composable process-discipline skills (TDD, brainstorming, systematic debugging, two-stage code review, verification) plus persistent task memory via a Dolt-backed database.
 
 **Repository:** <https://github.com/DollarDill/beads-superpowers>
-**Version:** 0.5.3
+**Version:** 0.6.0
 **License:** MIT (fork of obra/superpowers, also MIT)
 
 ## Architecture

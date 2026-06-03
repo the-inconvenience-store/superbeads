@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 > **Forked from:** [obra/superpowers](https://github.com/obra/superpowers) v5.0.7 (2026-03-31)
 > **Beads integration based on:** [gastownhall/beads](https://github.com/gastownhall/beads) v1.0.2 (2026-04-15)
 
-## [Unreleased]
+## [0.6.0] - 2026-06-03
 
 ### Added
 
@@ -31,6 +31,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - E2E tests for checksum validation (valid/corrupted/missing/skip), fallback chain (PATH stub-based tool hiding), atomic rollback (read-only target dir), and `bd` integration (hook JSON with bd in PATH).
 - Claude Code CLI, `bd`, and `wget` added to E2E Docker test container.
 - GitHub Action step in release workflow to generate and upload `checksums.txt` alongside release tarballs.
+- **Upstream drift audit** — obra/superpowers v5.0.7→v5.1.0 and gastownhall/beads v1.0.2→v1.0.4. ADR-0009, ADR-0010.
+- Pre-flight checks in `using-git-worktrees` — environment detection (already in worktree?), submodule guard, conditional consent flow (manual=ask, SDD=skip), `EnterWorktree` note for non-beads contexts. `bd worktree` remains Iron Law.
+- Environment detection in `finishing-a-development-branch` — detects normal repo / named-branch worktree / detached HEAD. Detached HEAD gets reduced 3-option menu (no merge). Provenance-based worktree cleanup only removes `.worktrees/` paths.
+- Security-bug reviewer test (`tests/claude-code/test-requesting-code-review.sh`) — plants SQL injection, plaintext passwords, and credential logging bugs, verifies the reviewer catches them.
+- `bd batch` atomic operations documented in `subagent-driven-development`, `executing-plans`, and `finishing-a-development-branch` for atomic close/dep/create transactions.
+- `bd -C <path>` documented in `using-git-worktrees` and `subagent-driven-development` for cross-worktree commands without cd.
+- `bd ready --explain` added to `systematic-debugging` (Phase 1 evidence gathering) and `executing-plans` (task selection) for dependency reasoning.
 
 ### Changed
 
@@ -51,6 +58,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `hooks/superpowers-reminder.sh`: rewritten with multi-format output (Cursor/Claude Code+Codex/generic) instead of hardcoded Claude Code JSON.
 - `install.sh`: auto-detects Codex CLI and OpenCode, installs skills to `~/.codex/skills/` and `~/.config/opencode/skills/` respectively. OpenCode plugin copied to `~/.config/opencode/plugins/`.
 - Version sync expanded from 3 to 6 files — added `.codex-plugin/plugin.json`, `.codex-plugin/marketplace.json`, `opencode/package.json` to `.version-bump.json`.
+- `requesting-code-review`: consolidated to template-only dispatch. `agents/code-reviewer.md` deleted (matching upstream v5.1.0). Skills now dispatch `Task (general-purpose)` with template from `skills/requesting-code-review/code-reviewer.md`.
+- `code-quality-reviewer-prompt.md`: dispatch changed from `superpowers:code-reviewer` to `Task (general-purpose)` with template.
+- `project-init`: `bd init --force` references updated for v1.0.4 deprecation — recovery paths now recommend `--reinit-local` or `--discard-remote`.
+- Upstream baseline versions updated: superpowers v5.0.7→v5.1.0, beads v1.0.2→v1.0.4 across all documentation files.
+- Cross-CLI tool mapping references (codex-tools.md, opencode-tools.md, copilot-tools.md) updated from named agent dispatch to template-based dispatch.
 
 ### Fixed
 
@@ -58,6 +70,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Hardcoded "21 invocable skills" in getting-started.md → `{{ invocable_count }}` template variable.
 - Review gate diagram in workflow.md: "Merge to main" → "Merge to epic branch" (tasks merge into epic worktree, not main).
 - `decisions/` was tracked in git despite being gitignored — untracked all files, fixed stale CLAUDE.md references.
+- `{PLAN_REFERENCE}` → `{PLAN_OR_REQUIREMENTS}` placeholder inconsistency in `skills/requesting-code-review/code-reviewer.md`.
+- `export.git-add` gotcha in CLAUDE.md now version-aware — notes v1.0.4+ changed default to opt-in.
+- `auditing-upstream-drift` beads baseline was v1.0.0 (should have been v1.0.2) — corrected to v1.0.4.
 
 ## [0.5.3] - 2026-05-03
 
