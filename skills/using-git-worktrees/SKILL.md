@@ -199,6 +199,7 @@ bd worktree remove <task-name>
 | Tests fail during baseline | Report failures + ask |
 | No package.json/Cargo.toml | Skip dependency install |
 | Parallel subagent work | Create one `bd worktree` per task, orchestrator manages lifecycle (max 5) |
+| Working across worktrees | `bd -C .worktrees/<name> ready` — run bd in a worktree without cd |
 
 ## Common Mistakes
 

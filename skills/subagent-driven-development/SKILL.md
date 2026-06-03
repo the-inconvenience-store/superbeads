@@ -182,6 +182,8 @@ digraph parallel_batch {
    Sequential mode — run in epic worktree directly, no per-task worktree needed
 ```
 
+> **Tip:** Use `bd -C .worktrees/<task> ready` to check task status across worktrees without changing directory.
+
 ### Failed Task Handling
 
 When a parallel task fails review:
