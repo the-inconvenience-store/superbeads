@@ -12,7 +12,7 @@ description: Use when beads/Dolt database initialization fails, when bd commands
 ## Iron Law: NEVER Run `bd init --force`
 
 ```
-NEVER run bd init --force. It destroys ALL existing data without confirmation.
+NEVER run bd init --force (deprecated in v1.0.4). Use the named-intent alternatives: bd init --reinit-local (preserves remote) or bd init --discard-remote (explicit destruction).
 ```
 
 **Why:** Issue #2363 documents an AI agent that destroyed 247 issues via `bd init --force` cascade. The root cause was misdiagnosing "server can't connect" as "database missing". `bd init --force` is a nuclear option that should ONLY be run by a human who explicitly types it.
@@ -22,7 +22,9 @@ NEVER run bd init --force. It destroys ALL existing data without confirmation.
 | `bd init` | ✅ Safe | Fresh project, no existing .beads/ |
 | `bd bootstrap` | ✅ Safe | Cloned repo with remote beads data |
 | `bd doctor --fix --yes` | ✅ Safe | Database exists but seems broken |
-| `bd init --force` | ❌ **NEVER** | **Do NOT use — destroys all data** |
+| `bd init --force` | ❌ **NEVER** | **Deprecated (v1.0.4) — do NOT use** |
+| `bd init --reinit-local` | ⚠️ Recovery only | Reinitialize local state, preserve remote data |
+| `bd init --discard-remote` | ⚠️ Recovery only | Discard remote data and reinitialize (explicit destruction) |
 
 ## Diagnostic Phase (Always Run First)
 
@@ -228,7 +230,7 @@ bd config drift 2>/dev/null
 ## Red Flags
 
 **Never:**
-- Run `bd init --force` — destroys all data
+- Run `bd init --force` (deprecated) — use `--reinit-local` or `--discard-remote` instead
 - Manually delete files inside `.dolt/` directories — causes unrecoverable corruption
 - Run raw `dolt` CLI commands while bd Dolt server is running — causes journal corruption
 - Assume "database not found" means data is missing — it may be a server connectivity issue
@@ -256,7 +258,7 @@ These lessons come from real recovery scenarios, not theory.
 
 **Scenario:** Machine A pushed beads. Machine B runs `bd init --force` (or `bd init` on a fresh clone without bootstrapping), creating an independent Dolt history. Machine B's `bd dolt push` then fails with "no common ancestor".
 
-**Resolution:** On cloned repos, always use `bd bootstrap` (not `bd init`). If divergence already happened, use Path C or Path F.
+**Resolution:** On cloned repos, always use `bd bootstrap` (not `bd init`). If divergence already happened, use Path C or Path F. If you need to reinitialize, use the named-intent flags introduced in v1.0.4: `bd init --reinit-local` (preserves remote data) or `bd init --discard-remote` (explicit destruction of remote data). Never use `bd init --force` (deprecated).
 
 ### Auto-export warning is benign when `issues.jsonl` is gitignored
 
