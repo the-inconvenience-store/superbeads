@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - `bd lint` deterministic checks in `writing-plans` self-review — runs `bd lint` on epic and all child tasks, plus `bd ready --explain` for dependency ordering, before manual judgment checks. Adopted from jbongaarts/superpowers-beads fork.
+- Structured blocker types in `executing-plans` — three-type taxonomy (`bd defer` for time-based, `bd create` + `bd dep add` for missing work, `bd human` for human decisions) replaces undifferentiated "STOP when blocked."
+- Description quality gate in `executing-plans` — check task description before claiming; bare titles with no context are flagged.
+- Richer `bd create` flags in `executing-plans` — documents `--body-file`, `--acceptance`, `--design-file`, `--notes`, and `--silent` for programmatic bead creation.
+- Claim-before-worktree ordering in `using-git-worktrees` — claim the bead before creating the worktree to prevent ownerless work.
+- "If Verification Cannot Run" section in `verification-before-completion` — handles edge cases where no verification command exists (no test suite, CI down, external dependency unavailable).
+- Skill override acknowledgment in `using-superpowers` — name the skipped skill and acknowledge the override when user asks to bypass.
 
 ## [0.6.0] - 2026-06-03
 

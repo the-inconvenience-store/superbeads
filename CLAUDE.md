@@ -204,6 +204,9 @@ This plugin uses `bd` (beads) for ALL task tracking.
 | Find duplicate beads | `bd find-duplicates` |
 | PR readiness | `bd preflight` |
 | Lint issue sections | `bd lint [id...]` |
+| Defer work | `bd defer <id> --until="<date>"` |
+| Flag for human decision | `bd human <id>` |
+| Validate parallel readiness | `bd swarm validate <epic-id>` |
 | Atomic batch operations | `bd batch` (stdin or `-f file`) |
 | Run in another directory | `bd -C <path> <command>` |
 | Sync beads | `bd dolt push` |
