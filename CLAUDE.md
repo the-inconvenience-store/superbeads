@@ -203,6 +203,7 @@ This plugin uses `bd` (beads) for ALL task tracking.
 | Append note to bead | `bd note <id> "context"` |
 | Find duplicate beads | `bd find-duplicates` |
 | PR readiness | `bd preflight` |
+| Lint issue sections | `bd lint [id...]` |
 | Atomic batch operations | `bd batch` (stdin or `-f file`) |
 | Run in another directory | `bd -C <path> <command>` |
 | Sync beads | `bd dolt push` |

@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `bd lint` deterministic checks in `writing-plans` self-review — runs `bd lint` on epic and all child tasks, plus `bd ready --explain` for dependency ordering, before manual judgment checks. Adopted from jbongaarts/superpowers-beads fork.
+
 ## [0.6.0] - 2026-06-03
 
 ### Added
