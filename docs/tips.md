@@ -57,7 +57,6 @@ description: Quick-reference bd command cheat sheet, skill routing table, troubl
 |---------|------|
 | `bd stats` | Open/closed/blocked counts |
 | `bd doctor` | Diagnose config problems |
-| `bd preflight` | PR readiness check |
 | `bd lint [id...]` | Check issues for missing required sections |
 | `bd note <id> "context"` | Append evidence to a bead |
 | `bd stale` | Beads with no recent activity |

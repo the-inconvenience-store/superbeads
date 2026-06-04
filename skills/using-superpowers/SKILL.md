@@ -150,7 +150,6 @@ This skills system uses **bd (beads)** for persistent task tracking across sessi
 | Recall specific memory | `bd recall <id>` |
 | Append note to bead | `bd note <id> "context"` |
 | Find duplicate beads | `bd find-duplicates` |
-| PR readiness check | `bd preflight` |
 | Sync to remote | `bd dolt push` |
 
 ### Rules

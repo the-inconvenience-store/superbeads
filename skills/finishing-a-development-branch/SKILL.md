@@ -38,14 +38,11 @@ Stop. Don't proceed to Step 2.
 **If tests pass:** Run pre-merge checklist:
 
 ```bash
-# Run pre-merge quality gate
-bd preflight
-
 # Check for duplicate beads (clean up before merge)
 bd find-duplicates
 ```
 
-If `bd preflight` or `bd find-duplicates` reports issues, fix them before proceeding. Then continue to Step 2.
+If `bd find-duplicates` reports issues, fix them before proceeding. Then continue to Step 2.
 
 ### Step 2: Detect Environment
 
