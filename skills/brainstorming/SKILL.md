@@ -153,15 +153,22 @@ Fix any issues inline. No need to re-review — just fix and move on.
 **User Review Gate:**
 After the spec review loop passes, **open the spec file in the user's editor** so they can review it, then gate progression with `AskUserQuestion`:
 
-**⚠️ Run `open` as a standalone Bash call** — never chain it after `bd` commands in the same invocation (e.g., `bd close <id> && open file.md`). The combination hangs.
+**User's preferred editor:** !`echo ${VISUAL:-${EDITOR:-not-configured}}`
+
+**⚠️ Run the open command as a standalone Bash call** — never chain it after `bd` commands in the same invocation (e.g., `bd close <id> && open file.md`). The combination hangs.
 
 ```bash
-# Auto-open spec in user's editor (platform-detected)
-# macOS:
-open "<spec-file-path>"
-# Linux (fallback):
-xdg-open "<spec-file-path>" 2>/dev/null
-# If neither available: just report the path
+# Open in user's preferred editor, with platform fallbacks
+if [ -n "$VISUAL" ]; then
+  "$VISUAL" "<spec-file-path>"
+elif [ -n "$EDITOR" ]; then
+  "$EDITOR" "<spec-file-path>"
+elif command -v open >/dev/null 2>&1; then
+  open "<spec-file-path>"
+else
+  xdg-open "<spec-file-path>" 2>/dev/null
+fi
+# If none available: just report the path
 ```
 
 Then immediately use the `AskUserQuestion` tool:
