@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- DCI-injected `$VISUAL`/`$EDITOR` preference in `brainstorming` and `writing-plans` User Review Gates — injects the user's preferred editor at skill load time via `!`echo ${VISUAL:-${EDITOR:-not-configured}}``; fallback chain: `$VISUAL` → `$EDITOR` → `open` (macOS) → `xdg-open` (Linux).
 - `bd lint` deterministic checks in `writing-plans` self-review — runs `bd lint` on epic and all child tasks, plus `bd ready --explain` for dependency ordering, before manual judgment checks.
 - Structured blocker types in `executing-plans` — three-type taxonomy (`bd defer` for time-based, `bd create` + `bd dep add` for missing work, `bd human` for human decisions) replaces undifferentiated "STOP when blocked."
 - Description quality gate in `executing-plans` — check task description before claiming; bare titles with no context are flagged.
@@ -19,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - "If Verification Cannot Run" section in `verification-before-completion` — handles edge cases where no verification command exists (no test suite, CI down, external dependency unavailable).
 - Skill override acknowledgment in `using-superpowers` — name the skipped skill and acknowledge the override when user asks to bypass.
 - `bd swarm validate` pre-step in `subagent-driven-development` parallel batch mode — analyzes the work graph for wave structure, max parallelism, and dependency warnings before dispatching subagents.
+
+### Removed
+
+- `bd preflight` references from `CLAUDE.md`, `finishing-a-development-branch`, `using-superpowers`, and `docs/tips.md` — command outputs beads-project-specific Go instructions, not applicable to this project.
 
 ## [0.6.0] - 2026-06-03
 
