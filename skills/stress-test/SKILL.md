@@ -28,12 +28,16 @@ This is NOT brainstorming (which creates designs) or verification (which checks 
 
 ```bash
 # Create a stress-test bead
-bd create "Stress-test: <topic>" -t chore
+bd create "Stress-test: <topic>" -t chore -p 2 \
+  --description="Adversarial review of <artifact>. Branches to interrogate: <count>"
+bd update <id> --claim
 ```
 
 ### Phase 1: Understand the Target
 
 Read the design, plan, or decision document thoroughly. If no document exists, ask the user to describe the approach. Explore the codebase for context — answer your own questions from code when possible rather than asking the user.
+
+**Restore point (Mode A only):** If the target artifact has uncommitted changes, commit or stash them before starting — this preserves a clean restore point before inline edits begin. In the normal flow (brainstorming → stress-test), the artifact is already committed.
 
 ### Phase 2: Map the Decision Tree
 
