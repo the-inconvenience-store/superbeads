@@ -95,7 +95,32 @@ Remaining: Error handling, Scale, Rollback, Testing strategy
 
 ### Phase 4: Document Findings
 
-After all major branches are resolved, produce a findings summary:
+After all branches are resolved, write the findings. The output mode depends on context.
+
+**Mode detection:**
+
+- **Mode A** applies when: the stress-test was invoked by brainstorming or writing-plans (caller passes the artifact path), OR the user explicitly points at a `.internal/specs/` or `.internal/plans/` file.
+- **Mode B** applies for everything else: user-initiated "grill me" with no artifact, stress-testing a conversation or decision, or targeting documents that shouldn't be edited inline (README, CLAUDE.md, etc.).
+- **When ambiguous:** Use `AskUserQuestion` to ask:
+
+```json
+{
+  "questions": [{
+    "question": "I see `<file>`. Should I edit it inline with findings, or produce a separate stress-test report?",
+    "header": "Output mode",
+    "options": [
+      {"label": "Edit inline (Mode A)", "description": "Apply changes directly to the source document and append a results summary"},
+      {"label": "Separate report (Mode B)", "description": "Write findings to .internal/stress-tests/ without modifying the source"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+**Mode A — Existing artifact** (spec, plan, design doc in `.internal/`):
+
+- Edit the source artifact directly when a branch changes the design.
+- At the end, append a `## Stress Test Results` section at the bottom of the source document:
 
 ```markdown
 ## Stress Test Results: <topic>
@@ -113,6 +138,29 @@ After all major branches are resolved, produce a findings summary:
 ### Confidence Assessment
 - Overall: High/Medium/Low
 - Areas of concern: [Any remaining worries]
+```
+
+Alternatively, record as a `bd note` on the parent bead if the source doc shouldn't be modified further.
+
+**Mode B — Standalone stress test** (no existing artifact):
+
+- Create `.internal/stress-tests/YYYY-MM-DD-<topic>.md` with the full findings template above.
+- Open in user's editor for review:
+
+**User's preferred editor:** !`echo ${VISUAL:-${EDITOR:-not-configured}}`
+
+```bash
+# Open in user's preferred editor, with platform fallbacks
+if [ -n "$VISUAL" ]; then
+  "$VISUAL" "<findings-file-path>"
+elif [ -n "$EDITOR" ]; then
+  "$EDITOR" "<findings-file-path>"
+elif command -v open >/dev/null 2>&1; then
+  open "<findings-file-path>"
+else
+  xdg-open "<findings-file-path>" 2>/dev/null
+fi
+# If none available: just report the path
 ```
 
 ### Phase 5: Close
