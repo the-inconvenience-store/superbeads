@@ -21,6 +21,16 @@ const TEST_DIR = '/tmp/brainstorm-test';
 const CONTENT_DIR = path.join(TEST_DIR, 'content');
 const STATE_DIR = path.join(TEST_DIR, 'state');
 
+// --- Auth: server requires a per-session key on every HTTP/WS request ---
+const TEST_TOKEN = 'a'.repeat(64); // BRAINSTORM_TOKEN env is used verbatim (64 hex chars)
+const COOKIE = `brainstorm-key-${TEST_PORT}=${TEST_TOKEN}`; // server mirrors the key into this cookie
+const ORIGIN = `http://localhost:${TEST_PORT}`;
+function wsUrl(pathPart = '/') {
+  const sep = pathPart.includes('?') ? '&' : '?';
+  return `ws://localhost:${TEST_PORT}${pathPart}${sep}key=${TEST_TOKEN}`;
+}
+const WS_OPTS = { headers: { Origin: ORIGIN } };
+
 function cleanup() {
   if (fs.existsSync(TEST_DIR)) {
     fs.rmSync(TEST_DIR, { recursive: true });
@@ -31,9 +41,10 @@ async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function fetch(url) {
+async function fetch(url, { auth = true } = {}) {
   return new Promise((resolve, reject) => {
-    http.get(url, (res) => {
+    const options = auth ? { headers: { Cookie: COOKIE } } : {};
+    http.get(url, options, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve({
@@ -45,9 +56,16 @@ async function fetch(url) {
   });
 }
 
+function freePort() {
+  // With an explicit BRAINSTORM_TOKEN the server refuses port fallback, so a
+  // leftover process on TEST_PORT would make every test fail to bind.
+  try { require('child_process').execSync(`fuser -k ${TEST_PORT}/tcp`, { stdio: 'ignore' }); } catch (e) { /* nothing listening */ }
+}
+
 function startServer() {
+  freePort();
   return spawn('node', [SERVER_PATH], {
-    env: { ...process.env, BRAINSTORM_PORT: TEST_PORT, BRAINSTORM_DIR: TEST_DIR }
+    env: { ...process.env, BRAINSTORM_PORT: TEST_PORT, BRAINSTORM_DIR: TEST_DIR, BRAINSTORM_TOKEN: TEST_TOKEN }
   });
 }
 
@@ -144,7 +162,7 @@ async function runTests() {
       const res = await fetch(`http://localhost:${TEST_PORT}/`);
       assert(res.body.includes('<h1>Custom Page</h1>'), 'Should contain original content');
       assert(res.body.includes('WebSocket'), 'Should still inject helper.js');
-      assert(!res.body.includes('indicator-bar'), 'Should NOT wrap in frame template');
+      assert(!res.body.includes('frame-content'), 'Should NOT wrap in frame template');
     });
 
     await test('wraps content fragments in frame template', async () => {
@@ -153,7 +171,7 @@ async function runTests() {
       await sleep(300);
 
       const res = await fetch(`http://localhost:${TEST_PORT}/`);
-      assert(res.body.includes('indicator-bar'), 'Fragment should get indicator bar');
+      assert(res.body.includes('frame-content'), 'Fragment should be wrapped in frame');
       assert(!res.body.includes('<!-- CONTENT -->'), 'Placeholder should be replaced');
       assert(res.body.includes('Pick a layout'), 'Fragment content should be present');
       assert(res.body.includes('data-choice="a"'), 'Fragment interactive elements intact');
@@ -188,7 +206,7 @@ async function runTests() {
     console.log('\n--- WebSocket Communication ---');
 
     await test('accepts WebSocket upgrade on /', async () => {
-      const ws = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws = new WebSocket(wsUrl(), WS_OPTS);
       await new Promise((resolve, reject) => {
         ws.on('open', resolve);
         ws.on('error', reject);
@@ -198,7 +216,7 @@ async function runTests() {
 
     await test('relays user events to stdout with source field', async () => {
       stdoutAccum = '';
-      const ws = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws = new WebSocket(wsUrl(), WS_OPTS);
       await new Promise(resolve => ws.on('open', resolve));
 
       ws.send(JSON.stringify({ type: 'click', text: 'Test Button' }));
@@ -214,7 +232,7 @@ async function runTests() {
       const eventsFile = path.join(STATE_DIR, 'events');
       if (fs.existsSync(eventsFile)) fs.unlinkSync(eventsFile);
 
-      const ws = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws = new WebSocket(wsUrl(), WS_OPTS);
       await new Promise(resolve => ws.on('open', resolve));
 
       ws.send(JSON.stringify({ type: 'click', choice: 'b', text: 'Option B' }));
@@ -232,7 +250,7 @@ async function runTests() {
       const eventsFile = path.join(STATE_DIR, 'events');
       if (fs.existsSync(eventsFile)) fs.unlinkSync(eventsFile);
 
-      const ws = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws = new WebSocket(wsUrl(), WS_OPTS);
       await new Promise(resolve => ws.on('open', resolve));
 
       ws.send(JSON.stringify({ type: 'hover', text: 'Something' }));
@@ -244,8 +262,8 @@ async function runTests() {
     });
 
     await test('handles multiple concurrent WebSocket clients', async () => {
-      const ws1 = new WebSocket(`ws://localhost:${TEST_PORT}`);
-      const ws2 = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws1 = new WebSocket(wsUrl(), WS_OPTS);
+      const ws2 = new WebSocket(wsUrl(), WS_OPTS);
       await Promise.all([
         new Promise(resolve => ws1.on('open', resolve)),
         new Promise(resolve => ws2.on('open', resolve))
@@ -270,7 +288,7 @@ async function runTests() {
     });
 
     await test('cleans up closed clients from broadcast list', async () => {
-      const ws1 = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws1 = new WebSocket(wsUrl(), WS_OPTS);
       await new Promise(resolve => ws1.on('open', resolve));
       ws1.close();
       await sleep(100);
@@ -282,7 +300,7 @@ async function runTests() {
     });
 
     await test('handles malformed JSON from client gracefully', async () => {
-      const ws = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws = new WebSocket(wsUrl(), WS_OPTS);
       await new Promise(resolve => ws.on('open', resolve));
 
       // Send invalid JSON — server should not crash
@@ -299,7 +317,7 @@ async function runTests() {
     console.log('\n--- File Watching ---');
 
     await test('sends reload on new .html file', async () => {
-      const ws = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws = new WebSocket(wsUrl(), WS_OPTS);
       await new Promise(resolve => ws.on('open', resolve));
 
       let gotReload = false;
@@ -319,7 +337,7 @@ async function runTests() {
       fs.writeFileSync(filePath, '<h2>Original</h2>');
       await sleep(500);
 
-      const ws = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws = new WebSocket(wsUrl(), WS_OPTS);
       await new Promise(resolve => ws.on('open', resolve));
 
       let gotReload = false;
@@ -335,7 +353,7 @@ async function runTests() {
     });
 
     await test('does NOT send reload for non-.html files', async () => {
-      const ws = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      const ws = new WebSocket(wsUrl(), WS_OPTS);
       await new Promise(resolve => ws.on('open', resolve));
 
       let gotReload = false;
@@ -403,10 +421,10 @@ async function runTests() {
       const template = fs.readFileSync(
         path.join(__dirname, '../../skills/brainstorming/scripts/frame-template.html'), 'utf-8'
       );
-      assert(template.includes('indicator-bar'), 'Should have indicator bar');
-      assert(template.includes('indicator-text'), 'Should have indicator text');
+      assert(template.includes('frame-content'), 'Should have frame content container');
+      assert(template.includes('class="status"'), 'Should have status area');
       assert(template.includes('<!-- CONTENT -->'), 'Should have content placeholder');
-      assert(template.includes('claude-content'), 'Should have content container');
+      assert(template.includes('<!-- BRANDING -->'), 'Should have branding placeholder');
       return Promise.resolve();
     });
 
