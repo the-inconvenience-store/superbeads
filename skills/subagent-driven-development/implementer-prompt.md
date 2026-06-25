@@ -144,18 +144,30 @@ Agent tool (subagent_type: "general-purpose"):
 
     If you find issues during self-review, fix them now before reporting.
 
+    If a reviewer finds issues and you fix them, re-run the tests that cover
+    the amended code and append the results to your report file. Reviewers
+    will not re-run tests for you — your report is the test evidence.
+
     ## Report Format
 
-    When done, report:
+    Write your full report to `[REPORT_FILE]` (a path the controller provides,
+    typically `.superpowers/sdd/task-<N>-report.md`). Include:
     - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
     - What you implemented (or what you attempted, if blocked)
     - What you tested and test results
     - Files changed
-    - Bead ID and close reason
+    - Bead ID and suggested close reason
     - Self-review findings (if any)
     - Any issues or concerns
+
+    Then report back to the controller with ONLY a short summary (the detail
+    lives in the report file): the **Status**, commits created (short SHA +
+    subject), a one-line test summary, your concerns if any, and the **report
+    file path**.
 
     Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctness.
     Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
     information that wasn't provided. Never silently produce work you're unsure about.
+    If BLOCKED or NEEDS_CONTEXT, put the specifics in the final message itself —
+    the controller acts on it directly.
 ```
