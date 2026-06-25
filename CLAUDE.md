@@ -368,18 +368,21 @@ Use `scripts/bump-version.sh` to update all at once:
 
 ## Installation (for users, not contributors)
 
-```bash
-# Option A: curl (recommended — auto-detects Claude Code, Codex, OpenCode)
-curl -fsSL https://raw.githubusercontent.com/DollarDill/beads-superpowers/main/install.sh | bash
+Native per-CLI plugin install is the recommended path (see README for the full tiered matrix: Verified = Claude Code/Codex/OpenCode; Best-effort = Cursor/Gemini/Copilot). `curl | bash` remains a fully-functional scoped fallback. Install `bd` first (`brew install beads`), then the plugin, then `bd init`.
 
-# Option B: Claude Code Marketplace
+```bash
+# Option A (recommended): Claude Code Marketplace
 claude plugin marketplace add DollarDill/beads-superpowers
 claude plugin install beads-superpowers@beads-superpowers-marketplace
 
-# Option C: Codex CLI Marketplace
+# Option B: Codex CLI Marketplace
 codex plugin marketplace add DollarDill/beads-superpowers
 codex plugin install beads-superpowers@beads-superpowers-marketplace
 # Then enable hooks: add [features] codex_hooks = true to ~/.codex/config.toml
+
+# Option C: scripted install (scoped fallback — beads/Dolt bootstrap, npx/scripted hook
+# registration, optional yegge.md agent, version pinning via --version, CI)
+curl -fsSL https://raw.githubusercontent.com/DollarDill/beads-superpowers/main/install.sh | bash
 ```
 
 ## Example Workflow

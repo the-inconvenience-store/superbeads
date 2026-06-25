@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-06-26
+
 ### Changed
 
 - **Installation reframed around native per-CLI plugin install.** Native plugin install is now the primary, recommended path in the README and docs; `curl | bash` is documented as a scoped "scripted / advanced install" fallback (its unique roles: beads/Dolt bootstrap, hook registration for the npx/scripted path, optional `yegge.md` agent, version pinning via `--version`, and CI). The curl installer remains fully functional — behavior unchanged, only its framing. (ADR-0015)
