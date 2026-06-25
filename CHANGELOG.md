@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Stress-test is now offered at every approval gate.** The `brainstorming` spec-review and `writing-plans` plan-review gates include an "Approved + stress-test" option (listed first, recommended), so the optional adversarial design review is surfaced every time — not only when a design was judged "complex." Choose it to run `stress-test` on the spec or plan before continuing; plain "Approved" skips it. (ADR-0020)
+
 ## [0.7.1] - 2026-06-26
 
 ### Changed

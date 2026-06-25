@@ -128,7 +128,7 @@ graph TD
 
 **Step 3 — Knowledge capture.** Findings are written to a persistent document; key learnings go into `bd remember` so they surface in future sessions.
 
-**Step 4 — Brainstorming.** The `brainstorming` skill walks through context, clarifying questions, 2–3 approaches with trade-offs, and a design spec committed to git. It ends by invoking `writing-plans` — not by jumping to code. The `stress-test` skill may fire here to interrogate the design adversarially.
+**Step 4 — Brainstorming.** The `brainstorming` skill walks through context, clarifying questions, 2–3 approaches with trade-offs, and a design spec committed to git. It ends by invoking `writing-plans` — not by jumping to code. The spec-review gate offers a `stress-test` every time, to interrogate the design adversarially before planning.
 
 **Step 5 — Decision capture.** Architecture decisions become ADRs in `decisions/` — explicit, timestamped records with context, rationale, and consequences.
 

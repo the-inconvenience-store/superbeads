@@ -81,7 +81,7 @@ Synthesize research into a persistent document. Store key learnings with `bd rem
 
 ### S4 — Brainstorm
 
-`brainstorming` explores the solution space through structured questions, surfaces assumptions, and produces a design spec committed to git. The design must be user-approved before moving forward. `stress-test` may fire here to interrogate the design adversarially.
+`brainstorming` explores the solution space through structured questions, surfaces assumptions, and produces a design spec committed to git. The design must be user-approved before moving forward. The spec-review gate offers a `stress-test` every time to interrogate the design adversarially.
 
 ### S5 — Decision capture
 
