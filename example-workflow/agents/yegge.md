@@ -145,7 +145,7 @@ When creating implementation plans (whether in plan mode or directly), use this 
 
 Recommend one of:
 
-- **Subagent-driven** (recommended for complex/multi-file): `beads-superpowers:subagent-driven-development` — fresh agent per task with two-stage review
+- **Subagent-driven** (recommended for complex/multi-file): `beads-superpowers:subagent-driven-development` — fresh agent per task with a single task review (spec + quality)
 - **Phase-by-phase** (default): Delegate to `@implementer` for sequential execution with bead-per-phase tracking
 
 ## Critical Rules (for non-trivial tasks)

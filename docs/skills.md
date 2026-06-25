@@ -144,7 +144,7 @@ Interrogates every branch of the decision tree with recommended answers and stru
 
 **Trigger:** When executing a plan with independent tasks.
 
-Dispatches a fresh subagent per task with two-stage code review between tasks. The orchestrator tracks beads; subagents don't touch them. When multiple tasks are unblocked, **parallel batch mode** runs up to 5 concurrently, each in its own worktree.
+Dispatches a fresh subagent per task with a single read-only task review between tasks — one reviewer returns a spec-compliance verdict and a code-quality verdict in one pass. The orchestrator tracks beads; subagents don't touch them. When multiple tasks are unblocked, **parallel batch mode** runs up to 5 concurrently, each in its own worktree.
 
 ### executing-plans
 
@@ -180,7 +180,7 @@ The agent must run verification commands and show actual output — not assert f
 
 **Trigger:** After completing tasks, major features, or before merging.
 
-Dispatches a code reviewer subagent that runs two stages: spec compliance first, then code quality. The reviewer gets the original requirements alongside the diff.
+Dispatches a code reviewer subagent that checks the diff against the original requirements, reporting strengths, issues grouped by severity, and an overall assessment. The reviewer gets the original requirements alongside the diff.
 
 ### receiving-code-review
 

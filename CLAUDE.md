@@ -75,7 +75,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Overview
 
-A plugin for Claude Code, Codex, and OpenCode that merges [Superpowers](https://github.com/obra/superpowers) skills (v5.1.0) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.0.4). It gives AI coding agents 22 composable process-discipline skills (TDD, brainstorming, systematic debugging, two-stage code review, verification) plus persistent task memory via a Dolt-backed database.
+A plugin for Claude Code, Codex, and OpenCode that merges [Superpowers](https://github.com/obra/superpowers) skills (v5.1.0) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.0.4). It gives AI coding agents 22 composable process-discipline skills (TDD, brainstorming, systematic debugging, code review, verification) plus persistent task memory via a Dolt-backed database.
 
 **Repository:** <https://github.com/DollarDill/beads-superpowers>
 **Version:** 0.6.0
@@ -248,7 +248,7 @@ If `bd setup claude` hooks are installed in any settings file (project or global
 | brainstorming | Socratic design before code — creates session beads |
 | stress-test | Adversarial design interrogation with recommended answers |
 | writing-plans | Bite-sized task plans — each task becomes a bead |
-| subagent-driven-development | Fresh agent per task + two-stage review; parallel batch mode for independent tasks |
+| subagent-driven-development | Fresh agent per task + single task review (spec + quality verdicts); parallel batch mode for independent tasks |
 | executing-plans | Batch execution in single session |
 | test-driven-development | RED-GREEN-REFACTOR — Iron Law: no code without failing test |
 | systematic-debugging | 4-phase root cause analysis before proposing fixes |
