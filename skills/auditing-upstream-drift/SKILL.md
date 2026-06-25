@@ -48,10 +48,14 @@ claude plugin validate .claude-plugin/plugin.json
 
 If validation fails, the plugin CANNOT be installed. Fix before proceeding.
 
-**Check 1.2 — Version consistency across 3 files:**
+**Check 1.2 — Version consistency across 6 files:**
 ```bash
-grep '"version"' .claude-plugin/plugin.json .claude-plugin/marketplace.json package.json
-# ALL THREE must show the same version string
+grep '"version"' package.json \
+  .claude-plugin/plugin.json .claude-plugin/marketplace.json \
+  .codex-plugin/plugin.json .codex-plugin/marketplace.json \
+  opencode/package.json
+# ALL SIX must show the same version string (Claude Code + Codex + OpenCode manifests).
+# Or use the source of truth: ./scripts/bump-version.sh --check
 ```
 
 If versions drift, run: `./scripts/bump-version.sh <version>`
@@ -85,8 +89,9 @@ cat .claude/settings.json | grep -q '"bd prime"' && echo "WARNING: bd setup clau
 **Check 1.7 — Skills count:**
 ```bash
 count=$(ls -d skills/*/ | wc -l)
-echo "Skills: $count (expected: 15)"
-[ "$count" -eq 15 ] && echo "PASS" || echo "FAIL: expected 15 skills"
+echo "Skills: $count (expected: 22)"
+[ "$count" -eq 22 ] && echo "PASS" || echo "FAIL: expected 22 skills"
+# Drift-proof alternative (source of truth): ./scripts/sync-skill-count.sh --check
 ```
 
 **Check 1.8 — LICENSE attribution:**
@@ -157,11 +162,11 @@ Verify the beads integration is complete and no stale references remain.
 
 **Check 3.1 — Zero active TodoWrite references:**
 ```bash
-results=$(grep -rn "TodoWrite" skills/ | grep -v "Do NOT use TodoWrite" | grep -v "replaces TodoWrite" | grep -v "auditing-upstream-drift")
+results=$(grep -rn "TodoWrite" skills/ | grep -v "Do NOT use TodoWrite" | grep -v "replaces TodoWrite" | grep -v "TodoWrite is forbidden" | grep -v "auditing-upstream-drift")
 [ -z "$results" ] && echo "PASS: zero active TodoWrite" || echo "FAIL: $results"
 ```
 
-The only allowed TodoWrite references are prohibitions ("Do NOT use TodoWrite") and this audit skill's own grep patterns.
+The only allowed TodoWrite references are prohibitions ("Do NOT use TodoWrite", "TodoWrite is forbidden") and this audit skill's own grep patterns.
 
 **Check 3.2 — Zero stale docs/superpowers/ paths:**
 ```bash
