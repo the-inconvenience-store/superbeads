@@ -9,7 +9,7 @@ This directory contains a ready-to-use development workflow for projects using [
 | Behavioral rules | `CLAUDE.md` | Karpathy's 4 principles + beads integration — loaded for all agents |
 | Orchestration | `agents/yegge.md` | Complete 11-state FSM development lifecycle — primary session agent |
 
-Subagents (researcher, implementer, code-reviewer) are dispatched via **prompt templates** within their respective skills — no separate agent files needed. The skills own the prompts, keeping them in sync.
+Subagents (researcher, implementer, code-reviewer) are dispatched via **prompt templates** within their skills — no separate agent files needed; the skills own the prompts, keeping them in sync.
 
 ### Naming
 
