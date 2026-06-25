@@ -5,11 +5,11 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
-Execute plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then code quality review.
+Execute plan by dispatching fresh subagent per task, with a single read-only task review after each — one reviewer returns a spec-compliance verdict and a code-quality verdict in one pass.
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
-**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
+**Core principle:** Fresh subagent per task + a single read-only task review (spec + quality verdicts in one pass) = high quality, fast iteration
 
 **Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
 
@@ -36,7 +36,7 @@ digraph when_to_use {
 **vs. Executing Plans (parallel session):**
 - Same session (no context switch)
 - Fresh subagent per task (no context pollution)
-- Two-stage review after each task: spec compliance first, then code quality
+- One task review after each task: spec-compliance and code-quality verdicts in a single read-only pass
 - Faster iteration (no human-in-loop between tasks)
 
 ## Pre-Flight Plan Review
@@ -62,12 +62,9 @@ digraph process {
         "Implementer subagent asks questions?" [shape=diamond];
         "Answer questions, provide context" [shape=box];
         "Implementer subagent implements, tests, commits, self-reviews" [shape=box];
-        "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
-        "Spec reviewer subagent confirms code matches spec?" [shape=diamond];
-        "Implementer subagent fixes spec gaps" [shape=box];
-        "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [shape=box];
-        "Code quality reviewer subagent approves?" [shape=diamond];
-        "Implementer subagent fixes quality issues" [shape=box];
+        "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" [shape=box];
+        "Task reviewer: spec compliant AND quality approved?" [shape=diamond];
+        "Implementer subagent fixes findings" [shape=box];
         "bd close <task-id> --reason 'Completed'" [shape=box];
     }
 
@@ -81,15 +78,11 @@ digraph process {
     "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
     "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
     "Implementer subagent asks questions?" -> "Implementer subagent implements, tests, commits, self-reviews" [label="no"];
-    "Implementer subagent implements, tests, commits, self-reviews" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
-    "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
-    "Spec reviewer subagent confirms code matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
-    "Implementer subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review"];
-    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="yes"];
-    "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" -> "Code quality reviewer subagent approves?";
-    "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
-    "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
-    "Code quality reviewer subagent approves?" -> "bd close <task-id> --reason 'Completed'" [label="yes"];
+    "Implementer subagent implements, tests, commits, self-reviews" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)";
+    "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" -> "Task reviewer: spec compliant AND quality approved?";
+    "Task reviewer: spec compliant AND quality approved?" -> "Implementer subagent fixes findings" [label="no"];
+    "Implementer subagent fixes findings" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" [label="re-review"];
+    "Task reviewer: spec compliant AND quality approved?" -> "bd close <task-id> --reason 'Completed'" [label="yes"];
     "bd close <task-id> --reason 'Completed'" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
@@ -121,7 +114,7 @@ digraph parallel_batch {
     ">1: Parallel batch" [shape=box];
     "Create bd worktree per task (max 5)" [shape=box];
     "Dispatch subagents in parallel (one Agent call per task, all in one message)" [shape=box];
-    "Two-stage review per task" [shape=box];
+    "Task review per task (single reviewer)" [shape=box];
     "All reviews pass?" [shape=diamond];
     "Merge passed task branches into epic worktree" [shape=box];
     "bd worktree remove completed tasks" [shape=box];
@@ -138,8 +131,8 @@ digraph parallel_batch {
     "How many unblocked?" -> ">1: Parallel batch" [label="2-5+"];
     ">1: Parallel batch" -> "Create bd worktree per task (max 5)";
     "Create bd worktree per task (max 5)" -> "Dispatch subagents in parallel (one Agent call per task, all in one message)";
-    "Dispatch subagents in parallel (one Agent call per task, all in one message)" -> "Two-stage review per task";
-    "Two-stage review per task" -> "All reviews pass?";
+    "Dispatch subagents in parallel (one Agent call per task, all in one message)" -> "Task review per task (single reviewer)";
+    "Task review per task (single reviewer)" -> "All reviews pass?";
     "All reviews pass?" -> "Merge passed task branches into epic worktree" [label="yes"];
     "All reviews pass?" -> "Handle failed tasks" [label="some failed"];
     "Handle failed tasks" -> "Merge passed task branches into epic worktree" [label="merge passing tasks"];
@@ -181,8 +174,10 @@ digraph parallel_batch {
        subagent_type: "general-purpose"
      })
 
-6. Two-stage review per task (can also run in parallel):
-   Spec compliance review → Code quality review
+6. Task review per task (can also run in parallel):
+   Dispatch the single task reviewer (./task-reviewer-prompt.md) with the task
+   brief, the implementer's report file, and the review-package diff. It returns
+   a spec-compliance verdict (✅/❌/⚠️) and a code-quality verdict in one pass.
 
 7. For each task that passes review:
      cd <epic-worktree-path>
@@ -295,8 +290,7 @@ Dispatch via the `Agent` tool:
 3. Use `subagent_type: "general-purpose"` (do NOT use `"implementer"` — that is Claude Code's built-in implementer agent with its own system prompt, which overrides the prompt template)
 
 - `./implementer-prompt.md` - Dispatch implementer subagent
-- `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
-- `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
+- `./task-reviewer-prompt.md` - Dispatch the single task reviewer subagent (returns spec-compliance + code-quality verdicts in one read-only pass)
 
 ## Example Workflow
 
@@ -330,13 +324,15 @@ Implementer: "Got it. Implementing now..."
   - Self-review: Found I missed --force flag, added it
   - Committed
 
-[Dispatch spec compliance reviewer]
-Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
+[Generate review package: scripts/review-package BASE HEAD]
+[Dispatch single task reviewer with the brief, report file, and diff]
+Task reviewer:
+  Spec Compliance: ✅ Spec compliant - all requirements met, nothing extra
+  Strengths: Good test coverage, clean
+  Issues: None
+  Task quality: Approved
 
-[Get git SHAs, dispatch code quality reviewer]
-Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
-
-[bd close <task-1-id> --reason "Completed: spec + quality review passed"]
+[bd close <task-1-id> --reason "Completed: review clean, commits a1b2c3d..e4f5a6b"]
 
 Task 2: Recovery modes
 
@@ -350,27 +346,23 @@ Implementer:
   - Self-review: All good
   - Committed
 
-[Dispatch spec compliance reviewer]
-Spec reviewer: ❌ Issues:
-  - Missing: Progress reporting (spec says "report every 100 items")
-  - Extra: Added --json flag (not requested)
+[Generate review package + dispatch single task reviewer]
+Task reviewer:
+  Spec Compliance: ❌ Issues:
+    - Missing: Progress reporting (spec says "report every 100 items")
+    - Extra: Added --json flag (not requested)
+  Issues (Important): Magic number (100)
+  Task quality: Needs fixes
 
-[Implementer fixes issues]
-Implementer: Removed --json flag, added progress reporting
+[Implementer fixes all findings in one pass]
+Implementer: Removed --json flag, added progress reporting, extracted PROGRESS_INTERVAL constant
 
-[Spec reviewer reviews again]
-Spec reviewer: ✅ Spec compliant now
+[Re-generate review package + re-dispatch task reviewer]
+Task reviewer:
+  Spec Compliance: ✅ Spec compliant now
+  Task quality: Approved
 
-[Dispatch code quality reviewer]
-Code reviewer: Strengths: Solid. Issues (Important): Magic number (100)
-
-[Implementer fixes]
-Implementer: Extracted PROGRESS_INTERVAL constant
-
-[Code reviewer reviews again]
-Code reviewer: ✅ Approved
-
-[bd close <task-2-id> --reason "Completed: spec + quality review passed"]
+[bd close <task-2-id> --reason "Completed: review clean, commits e4f5a6b..c7d8e9f"]
 
 ...
 
@@ -406,13 +398,13 @@ Conversation memory does not survive compaction, and a controller that loses its
 
 **Quality gates:**
 - Self-review catches issues before handoff
-- Two-stage review: spec compliance, then code quality
+- Single read-only task review: spec compliance and code quality in one pass
 - Review loops ensure fixes actually work
 - Spec compliance prevents over/under-building
 - Code quality ensures implementation is well-built
 
 **Cost:**
-- More subagent invocations (implementer + 2 reviewers per task)
+- More subagent invocations (implementer + 1 task reviewer per task)
 - Controller does more prep work (extracting all tasks upfront)
 - Review loops add iterations
 - But catches issues early (cheaper than debugging later)
@@ -421,7 +413,7 @@ Conversation memory does not survive compaction, and a controller that loses its
 
 **Never:**
 - Start implementation on main/master branch without explicit user consent
-- Skip reviews (spec compliance OR code quality)
+- Skip the task review (it returns both spec-compliance and code-quality verdicts)
 - Proceed with unfixed issues
 - Dispatch parallel subagents WITHOUT per-task worktree isolation (each subagent MUST have its own `bd worktree`)
 - Dispatch more than 5 parallel subagents in a single batch (resource exhaustion)
@@ -429,10 +421,9 @@ Conversation memory does not survive compaction, and a controller that loses its
 - Make subagent read plan file (provide full text instead)
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
-- Accept "close enough" on spec compliance (spec reviewer found issues = not done)
+- Accept "close enough" on spec compliance (task reviewer found issues = not done)
 - Skip review loops (reviewer found issues = implementer fixes = review again)
-- Let implementer self-review replace actual review (both are needed)
-- **Start code quality review before spec compliance is ✅** (wrong order)
+- Let implementer self-review replace the task review (both are needed)
 - Move to next task while the review has open issues
 - **Coach a reviewer to suppress findings** — never instruct a reviewer to ignore or not flag an issue, or pre-rate a finding's severity. If your reviewer prompt contains "do not flag", "don't treat X as a defect", "at most Minor", or "the plan chose", stop: you are pre-judging. Let the reviewer raise it and adjudicate in the review loop.
 
@@ -459,7 +450,7 @@ Conversation memory does not survive compaction, and a controller that loses its
 - **superpowers:requesting-code-review** - Code review template for reviewer subagents
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
 - **superpowers:dispatching-parallel-agents** - SDD's parallel batch mode uses this skill's dispatch pattern: when `bd ready --parent` returns multiple unblocked tasks, up to 5 are dispatched concurrently, each in its own worktree
-- **superpowers:receiving-code-review** - When two-stage review produces feedback, this skill's anti-sycophancy protocol ensures technical evaluation rather than blind acceptance
+- **superpowers:receiving-code-review** - When the task review produces feedback, this skill's anti-sycophancy protocol ensures technical evaluation rather than blind acceptance
 
 **Subagents should use:**
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
