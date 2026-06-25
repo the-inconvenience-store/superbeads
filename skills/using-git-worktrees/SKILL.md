@@ -34,6 +34,8 @@ Raw `git worktree add` misses `.gitignore` setup and safety checks — while bea
 | Worktree info | `bd worktree info` | ~~(no equivalent)~~ |
 
 > **Note:** Claude Code provides a native `EnterWorktree` tool for worktree management. For non-beads projects, this is a viable alternative. For beads-integrated projects, `bd worktree create` remains mandatory — it handles database sharing and `.gitignore` management that `EnterWorktree` does not provide.
+>
+> **Deliberate divergence from upstream:** superpowers v6.0.3 rewrote this skill to prefer the harness-native worktree tool first (`EnterWorktree` → existing `.worktrees/` → raw `git worktree`). We do **not** adopt that native-tool-first selection order — it bypasses `bd worktree`'s beads-database sharing across worktrees. The Iron Law above (always `bd worktree`) is intentional and takes precedence. (See ADR-0014.)
 
 ## Directory Selection
 
@@ -64,8 +66,8 @@ Run these checks BEFORE creating any worktree.
 Check whether you are already inside a worktree:
 
 ```bash
-GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
-GIT_COMMON=$(git rev-parse --git-common-dir 2>/dev/null)
+GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
 if [ "$GIT_DIR" != "$GIT_COMMON" ]; then
   echo "WARNING: Already inside a worktree."
 fi

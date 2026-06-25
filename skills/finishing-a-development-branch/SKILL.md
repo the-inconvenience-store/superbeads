@@ -49,8 +49,8 @@ If `bd find-duplicates` reports issues, fix them before proceeding. Then continu
 Run the following to determine the git context:
 
 ```bash
-GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
-GIT_COMMON=$(git rev-parse --git-common-dir 2>/dev/null)
+GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
 IS_WORKTREE=$( [ "$GIT_DIR" != "$GIT_COMMON" ] && echo "yes" || echo "no" )
 IS_DETACHED=$( git symbolic-ref HEAD >/dev/null 2>&1 && echo "no" || echo "yes" )
 ```
@@ -163,15 +163,30 @@ Then: Cleanup worktree (Step 6)
 # Push branch
 git push -u origin <feature-branch>
 
-# Create PR
-gh pr create --title "<title>" --body "$(cat <<'EOF'
+# Create PR/MR via the forge's CLI (detected from the origin remote)
+REMOTE_URL=$(git remote get-url origin)
+case "$REMOTE_URL" in
+  *github.com*)
+    gh pr create --title "<title>" --body "$(cat <<'EOF'
 ## Summary
 <2-3 bullets of what changed>
 
 ## Test Plan
 - [ ] <verification steps>
 EOF
-)"
+)" ;;
+  *gitlab*)
+    glab mr create --title "<title>" --description "$(cat <<'EOF'
+## Summary
+<2-3 bullets of what changed>
+
+## Test Plan
+- [ ] <verification steps>
+EOF
+)" ;;
+  *)
+    echo "Branch pushed to origin. Open a PR/MR via your forge's web UI or CLI." ;;
+esac
 ```
 
 Then: Cleanup worktree (Step 6)
