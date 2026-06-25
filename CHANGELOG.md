@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- "Known Deliberate Divergences" registry in `auditing-upstream-drift` — a table of the shared skills that intentionally differ from upstream (beads-as-ledger across all skills, the `bd worktree` Iron Law, Land the Plane, the SDD beads ledger, and the multi-CLI `references/` approach), plus a pointer from the Phase 5 drift check. A future audit now marks these as a deliberate SKIP instead of re-flagging them as drift to revert.
 - DCI-injected `$VISUAL`/`$EDITOR` preference in `brainstorming` and `writing-plans` User Review Gates — injects the user's preferred editor at skill load time via `!`echo ${VISUAL:-${EDITOR:-not-configured}}``; fallback chain: `$VISUAL` → `$EDITOR` → `open` (macOS) → `xdg-open` (Linux).
 - `bd lint` deterministic checks in `writing-plans` self-review — runs `bd lint` on epic and all child tasks, plus `bd ready --explain` for dependency ordering, before manual judgment checks.
 - Global Constraints, Interfaces, and Task Right-Sizing blocks in `writing-plans` (from upstream superpowers v6.0.3) — plans now carry a Global Constraints section (project-wide rules copied verbatim into the header so they reach isolated implementers and reviewers), each task gets a Consumes/Produces Interfaces block (exact neighbor signatures for context-isolated implementers), and a Task Right-Sizing definition draws task boundaries at the smallest unit worth its own test cycle and reviewer gate.
