@@ -75,7 +75,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Overview
 
-This project is a **Claude Code marketplace plugin** (beads-superpowers) that merges [Superpowers](https://github.com/obra/superpowers) skills with [Beads](https://github.com/gastownhall/beads) issue tracking. It provides 22 skills for AI coding agents with persistent task memory via a Dolt-backed database.
+This project is a plugin for **Claude Code, Codex, and OpenCode** (beads-superpowers) that merges [Superpowers](https://github.com/obra/superpowers) skills with [Beads](https://github.com/gastownhall/beads) issue tracking. It provides 22 skills for AI coding agents with persistent task memory via a Dolt-backed database.
 
 ## Beads Issue Tracking
 
@@ -101,7 +101,7 @@ When modifying skills in this repo:
 - All task tracking uses `bd` commands — never TodoWrite
 - Test changes by verifying `grep -r "TodoWrite" skills/` returns only prohibition references
 - The SessionStart hook at `hooks/session-start` injects `using-superpowers` + `bd prime`
-- Subagent review prompts (spec-reviewer, code-quality-reviewer) are NOT beads-aware — orchestrator only. Exception: `implementer-prompt.md` and `researcher-prompt.md` ARE beads-aware (include skill invocations, bead lifecycle, LSP instructions).
+- The single task review prompt (`task-reviewer-prompt.md`) is NOT beads-aware — orchestrator only. Exception: `implementer-prompt.md` and `researcher-prompt.md` ARE beads-aware (include skill invocations, bead lifecycle, LSP instructions).
 - Subagent prompt templates live inside their respective skills: `skills/subagent-driven-development/implementer-prompt.md`, `skills/research-driven-development/researcher-prompt.md`. Skills own their dispatch prompts — no standalone agent files for subagents.
 - Run the Quick Audit before releasing: see `skills/auditing-upstream-drift/SKILL.md`
 

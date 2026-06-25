@@ -13,6 +13,8 @@ description: Quick-reference bd command cheat sheet, skill routing table, troubl
 | `bd ready` | Unblocked beads ready to work |
 | `bd ready --parent <epic>` | Remaining tasks in an epic |
 | `bd list --status=open` | All open beads |
+| `bd query "status=open AND priority<=1"` | Compound query — replaces `bd list` + jq (v1.0.5) |
+| `bd count --by-status` | Grouped counts (`--by-priority` / `--by-type`) (v1.0.5) |
 | `bd show <id>` | Full details for one bead |
 | `bd blocked` | Beads waiting on dependencies |
 | `bd epic status <id>` | Epic progress summary |
@@ -35,6 +37,7 @@ description: Quick-reference bd command cheat sheet, skill routing table, troubl
 | `bd batch` (stdin or `-f`) | Atomic multi-op transactions (close, dep, update) |
 | `bd -C <path> <command>` | Run bd against another directory without cd |
 | `bd ready --explain` | Show why tasks are/aren't ready |
+| `bd merge-slot acquire` / `release` | Serialize merges across concurrent orchestrators (v1.0.5) |
 
 ### Memory
 

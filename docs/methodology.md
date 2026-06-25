@@ -134,7 +134,7 @@ graph TD
 
 **Step 6 — Planning.** `writing-plans` breaks the design into bite-sized tasks (2–5 minutes each) with exact file paths, code, and verification steps. Every task becomes a bead.
 
-**Step 7 — Implementation.** Code runs in an isolated git worktree under TDD. The orchestrator creates an epic with task children and dependency chains, then dispatches implementer subagents. When multiple tasks are unblocked, parallel batch mode runs up to 5 concurrently, each in its own worktree. After each task, a spec reviewer and code quality reviewer run in sequence — the bead closes only after both pass.
+**Step 7 — Implementation.** Code runs in an isolated git worktree under TDD. The orchestrator creates an epic with task children and dependency chains, then dispatches implementer subagents. When multiple tasks are unblocked, parallel batch mode runs up to 5 concurrently, each in its own worktree. After each task, one read-only reviewer returns a spec-compliance verdict and a code-quality verdict in a single pass; the bead closes only after that review passes. Task briefs, implementer reports, and review diffs move between stages as files under a per-worktree `.superpowers/sdd/` directory, keeping the orchestrator's context lean.
 
 **Step 8 — Verification.** The full test suite runs fresh — not relying on the last run during development. "Tests pass" means a test command was just executed and its output is attached.
 
@@ -146,7 +146,7 @@ graph TD
 
 ## Agent memory
 
-Because beads tracks every process step, the memory types agents need are populated as a side effect of following the workflow. 17 of {{ skill_count }} skills now prompt for `bd remember` at their natural completion points — root causes after debugging, design decisions after brainstorming, review insights after code review — so memory capture happens within the skill workflow, not as a separate step.
+Because beads tracks every process step, the memory types agents need are populated as a side effect of following the workflow. 21 of {{ skill_count }} skills now prompt for `bd remember` at their natural completion points — root causes after debugging, design decisions after brainstorming, review insights after code review — so memory capture happens within the skill workflow, not as a separate step.
 
 | Memory Type | Beads Feature | What it answers |
 |-------------|---------------|-----------------|
@@ -184,7 +184,7 @@ Every rule in every skill has been verified through adversarial pressure testing
 
 ### Skill Discovery Optimization (SDO)
 
-An empirical finding: when a skill's YAML `description` field summarized the workflow ("code review between tasks"), the agent followed the description instead of reading the full skill content and did one review instead of the two the skill specified. As a result, every skill's `description` is a trigger condition ("when to use this"), not a workflow summary ("what this does"), which forces the full content to be read.
+An empirical finding: when a skill's YAML `description` field summarized the workflow ("code review between tasks"), the agent followed the description instead of reading the full skill content and skipped steps the full skill specified. As a result, every skill's `description` is a trigger condition ("when to use this"), not a workflow summary ("what this does"), which forces the full content to be read.
 
 ## Design decisions
 

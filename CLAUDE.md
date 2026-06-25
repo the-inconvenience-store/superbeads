@@ -78,7 +78,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 A plugin for Claude Code, Codex, and OpenCode that merges [Superpowers](https://github.com/obra/superpowers) skills (v6.0.3) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.0.5). It gives AI coding agents 22 composable process-discipline skills (TDD, brainstorming, systematic debugging, code review, verification) plus persistent task memory via a Dolt-backed database.
 
 **Repository:** <https://github.com/DollarDill/beads-superpowers>
-**Version:** 0.6.0
+**Version:** 0.7.0
 **License:** MIT (fork of obra/superpowers, also MIT)
 
 ## Architecture
@@ -287,7 +287,7 @@ If `bd setup claude` hooks are installed in any settings file (project or global
 
 1. **Do NOT remove** anti-rationalization tables, Iron Laws, or Red Flags sections
 2. **Do NOT add** TodoWrite references — use `bd` commands
-3. **Do NOT modify** subagent review prompts (spec-reviewer, code-quality-reviewer) with beads commands — orchestrator only. Exception: `implementer-prompt.md` IS beads-aware by design (includes skill invocations, bead lifecycle, LSP instructions).
+3. **Do NOT modify** the task review prompt (`task-reviewer-prompt.md`) with beads commands — orchestrator only. Exception: `implementer-prompt.md` IS beads-aware by design (includes skill invocations, bead lifecycle, LSP instructions).
 4. Verify after changes: `grep -r "TodoWrite" skills/ | grep -v "Do NOT use" | grep -v "replaces"` — must return empty
 
 ### Key Anti-Patterns
@@ -395,17 +395,17 @@ Subagents (researcher, implementer, code-reviewer) are dispatched via **prompt t
 
 ## Syncing Source to Installed Plugin
 
-After modifying skills, the installed plugin cache at `~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.6.0/` goes stale.
+After modifying skills, the installed plugin cache at `~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.7.0/` goes stale.
 
 **Recommended:** Symlink the cache to this repo (one-time, survives edits):
 
 ```bash
-rm -rf ~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.6.0
+rm -rf ~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.7.0
 ln -s ~/workplace/beads-superpowers \
-  ~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.6.0
+  ~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.7.0
 ```
 
-**Quick check for drift:** `diff -rq skills/ ~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.6.0/skills/`
+**Quick check for drift:** `diff -rq skills/ ~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.7.0/skills/`
 
 **Note:** `claude plugin update` has a [cache bug](https://github.com/anthropics/claude-code/issues/14061) — use symlink instead.
 

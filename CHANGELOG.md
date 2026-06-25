@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-06-25
+
 ### Added
 
 - "Known Deliberate Divergences" registry in `auditing-upstream-drift` — a table of the shared skills that intentionally differ from upstream (beads-as-ledger across all skills, the `bd worktree` Iron Law, Land the Plane, the SDD beads ledger, and the multi-CLI `references/` approach), plus a pointer from the Phase 5 drift check. A future audit now marks these as a deliberate SKIP instead of re-flagging them as drift to revert.
@@ -30,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Reflexion self-review (Phase 4.5) in `stress-test` — internal self-critique pass after documenting findings. Checks coverage, depth, and missed angles; loops back to interrogation if gaps found. Capped at one pass to prevent infinite recursion.
 - DCI-injected `$VISUAL`/`$EDITOR` preference in `stress-test` Mode B — same fallback chain as `brainstorming` and `writing-plans`.
 - Phase 1 restore point in `stress-test` — commits or stashes the target artifact before inline edits begin, preserving a clean rollback point.
+- Docs-site SEO: links shared from [dollardill.github.io/beads-superpowers](https://dollardill.github.io/beads-superpowers/) now render rich previews. The MkDocs social plugin generates Open Graph and Twitter card images, every page carries a meta description, and the site ships a `robots.txt` plus Google Search Console verification. (The Search Console verification file removed in 0.5.0 returns as part of that setup.)
 
 ### Changed
 
@@ -39,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Skill vocabulary made vendor-neutral and the discovery concept renamed (from upstream superpowers v6.0.3) — "Claude Search Optimization (CSO)" is now "Skill Discovery Optimization (SDO)" across `writing-skills`, `docs/methodology.md`, `docs/skills.md`, and `CLAUDE.md`, and the generic-stand-in "Claude" prose in `writing-skills` and `docs/methodology.md` now reads as "agent"/"your agent" so the guidance fits any harness. Factual Claude Code platform references (built-in agent names, the `EnterWorktree` tool) are kept verbatim, the `writing-skills` SDO worked example restores "two-stage review process" so it stays internally consistent, and the `using-superpowers` Platform Adaptation note now lists all four reference tool-maps shipped (`codex`, `copilot`, `gemini`, `opencode`). The vendored `anthropic-best-practices.md` is left unchanged as cited Anthropic source material; baseline version bumps are deferred.
 - `finishing-a-development-branch` PR/MR step is now forge-aware instead of GitHub-only — the "Create a Pull Request" option detects the forge from the `origin` remote and runs `gh pr create` for GitHub, `glab mr create` for GitLab, or prints an actionable "open via your forge's web UI" message otherwise (the PR body template is preserved). Worktree detection in `finishing-a-development-branch` and `using-git-worktrees` now canonicalizes git paths with `pwd -P`, so it classifies correctly when run from a subdirectory. These are selective cherry-picks from upstream superpowers v6.0.3; the `bd worktree` Iron Law and the Land-the-Plane session-close ritual are deliberately retained, and upstream's native-tool-first worktree selection (which would bypass beads-database sharing across worktrees) is **not** adopted — `using-git-worktrees` carries a note recording the divergence (see ADR-0014).
 - Documented upstream baselines bumped to reflect the completed adoption — `obra/superpowers` v5.1.0 → **v6.0.3** and `gastownhall/beads` v1.0.4 → **v1.0.5** across the `CLAUDE.md` Upstream Sources table and Project Overview, the `docs/methodology.md` and `docs/tips.md` source lists, and the `auditing-upstream-drift` skill's baseline so future drift is measured from v6.0.3/v1.0.5. Historical and since-version references are intentionally preserved (the CHANGELOG fork/provenance lines, the `export.git-add` "v1.0.4+" gotcha, and `bd init --force` "deprecated in v1.0.4" notes all record when a behavior changed and stay as-is).
+- Public identity metadata aligned with the multi-CLI reality — the `.claude-plugin` and `.codex-plugin` marketplace descriptions now read "Plugin for Claude Code, Codex, and OpenCode" instead of "Claude Code plugin", and `CODE_OF_CONDUCT.md` routes enforcement reports to the current maintainer's GitHub contact rather than the upstream author's email.
 
 ### Removed
 
@@ -49,6 +53,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `subagent-driven-development`: completed the file-handoff adoption that v6.0.3 introduced. The skill had contradicted itself — the "File Handoffs" section said to hand the implementer a task brief *file*, while `implementer-prompt.md` and an "Efficiency gains" bullet still said to paste the full task text and "don't make subagent read file." Both are now reconciled to the file-based model: the implementer reads its task brief at `[BRIEF_FILE]` (written by `scripts/task-brief`), matching upstream.
 - `claude-code` skill tests: the SDD fast test never reached clean completion. The cause was brittle assertions, not latency — `assert_contains` matched model prose case-sensitively (so "Do Not Trust" missed `not trust` and "skepticism" missed `skeptical`). Made `assert_contains` case-insensitive, broadened the reviewer-mindset assertions to the vocabulary the model actually uses (skeptic/distrust/unverified/adversarial; code/diff/ground truth), and updated the task-handoff test to the brief-file model. The suite now runs green end-to-end (verified across two consecutive full runs); the nine sequential model calls need a generous outer timeout (≥600 s).
 - `auditing-upstream-drift`: corrected the skill's own stale self-checks — the skill-count check expected 15 skills (now 22), the version-consistency check covered 3 manifests (now all 6, including the Codex and OpenCode manifests), and Check 3.1 no longer false-fails on the `getting-up-to-speed` "TodoWrite is forbidden" prohibition line.
+- `systematic-debugging` no longer silently switches Claude Code into extended-thinking mode every time it loads. The skill contained the literal token `Ultrathink`, which Claude Code scans for to enable extended thinking; hyphenating it to `Ultra-think` (matching upstream superpowers v6.0.3) keeps the word in the prose without tripping the trigger.
 
 ## [0.6.0] - 2026-06-03
 

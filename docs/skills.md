@@ -254,8 +254,10 @@ Skills use `bd` commands to track work. Only the orchestrating agent manages bea
 | Claim work | `bd update <id> --claim` | executing-plans |
 | Complete work | `bd close <id> --reason "why"` | all execution skills |
 | Check remaining | `bd ready --parent <epic>` | SDD, executing-plans |
+| Compound query | `bd query "status=open AND priority<=1"` | getting-up-to-speed (replaces `bd list` + jq) |
+| Grouped counts | `bd count --by-status` | getting-up-to-speed (also `--by-priority`/`--by-type`) |
 | Add dependency | `bd dep add <child> <parent>` | SDD, writing-plans |
-| Store learning | `bd remember "insight"` | 17 of {{ skill_count }} skills prompt for this |
+| Store learning | `bd remember "insight"` | 21 of {{ skill_count }} skills prompt for this |
 | Attach evidence | `bd note <id> "context"` | verification |
 | Explain dependencies | `bd ready --explain` | systematic-debugging, executing-plans |
 | Atomic batch ops | `bd batch` (stdin) | SDD, executing-plans, finishing-branch |
