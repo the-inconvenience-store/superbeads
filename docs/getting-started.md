@@ -170,7 +170,7 @@ If skills aren't showing, the plugin may not be installed for your CLI. If `bd r
 
 The plugin registers two hooks via `hooks/hooks.json`:
 
-**SessionStart** fires on every session start, clear, and compact. It reads the `using-superpowers` skill (which routes to all other skills), runs `bd prime` (captures beads state and persistent memories) unless it detects `bd prime` is already registered as a hook elsewhere, and outputs the combined context (~2–3k tokens).
+**SessionStart** fires on every session start, clear, and compact. It reads the `using-superpowers` skill (which routes to all other skills), runs `bd prime` to capture beads state and persistent memories, and outputs the combined context (~2–3k tokens). If `bd prime` is already registered as a hook elsewhere, this step is skipped automatically.
 
 **UserPromptSubmit** fires on every user message. It injects a reminder listing all {{ invocable_count }} invocable skills with their trigger conditions — "bug → systematic-debugging", "new feature → brainstorming", etc. This keeps the agent from forgetting about skills mid-session.
 
