@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# beads-superpowers installer
+# beads-superpowers installer (scripted / advanced install)
 # https://github.com/DollarDill/beads-superpowers
 #
-# Usage:
+# Preferred install for Claude Code, Codex, OpenCode: use the native plugin system.
+# Use this script for: beads/Dolt bootstrap, npx/scripted hook registration,
+# optional yegge.md agent install, version pinning (--version), or CI automation.
+#
+# Scripted usage:
 #   curl -fsSL https://raw.githubusercontent.com/DollarDill/beads-superpowers/main/install.sh | bash
 #   curl -fsSL <url> | bash -s -- --yes            # CI / non-interactive
 #   curl -fsSL <url> | bash -s -- --version 0.4.0  # Pin version
@@ -182,7 +186,18 @@ promote_staging() {
 
 usage() {
   cat <<'USAGE'
-beads-superpowers installer
+beads-superpowers — scripted / advanced installer
+
+Preferred install for Tier-1 CLIs:
+  Claude Code:  claude plugin marketplace add DollarDill/beads-superpowers
+  Codex:        codex plugin marketplace add DollarDill/beads-superpowers
+  OpenCode:     see https://github.com/DollarDill/beads-superpowers#opencode
+
+Use this script when you need:
+  - beads/Dolt bootstrap and hook registration outside the plugin system
+  - npx/scripted install path with SessionStart hook wiring
+  - optional yegge.md orchestrator agent install
+  - version pinning (--version) or CI automation
 
 Usage:
   curl -fsSL <url> | bash
@@ -302,11 +317,12 @@ detect_existing_install() {
 # --- Phase 2: Consent ---
 print_consent() {
   echo
-  printf "${BOLD}beads-superpowers v%s installer${NC}\n" "$VERSION"
+  printf "${BOLD}beads-superpowers v%s — scripted / advanced installer${NC}\n" "$VERSION"
   echo
-  echo "This script will install 22 skills using the best available method:"
+  echo "This script installs 22 skills via the best available fallback method."
+  echo "(For Claude Code / Codex / OpenCode, native plugin install is preferred.)"
   if [ "$HAS_CLAUDE" = 1 ] || [ "$HAS_CODEX" = 1 ]; then
-    echo "  1. Plugin system (Claude Code / Codex)"
+    echo "  1. Plugin system (Claude Code / Codex) — used when CLI detected"
   fi
   [ "$HAS_NPX" = 1 ] && echo "  2. npx skills add"
   echo "  3. Direct download (tarball / git clone)"
