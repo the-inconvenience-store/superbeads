@@ -160,6 +160,6 @@ Two interrupt states can fire at any point in the FSM. They suspend the current 
 
 ## Session protocol
 
-**Start:** The SessionStart hook fires automatically, injecting skill context and running `bd prime`. This surfaces unblocked beads, in-progress work from previous sessions, and persistent memories. Orient first, claim second, implement third.
+**Start:** The SessionStart hook fires automatically, injecting skill context and running `bd prime`. This surfaces unblocked beads, in-progress work from previous sessions, and persistent memories. Orient before claiming; claim before implementing.
 
 **End:** S10 (Close Branch) for code paths, S11 (Session Close) for non-branch paths. Close all beads with evidence, push beads remote, push git, verify clean state. A session with uncommitted work or unpushed commits has not landed — the push is the definition of completion.
