@@ -13,7 +13,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 | Find files by name | `find` or `bash` with shell globs |
 | List files and subdirectories | `ls` when active; otherwise `bash` with `ls` |
 | Dispatch a subagent (`Subagent (general-purpose):` template) | Use an installed subagent tool such as `subagent` from `pi-subagents` if available |
-| Task tracking ("create a todo", "mark complete") | task tracking uses the `bd` (beads) CLI via the shell — not TodoWrite |
+| Task tracking ("create a todo", "mark complete") | task tracking uses the `bd` (beads) CLI via the shell — Do NOT use TodoWrite |
 
 ## Skills
 
@@ -25,4 +25,4 @@ Pi core does not ship a standard subagent tool. The `pi-subagents` package is a 
 
 ## Task lists
 
-This plugin tracks ALL tasks with the `bd` (beads) CLI run via the shell — not TodoWrite. Use `bd create`, `bd update`, and `bd close` commands via `bash`. Run `bd prime` at the start of each session to load persistent project memory.
+This plugin tracks ALL tasks with the `bd` (beads) CLI run via the shell — Do NOT use TodoWrite. Use `bd create`, `bd update`, and `bd close` commands via `bash`. Run `bd prime` at the start of each session to load persistent project memory.

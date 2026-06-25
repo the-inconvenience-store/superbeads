@@ -16,7 +16,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 | Pose a structured question to your human partner | `ask_question` |
 | Dispatch a subagent (`Subagent (general-purpose):` template) | `invoke_subagent` with a built-in `TypeName` — `self` for full-capability work, `research` for read-only (see [Subagent support](#subagent-support)) |
 | Multiple parallel dispatches | Multiple entries in one `invoke_subagent` call's `Subagents` array |
-| Task tracking ("create a todo", "mark complete") | task tracking uses the `bd` (beads) CLI via the shell — not TodoWrite |
+| Task tracking ("create a todo", "mark complete") | task tracking uses the `bd` (beads) CLI via the shell — Do NOT use TodoWrite |
 
 ## Invoking a skill — read its `SKILL.md`
 
@@ -82,4 +82,4 @@ serialize independent subagent tasks just to preserve a simpler history.
 
 ## Task tracking
 
-This plugin tracks ALL tasks with the `bd` (beads) CLI run via the shell — not TodoWrite. When a skill says to create a todo list or track tasks, use `bd create`, `bd update`, and `bd close` commands via `run_command`. Run `bd prime` at the start of each session to load persistent project memory.
+This plugin tracks ALL tasks with the `bd` (beads) CLI run via the shell — Do NOT use TodoWrite. When a skill says to create a todo list or track tasks, use `bd create`, `bd update`, and `bd close` commands via `run_command`. Run `bd prime` at the start of each session to load persistent project memory.
