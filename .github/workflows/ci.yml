@@ -67,3 +67,6 @@ jobs:
 
       - name: Validate hook output is JSON
         run: bash hooks/session-start 2>&1 | python3 -m json.tool > /dev/null
+
+      - name: Hook warnings test
+        run: bash tests/hooks/test-session-start-warnings.sh

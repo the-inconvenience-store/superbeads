@@ -75,4 +75,15 @@ else
   printf '{\n  "additionalContext": "%s"\n}\n' "$session_context"
 fi
 
+# bd-absent hint (non-fatal, one line to stderr)
+if ! command -v bd >/dev/null 2>&1; then
+  printf '%s\n' "beads not found — install bd to enable persistent task memory: https://github.com/DollarDill/beads-superpowers#prerequisites" >&2
+fi
+
+# upstream-superpowers coexistence collision warning (best-effort, non-fatal)
+_bsp_plugins="$HOME/.claude/plugins/installed_plugins.json"
+if grep -Eq '"superpowers@(claude-plugins-official|superpowers-marketplace)"' "$_bsp_plugins" 2>/dev/null; then
+  printf '%s\n' "warning: obra/superpowers appears installed alongside beads-superpowers — skill names collide; use one or the other" >&2
+fi
+
 exit 0
