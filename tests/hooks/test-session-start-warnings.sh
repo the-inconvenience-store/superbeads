@@ -14,13 +14,13 @@ rm -rf "$emptyhome"
 tmp=$(mktemp -d); mkdir -p "$tmp/.claude/plugins"
 printf '{"plugins":{"superpowers@claude-plugins-official":{"enabled":true}}}\n' > "$tmp/.claude/plugins/installed_plugins.json"
 out=$(HOME="$tmp" bash "$HOOK" 2>&1)
-echo "$out" | grep -qi "skill names collide" || { echo "FAIL: no collision warning from installed_plugins.json"; fail=1; }
+echo "$out" | grep -qi "obra/superpowers appears installed" || { echo "FAIL: no collision warning from installed_plugins.json"; fail=1; }
 rm -rf "$tmp"
 
 # Case 3: clean HOME, bd present → NO collision warning (no false positive).
 tmp=$(mktemp -d); mkdir -p "$tmp/.claude"
 out=$(HOME="$tmp" bash "$HOOK" 2>&1)
-echo "$out" | grep -qi "skill names collide" && { echo "FAIL: false-positive collision warning"; fail=1; }
+echo "$out" | grep -qi "obra/superpowers appears installed" && { echo "FAIL: false-positive collision warning"; fail=1; }
 rm -rf "$tmp"
 
 [ "$fail" -eq 0 ] && echo "PASS: session-start warnings" || exit 1
