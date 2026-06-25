@@ -189,13 +189,16 @@ fi
 
 Then immediately use the `AskUserQuestion` tool:
 
+<!-- Canonical 3-option stress-test gate — keep identical to brainstorming/SKILL.md (ADR-0020) -->
+
 ```json
 {
   "questions": [{
-    "question": "Plan opened in your editor at `<path>`. Review it and let me know when ready.",
+    "question": "Plan opened in your editor at `<path>`. Review it and let me know how to proceed.",
     "header": "Plan review",
     "options": [
-      {"label": "Approved", "description": "Plan looks good — proceed to choose execution method"},
+      {"label": "Approved + stress-test (Recommended)", "description": "Plan looks good — run an adversarial stress-test before execution"},
+      {"label": "Approved", "description": "Plan looks good — skip stress-test and proceed to choose execution method"},
       {"label": "Needs changes", "description": "I want to revise the plan before proceeding"}
     ],
     "multiSelect": false
@@ -203,7 +206,10 @@ Then immediately use the `AskUserQuestion` tool:
 }
 ```
 
-If the user selects "Needs changes", make the requested changes and re-run the self-review. Only proceed to execution handoff once approved.
+Route on the answer:
+- **Approved + stress-test** → invoke the `stress-test` skill with the plan path (`.internal/plans/YYYY-MM-DD-<feature-name>.md`) as the Mode-A artifact; when it completes, proceed to **Execution Handoff**.
+- **Approved** → proceed to **Execution Handoff** directly.
+- **Needs changes** → make the requested changes and re-run the self-review. Only proceed once approved.
 
 If you discovered something reusable, capture it before closing:
 
@@ -252,4 +258,4 @@ After the plan is approved, **use the `AskUserQuestion` tool** to offer the exec
 - **subagent-driven-development** — execution handoff (user choice).
 - **executing-plans** — execution handoff (user choice).
 
-**Pairs with:** **stress-test** — optional adversarial review of the plan before execution.
+**Pairs with:** **stress-test** — offered at the plan-review gate every time (the "Approved + stress-test" option), before execution.
