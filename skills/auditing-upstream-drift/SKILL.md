@@ -36,6 +36,7 @@ These shared skills intentionally differ from upstream superpowers. When Phase 5
 | **finishing-a-development-branch** | Land the Plane (`bd close` → `bd dolt push` → `git push`) | no session-close ritual | core to the beads workflow |
 | **subagent-driven-development** | beads is the durable ledger; Parallel Batch Mode kept; `bd merge-slot` optional | markdown progress ledger | beads survives compaction; single orchestrator already serializes merges (ADR-0013, ADR-0012) |
 | **using-superpowers, writing-skills** | Claude Code tool names + per-CLI `references/` maps | fully vendor-neutral tool vocabulary | we ship multi-CLI adapters, not one neutral vocabulary (ADR-0006) |
+| **Beads integration** | CLI-only: call `bd` directly in skills + one SessionStart `bd prime` hook; no beads Claude plugin or beads-mcp server | Claude plugin + MCP server | Lowest overhead; full `bd` command coverage; matches beads' own "CLI + hooks when shell is available" guidance (ADR-0017) |
 
 When a CHANGED skill from Phase 5 matches a row here, mark it **SKIP (deliberate divergence)** in the report — not drift.
 
