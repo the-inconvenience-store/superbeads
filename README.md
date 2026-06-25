@@ -66,6 +66,10 @@ When you start a task, the agent runs **brainstorming** to nail down requirement
 | `writing-skills` | Meta-skill for creating or modifying skills in this plugin |
 | `auditing-upstream-drift` | Detects staleness vs upstream superpowers and beads releases |
 
+## Docs
+
+**[dollardill.github.io/beads-superpowers](https://dollardill.github.io/beads-superpowers/)** — getting started, methodology, skills reference, example workflow, and tips.
+
 ## Quickstart
 
 The fastest path — Claude Code with native plugin install:
@@ -197,10 +201,6 @@ npx skills add DollarDill/beads-superpowers -g --copy -y
 ```
 
 Re-running the installer or `npx skills add` overwrites the existing installation. No `bd init` needed — your existing `.beads/` database is untouched.
-
-## Docs
-
-**[dollardill.github.io/beads-superpowers](https://dollardill.github.io/beads-superpowers/)** — getting started, methodology, skills reference, example workflow, and tips.
 
 ## Built on
 
