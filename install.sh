@@ -246,6 +246,13 @@ detect_tools() {
   command -v wget     >/dev/null 2>&1 && HAS_WGET=1
   command -v python3  >/dev/null 2>&1 && HAS_PYTHON3=1
   command -v bd       >/dev/null 2>&1 && HAS_BEADS=true
+  command -v cursor-agent >/dev/null 2>&1 && HAS_CURSOR=1 || HAS_CURSOR=0
+  command -v gemini       >/dev/null 2>&1 && HAS_GEMINI=1 || HAS_GEMINI=0
+  command -v copilot      >/dev/null 2>&1 && HAS_COPILOT=1 || HAS_COPILOT=0
+  command -v droid        >/dev/null 2>&1 && HAS_DROID=1 || HAS_DROID=0
+  command -v agy          >/dev/null 2>&1 && HAS_AGY=1 || HAS_AGY=0
+  command -v kimi         >/dev/null 2>&1 && HAS_KIMI=1 || HAS_KIMI=0
+  command -v pi           >/dev/null 2>&1 && HAS_PI=1 || HAS_PI=0
 }
 
 detect_upstream_conflict() {
@@ -823,6 +830,13 @@ print_next_steps() {
     echo "    Plugin installed — skills and hooks are active automatically."
   fi
   echo
+  [ "$HAS_GEMINI" = 1 ]  && info "Gemini CLI detected — native install: gemini extensions install https://github.com/DollarDill/beads-superpowers"
+  [ "$HAS_COPILOT" = 1 ] && info "Copilot CLI detected — native install: copilot plugin marketplace add DollarDill/beads-superpowers && copilot plugin install beads-superpowers@beads-superpowers-marketplace"
+  [ "$HAS_CURSOR" = 1 ]  && info "Cursor detected — native install: /add-plugin beads-superpowers (in Cursor Agent)"
+  [ "$HAS_DROID" = 1 ]   && info "Factory Droid detected — native: droid plugin marketplace add https://github.com/DollarDill/beads-superpowers && droid plugin install beads-superpowers@beads-superpowers-marketplace"
+  [ "$HAS_AGY" = 1 ]     && info "Antigravity detected — native install: agy plugin install https://github.com/DollarDill/beads-superpowers"
+  [ "$HAS_KIMI" = 1 ]    && info "Kimi Code detected — native install: /plugins install https://github.com/DollarDill/beads-superpowers"
+  [ "$HAS_PI" = 1 ]      && info "Pi detected — native install: pi install git:github.com/DollarDill/beads-superpowers"
 }
 
 # --- Uninstall ---
