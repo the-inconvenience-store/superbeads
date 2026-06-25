@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - `systematic-debugging`: the extended-thinking keyword in the skill body was un-hyphenated (`Ultrathink`), which silently triggered extended thinking every time the skill loaded. Hyphenated to `Ultra-think` to match upstream superpowers v6.0.3.
+- `auditing-upstream-drift`: corrected the skill's own stale self-checks — the skill-count check expected 15 skills (now 22), the version-consistency check covered 3 manifests (now all 6, including the Codex and OpenCode manifests), and Check 3.1 no longer false-fails on the `getting-up-to-speed` "TodoWrite is forbidden" prohibition line.
 
 ## [0.6.0] - 2026-06-03
 
