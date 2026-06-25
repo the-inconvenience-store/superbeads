@@ -39,6 +39,15 @@ digraph when_to_use {
 - Two-stage review after each task: spec compliance first, then code quality
 - Faster iteration (no human-in-loop between tasks)
 
+## Pre-Flight Plan Review
+
+Before dispatching Task 1, scan the plan once for conflicts:
+
+- tasks that contradict each other or the plan's Global Constraints
+- anything the plan explicitly mandates that the review rubric treats as a defect (a test that asserts nothing, verbatim duplication of a logic block)
+
+Present everything you find to your human partner as **one batched `AskUserQuestion`** — each finding beside the plan text that mandates it, asking which governs — before execution begins, not one interrupt per discovery mid-plan. If the scan is clean, proceed without comment. The review loop remains the net for conflicts that only emerge from implementation.
+
 ## The Process (Sequential Mode)
 
 > This section describes **sequential execution** — one task at a time in a shared epic worktree. This is the default when tasks have dependencies or only one task is unblocked. For parallel execution of independent tasks, see **Parallel Batch Mode** below.
@@ -225,6 +234,8 @@ Mode selection is automatic. The orchestrator checks after every batch or sequen
 
 Use the least powerful model that can handle each role to conserve cost and increase speed.
 
+**Always specify the model explicitly when dispatching a subagent.** An omitted model inherits your session's model — often the most expensive — which silently defeats this section. For review tasks, scale the model to the diff's size, complexity, and risk: a small mechanical diff does not need the most capable model; a subtle concurrency change does.
+
 **Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
 
 **Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
@@ -260,6 +271,20 @@ If you discovered something reusable, capture it before closing:
 # Only if worth preserving for future sessions:
 bd remember "sdd: <pattern about subagent delegation>"
 ```
+
+## Handling Reviewer ⚠️ Items
+
+The task reviewer returns a Spec Compliance verdict of ✅, ❌, or ⚠️. A ⚠️ "cannot verify from diff" item does **not** block the task on its own — but you (the controller) must resolve it, because it usually needs cross-task context the reviewer lacks. Check the named requirement against the broader implementation. If the ⚠️ turns out to be a real gap, treat it as a failed spec review and re-dispatch the implementer to close it; if it's actually satisfied elsewhere, record that and proceed.
+
+## File Handoffs
+
+Hand task text and review diffs to subagents as **files**, not pasted context — this keeps large text out of your own context and gives subagents a single thing to read.
+
+- Before dispatching an implementer, run `scripts/task-brief <plan-file> <N>` → writes `.superpowers/sdd/task-<N>-brief.md`. Pass that path to the implementer as "read this first — it is your requirements."
+- The implementer writes its full report to `.superpowers/sdd/task-<N>-report.md` (you name the path in the dispatch via `[REPORT_FILE]`); the reviewer reads it as a file.
+- Before dispatching the reviewer, run `scripts/review-package <BASE> <HEAD>` → writes `.superpowers/sdd/review-<base7>..<head7>.diff` (commit log + file stat + unified diff). Pass that path to the reviewer. `BASE` is the commit recorded before the implementer ran — never `HEAD~1`.
+- The reviewer is **read-only**: it must not mutate the working tree, the index, HEAD, or branch state.
+- `.superpowers/sdd/` is resolved **per working tree** (`scripts/sdd-workspace`). In Parallel Batch Mode each `bd worktree` therefore gets its own isolated directory — concurrent tasks never collide on brief/report/diff filenames.
 
 ## Prompt Templates
 
@@ -356,6 +381,10 @@ Final reviewer: All requirements met, ready to merge
 Done!
 ```
 
+## Durable Progress
+
+Conversation memory does not survive compaction, and a controller that loses its place can re-dispatch completed tasks. **Beads is your durable ledger** — it survives compaction and is reloaded by `bd prime`. After any interruption, run `bd ready --parent <epic-id>`: tasks still open are the remaining work; closed task beads are done — do not re-dispatch them. Record each task's commit range in its close reason so `git log` recovery works without a separate file, e.g. `bd close <task-id> --reason "Completed: commits <base7>..<head7>, review clean"`. Do **not** keep a separate markdown progress ledger — the beads DB is the single source of truth.
+
 ## Advantages
 
 **vs. Manual execution:**
@@ -404,7 +433,8 @@ Done!
 - Skip review loops (reviewer found issues = implementer fixes = review again)
 - Let implementer self-review replace actual review (both are needed)
 - **Start code quality review before spec compliance is ✅** (wrong order)
-- Move to next task while either review has open issues
+- Move to next task while the review has open issues
+- **Coach a reviewer to suppress findings** — never instruct a reviewer to ignore or not flag an issue, or pre-rate a finding's severity. If your reviewer prompt contains "do not flag", "don't treat X as a defect", "at most Minor", or "the plan chose", stop: you are pre-judging. Let the reviewer raise it and adjudicate in the review loop.
 
 **If subagent asks questions:**
 - Answer clearly and completely
