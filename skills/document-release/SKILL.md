@@ -145,7 +145,17 @@ Thresholds: **<2 → rewrite** the entry; **3 → gold** (preserve as-is or mino
 | CHANGELOG.md | ✅ Polished | Voice improvements |
 ```
 
-6. Close the bead: `bd close <id> --reason "Documentation updated: <summary>"`
+6. **Documentation Debt (from the Step 1.5 coverage map).** For each judgment-confirmed gap, **offer** a bead (do not auto-create — consistent with "ask before new TODO items"): `bd create "docs-debt: <entity> missing <quadrant>" -t chore -p 3`. Before creating, **check for an existing open `docs-debt` bead for the same entity** (`bd find-duplicates`, or `bd list --status=open | grep docs-debt`) and skip duplicates so the ledger doesn't fill with re-filed gaps. If a PR exists, also append the lightweight always-available form to the PR body:
+
+   ```text
+   ### Documentation Debt
+   - ⚠️ `<entity>` — reference present, no how-to example
+   - 🗂️ <diagram file> — "FooProcessor" renamed to "BarProcessor" in code, diagram may be stale
+   ```
+
+   This informs reviewers and backlog prioritisation; it does not block the PR.
+7. **(Optional) Cross-model doc review.** For a high-stakes release, you may optionally dispatch a documentation-review subagent via the **`requesting-code-review`** skill to check the docs against the shipped diff. No external binaries — this reuses the existing review pattern.
+8. Close the bead: `bd close <id> --reason "Documentation updated: <summary>"`
 
 ## Critical Rules
 
