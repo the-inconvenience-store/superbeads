@@ -104,6 +104,16 @@ Use the `AskUserQuestion` tool for risky changes. Provide context, recommendatio
 - Ensure each bullet leads with what the user can *do*, not implementation details
 - Flag commit-message-style entries for rewrite to user-forward language
 
+**Sell-test (0–3 rubric).** Score each entry — this scoring always applies:
+
+- **+1 What changed** — names the specific feature/fix
+- **+1 Why care** — user impact or pain removed
+- **+1 How to use** — a command, flag, or link
+
+Thresholds: **<2 → rewrite** the entry; **3 → gold** (preserve as-is or minor wording only). Lead with what the user can now *do* ("You can now…"), not "Refactored…".
+
+**Optional contributor split (format-compatible).** Only when a project keeps developer-only notes (migration steps, deprecation) in its CHANGELOG, move them to a clearly-separated sub-list — at a heading level/placement that respects the project's existing convention. For **Keep a Changelog** (the common case), that is a nested bullet or sub-list, **never** a competing `###` that collides with the `### Added/Changed/Fixed` level. The rubric never restructures a CHANGELOG to force the split — it stays Edit-only (polish, never clobber or regenerate).
+
 ### Step 6: Cross-Doc Consistency
 1. Check README/CLAUDE.md/ARCHITECTURE alignment
 2. Ensure every doc file is reachable from one entry point (README or CLAUDE.md)
