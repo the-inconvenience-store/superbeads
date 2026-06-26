@@ -263,6 +263,7 @@ If you catch yourself thinking:
 | "Reference too long, I'll adapt the pattern" | Partial understanding guarantees bugs. Read it completely. |
 | "I see the problem, let me fix it" | Seeing symptoms ≠ understanding root cause. |
 | "One more fix attempt" (after 2+ failures) | 3+ failures = architectural problem. Question pattern, don't fix again. |
+| "Quick patch / retry-timeout wrapper is fine" | A fix that papers over the defect, weakens a security control, or accepts material risk is a symptom fix — forbidden (Production-Grade Doctrine). |
 
 ## Quick Reference
 

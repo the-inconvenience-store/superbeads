@@ -299,6 +299,7 @@ print('✓ Both hooks removed from settings.json')
 - Skip the backup step — always back up before modifying settings
 - Install hooks if the marketplace plugin is already active (duplicate injection)
 - Install to global settings when user chose project-level, or vice versa
+- Skip the backup or shortcut a safety step — a shortcut that accepts data-loss risk is the doctrine in microcosm (Production-Grade Doctrine)
 
 **Always:**
 - Check for existing hooks before adding

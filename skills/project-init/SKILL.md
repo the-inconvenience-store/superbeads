@@ -17,6 +17,8 @@ NEVER run bd init --force (deprecated in v1.0.4). Use the named-intent alternati
 
 **Why:** Issue #2363 documents an AI agent that destroyed 247 issues via `bd init --force` cascade. The root cause was misdiagnosing "server can't connect" as "database missing". `bd init --force` is a nuclear option that should ONLY be run by a human who explicitly types it.
 
+This Iron Law is the Production-Grade Doctrine (see using-superpowers) applied to your data ledger: never take the shortcut that accepts catastrophic, irreversible risk.
+
 | Action | Safe? | Use When |
 |--------|-------|----------|
 | `bd init` | ✅ Safe | Fresh project, no existing .beads/ |

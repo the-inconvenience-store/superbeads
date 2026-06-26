@@ -277,6 +277,7 @@ bd create "Follow-up: <title>" -t task -p <priority>
 | "The source is about the right topic" | Topical ≠ supporting. Verify the quote actually states the claim. |
 | "I'll hand the agents the whole topic" | Decompose. Give each agent one bounded sub-question + the 4-part contract. |
 | "This needs 10 agents" | Cap at 5. Scale effort to the query tier. |
+| "The cheaper recommendation is fine to default to" | Any recommendation that advises a shortcut, descope, material-risk trade-off, or security regression must be flagged as such — never the default path (Production-Grade Doctrine). |
 
 ## Example
 

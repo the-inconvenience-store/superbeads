@@ -7,7 +7,7 @@ description: Use when checking if beads-superpowers is outdated, before a plugin
 
 This is the quality gate for the beads-superpowers plugin. It verifies everything — upstream staleness, test pass rates, documentation accuracy, plugin manifest validity, hook functionality, content integrity, and beads integration completeness.
 
-**Iron Law:** NO PLUGIN RELEASE WITHOUT A FULL AUDIT FIRST.
+**Iron Law:** NO PLUGIN RELEASE WITHOUT A FULL AUDIT FIRST. Audit findings with security or material-risk impact are never downgraded to make a release, and phases are never skipped for a date (Production-Grade Doctrine, see using-superpowers).
 
 ## When to Use
 
@@ -38,6 +38,7 @@ These shared skills intentionally differ from upstream superpowers. When Phase 5
 | **using-superpowers, writing-skills** | Claude Code tool names + per-CLI `references/` maps | fully vendor-neutral tool vocabulary | we ship multi-CLI adapters, not one neutral vocabulary (ADR-0006) |
 | **Beads integration** | CLI-only: call `bd` directly in skills + one SessionStart `bd prime` hook; no beads Claude plugin or beads-mcp server | Claude plugin + MCP server | Lowest overhead; full `bd` command coverage; matches beads' own "CLI + hooks when shell is available" guidance (ADR-0017) |
 | **brainstorming, writing-plans** | stress-test (a fork-only skill) is offered at the approval gate via a 3-option "Approved + stress-test" gate folded into the upstream Approved/Needs-changes review gate | 2-option review gate; no stress-test (stress-test does not exist upstream) | stress-test is one of our 7 fork-unique skills; offering it at every spec/plan gate is intended fork behavior (ADR-0020) |
+| **using-superpowers** | carries a fork-only `## Production-Grade Doctrine` block (treat every project as production-facing; no shortcuts/descope/material-risk; never a security regression) | no such doctrine (obra/superpowers has none) | intended fork behavior (ADR-0023); a future audit marks it SKIP, not Conflict |
 
 When a CHANGED skill from Phase 5 matches a row here, mark it **SKIP (deliberate divergence)** in the report — not drift.
 

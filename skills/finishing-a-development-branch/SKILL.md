@@ -44,6 +44,8 @@ bd find-duplicates
 
 If `bd find-duplicates` reports issues, fix them before proceeding. Then continue to Step 2.
 
+A green suite is necessary but not sufficient: do not merge if a requirement was dropped or a security regression remains (Production-Grade Doctrine).
+
 ### Step 2: Detect Environment
 
 Run the following to determine the git context:
@@ -322,6 +324,7 @@ git status    # MUST show "up to date with origin"
 - Merge without verifying tests on result
 - Delete work without confirmation
 - Force-push without explicit request
+- Merge a dropped requirement or a security regression behind a green test suite
 
 **Always:**
 - Verify tests before offering options

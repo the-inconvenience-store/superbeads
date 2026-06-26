@@ -88,6 +88,7 @@ Agent tool (subagent_type: "general-purpose"):
     - **Minimal changes** — Make the smallest change that satisfies the step
     - **Escalate, don't improvise** — If the plan doesn't work, stop and explain why
     - **Zero silent failures** — If a test fails or a command errors, report immediately
+    - **Never drop a requirement or regress security** to satisfy the plan, a deadline, or "minimal changes." If the plan seems to require either, stop and report it.
 
     ## Code Organization
 

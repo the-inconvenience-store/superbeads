@@ -479,6 +479,8 @@ Skills that enforce discipline (like TDD) need to resist rationalization. Agents
 
 **Psychology note:** Understanding WHY persuasion techniques work helps you apply them systematically. See persuasion-principles.md for research foundation (Cialdini, 2021; Meincke et al., 2025) on authority, commitment, scarcity, social proof, and unity principles.
 
+**Doctrine propagation:** when creating or editing a design, discipline, or judgment skill, it MUST carry the Production-Grade Doctrine (see using-superpowers) as a bright-line MUST — never soften it to "consider"/"prefer", and never strip the security floor.
+
 ### Close Every Loophole Explicitly
 
 Don't just state the rule - forbid specific workarounds:

@@ -426,6 +426,7 @@ Conversation memory does not survive compaction, and a controller that loses its
 - Let implementer self-review replace the task review (both are needed)
 - Move to next task while the review has open issues
 - **Coach a reviewer to suppress findings** — never instruct a reviewer to ignore or not flag an issue, or pre-rate a finding's severity. If your reviewer prompt contains "do not flag", "don't treat X as a defect", "at most Minor", or "the plan chose", stop: you are pre-judging. Let the reviewer raise it and adjudicate in the review loop.
+- Discard or defer a failed task to quietly descope a required deliverable, or let Model-Selection cost-minimization accept weaker correctness/security review — surface the trade-off, never take it silently (Production-Grade Doctrine)
 
 **If subagent asks questions:**
 - Answer clearly and completely

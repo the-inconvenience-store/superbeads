@@ -224,6 +224,7 @@ After agents return:
 2. **Check for conflicts** - Did agents edit same code?
 3. **Run full suite** - Verify all fixes work together
 4. **Spot check** - Agents can make systematic errors
+5. **No weakening to "pass"** - An agent may not satisfy its narrow goal by weakening tests, dropping a requirement, or regressing security — verify this on integration (Production-Grade Doctrine)
 
 If you discovered something reusable, capture it before closing:
 
