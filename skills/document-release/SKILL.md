@@ -126,9 +126,9 @@ Thresholds: **<2 → rewrite** the entry; **3 → gold** (preserve as-is or mino
 
 ### Step 8: VERSION Bump Decision
 **Critical rule:** Never bump silently — always use `AskUserQuestion`.
-- If VERSION was not bumped: ask whether to bump PATCH/MINOR or skip
-- If VERSION was already bumped: verify scope coverage; ask if gaps exist
-- Use `scripts/bump-version.sh` if available
+- **If already bumped:** verify the bump scope matches the shipped changes via `AskUserQuestion` — A) bump is correct → proceed; B) too conservative → escalate to user; C) too aggressive → escalate. A feature-A bump must not silently absorb feature-B.
+- **If not bumped:** ask whether to bump PATCH/MINOR — and accept **"this project batches releases → record under `[Unreleased]`, defer the bump to release time"** as a first-class, no-friction answer. Do not nag for a per-PR bump on repos that deliberately batch. Never bump silently either way.
+- Use `scripts/bump-version.sh` if available. (Note: it may not sync every prose mention of the version — e.g. root `CLAUDE.md` — so spot-check after a real bump.)
 
 ### Step 9: Commit and Output
 1. Stage modified doc files by name (never `git add -A`)
