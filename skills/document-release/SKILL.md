@@ -52,6 +52,31 @@ Detect git platform (GitHub/GitLab/unknown) and determine the base branch. Use `
 3. Discover all `.md` files: `find . -name '*.md' -not -path './.git/*' -not -path './.worktrees/*'`
 4. Categorise changes: new features, behaviour changes, removals, infrastructure
 
+### Step 1.5: Coverage Map (Diataxis Blast-Radius Audit)
+
+Catches **missing** docs (shipped public surface that was never documented) — the per-file audit (Step 2) only catches **stale** docs.
+
+1. **Extract new public surface** from `git diff <base>..HEAD`. "Public surface" is whatever the project exposes to users — a general superset, not any one project type:
+   - **Apps:** new API endpoints, CLI flags, config keys, env vars.
+   - **Libraries:** new exported functions, classes, public types.
+   - **Tools / plugins:** new skills, user-facing commands, hooks, manifest fields, install flags.
+   - …plus any renamed or removed surface in the above.
+2. **Grid each item against the four Diataxis quadrants** (definitions are generic; the doc targets in parentheses are *examples*, never a hardcoded file list):
+   - **Reference** — factual descriptions, signatures, option lists (README tables, AGENTS.md lists)
+   - **How-to** — task-oriented guidance (README examples, CONTRIBUTING workflows)
+   - **Tutorial** — step-by-step learning paths (getting-started guides)
+   - **Explanation** — rationale and design reasoning (ARCHITECTURE, design docs, ADRs)
+
+   ```text
+   <entity>     reference  how-to  tutorial  explanation
+   <entity-1>   yes        no      no        no
+   <entity-2>   yes        yes     no        no
+   ```
+3. **Calibrate gaps (avoid alert-fatigue).** The grid *shows* all four cells, but only **judgment-confirmed gaps** become debt: a new user-facing surface with **zero** coverage anywhere, OR missing the **one quadrant that surface type genuinely needs** (e.g. a new flag with no Reference; a new workflow with no How-to). Tutorial/Explanation are flagged only when the change is significant enough to warrant them. An empty cell the entity genuinely doesn't need is **not** a gap.
+4. **Guardrail — informs, never generates.** The coverage map flags gaps for beads + the PR body; it does **not** auto-write doc pages. Point real gaps at the **`write-documentation`** skill as the follow-up.
+5. **Diagram-drift sub-check (flag-only).** Scope to **entity-bearing diagrams** — architecture / component / data-flow diagrams whose labels name code entities (e.g. `ARCHITECTURE.md`, or `docs/*.md` Mermaid). Extract entity names, cross-reference the diff, and flag any the diff **renamed or removed**. Prose/workflow flowcharts (e.g. process `dot` graphs) are in scope only when a renamed skill/command/step is itself the label. Never auto-edit a diagram.
+6. **Empty-check gate (conservative early exit).** After building the coverage map, if the diff is **unambiguously doc-irrelevant** — both (a) `git diff <base>..HEAD --name-only -- '*.md'` is empty (zero docs changed) **and** (b) the coverage map found **no** new user-facing surface — emit "All documentation is up to date" and exit without an empty commit. **When in doubt, do not exit — run the full audit (Steps 2–9).** A false-skip would ship undocumented surface (the failure this skill exists to prevent), which is strictly worse than a redundant audit.
+
 ### Step 2: Per-File Documentation Audit
 Read each documentation file and cross-reference against the diff:
 
