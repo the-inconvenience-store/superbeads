@@ -136,6 +136,15 @@ Subagent (general-purpose):
     Acknowledge what was done well before listing issues — accurate praise
     helps the implementer trust the rest of the feedback.
 
+    **Security floor:** any security regression — a weakened, removed, or
+    bypassed security control (auth, validation, sanitization, secrets,
+    permissions, isolation) or a newly introduced vulnerability — is
+    automatically **Critical / blocking**, regardless of the change's size or any
+    stated rationale. It is never "Minor", and a rationale never downgrades it.
+    (A regression *weakens* the existing posture or adds a new hole; merely
+    touching security code, or a pre-existing issue this change doesn't worsen,
+    is not one.)
+
     ## Output Format
 
     ### Spec Compliance

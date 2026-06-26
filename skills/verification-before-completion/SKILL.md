@@ -49,6 +49,7 @@ Skip any step = lying, not verifying
 | Regression test works | Red-green cycle verified | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist | Tests passing |
+| No security regression | SAST/audit tool if one exists (semgrep, bandit, npm/pip audit) → 0 new findings, AND diff review: no control weakened/removed/bypassed, no new sink. No tool? Use the "If Verification Cannot Run" path: record the manual diff-review as evidence, note no SAST available. | Tests pass (tests rarely cover security) |
 
 ## If Verification Cannot Run
 
@@ -67,6 +68,7 @@ When no verification command exists (no test suite, CI down, external dependency
 - Trusting agent success reports
 - Relying on partial verification
 - Thinking "just this once"
+- About to claim done while a requirement was quietly dropped, or a security regression remains unverified (tests passing ≠ security verified)
 - Tired and wanting work over
 - **ANY wording implying success without having run verification**
 
@@ -81,6 +83,7 @@ When no verification command exists (no test suite, CI down, external dependency
 | "Agent said success" | Verify independently |
 | "I'm tired" | Exhaustion ≠ excuse |
 | "Partial check is enough" | Partial proves nothing |
+| "It's good enough to ship" | Production system, real users — no shortcut, no dropped requirement, no accepted security regression |
 | "Different words so rule doesn't apply" | Spirit over letter |
 
 ## Key Patterns

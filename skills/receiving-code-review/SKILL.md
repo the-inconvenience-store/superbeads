@@ -130,6 +130,8 @@ Push back when:
 
 **Signal if uncomfortable pushing back out loud:** "Strange things are afoot at the Circle K"
 
+**Never** push back on, YAGNI-delete, or select "Proceed anyway" past a **security or material-risk** finding. Security/risk feedback is acted on or escalated — never dismissed. (Production-Grade Doctrine — and because this skill runs in the main session, it is also stated in full in `using-superpowers`.)
+
 ## Acknowledging Correct Feedback
 
 When feedback IS correct:

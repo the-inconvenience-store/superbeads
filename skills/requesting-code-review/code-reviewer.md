@@ -70,6 +70,8 @@ git diff {BASE_SHA}..{HEAD_SHA}
 #### Critical (Must Fix)
 [Bugs, security issues, data loss risks, broken functionality]
 
+**Security floor (blocking):** A security regression — weakened, removed, or bypassed auth, validation, sanitization, secrets handling, permissions, or isolation, or a newly introduced vulnerability — is automatically **Critical** and forces **Ready to merge? = No**. A regression *weakens* the existing posture or adds a new hole (merely touching security code, or a pre-existing issue this change doesn't worsen, is not one). Never grade a security regression Minor; never pass it "With fixes".
+
 #### Important (Should Fix)
 [Architecture problems, missing features, poor error handling, test gaps]
 
