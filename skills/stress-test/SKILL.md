@@ -205,6 +205,8 @@ If you discovered something reusable, capture it before closing:
 bd remember "design: <gap or insight revealed by stress testing>"
 ```
 
+**Capturing decisions:** if a resolved branch settled an architecturally-significant choice, offer an ADR per **Capturing Decisions** (`using-superpowers`) — only when the 3-gate holds.
+
 ## Anti-Rationalization
 
 | Shortcut | Reality |
