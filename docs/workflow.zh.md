@@ -114,7 +114,7 @@ graph TD
 
 在非分支路径上——研究查询、从未创建分支的快速任务——相同的收尾流程在没有合并步骤的情况下运行：`bd close` → `bd dolt push` → `git push` → `git status`。下一个会话运行 `bd prime` 以恢复完整上下文。
 
-## 审查门控 {#review-gate}
+## 审查门控 <a id="review-gate"></a>
 
 当 SDD 委托给子智能体时，结果在被接受前需通过四项检查：
 
