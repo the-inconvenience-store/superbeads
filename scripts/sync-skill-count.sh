@@ -67,7 +67,8 @@ count = $COUNT
 path = pathlib.Path('.github/workflows/ci.yml')
 content = path.read_text()
 # Match: -lt N on the if line, followed within 2 lines by 'Expected at least N skills'
-pattern = r'(-lt )\d+(\]; then\n\s+echo \"::error::Expected at least )\d+( skills)'
+# Note: \s* before ] tolerates the '-lt N ]' spacing in the live workflow (bd-k2f9.1).
+pattern = r'(-lt )\d+(\s*\]; then\n\s+echo \"::error::Expected at least )\d+( skills)'
 replacement = rf'\g<1>{count}\g<2>{count}\g<3>'
 content = re.sub(pattern, replacement, content)
 path.write_text(content)
