@@ -46,6 +46,9 @@ jobs:
       - name: Verify zero active TodoWrite references
         run: bash scripts/check-todowrite.sh
 
+      - name: Check agent-filed bead discipline present
+        run: bash scripts/check-agent-bead-stamp.sh
+
       - name: Skill contract tests
         run: bash tests/skills/test-getting-up-to-speed-contract.sh
 
