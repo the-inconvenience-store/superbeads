@@ -109,7 +109,7 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 7 best-effort harn
 
 ## Common Gotchas
 
-- **Embedded Dolt mode** — This project uses embedded Dolt (`.beads/metadata.json` `dolt_mode: embedded`). `bd dolt push/pull/status/show` all fail. No remote configured.
+- **Embedded Dolt mode** — `.beads/metadata.json` `dolt_mode: embedded` runs the Dolt engine **in-process** (no separate sql-server). This does NOT disable sync: `bd dolt status/show/push/pull` all work and a remote is configured (`origin`, git+ssh). (Verified 2026-06-28: `bd dolt push` → "Push complete".) Genuine push failures are setup-specific (diverged history, GitHub push-protection if a token is in Dolt history) — see the `project-init` skill, not a blanket "embedded fails".
 - **`export.git-add` pollutes branches (v1.0.2 and earlier)** — In beads v1.0.2 and earlier, `export.git-add` defaulted to `true`, auto-staging `issues.jsonl` on every commit. Workaround: `bd config set export.git-add false` before branch work. In **v1.0.4+**, auto-export is opt-in by default — no workaround needed. Check with `bd config show`.
 - **DCI only works in SKILL.md** — The `!` backtick syntax (Dynamic Context Injection) only works in `SKILL.md` and `.claude/commands/*.md`. NOT in agent `.md` files, `CLAUDE.md`, or rules files.
 - **Never run `npx skills add` from inside this repo** — It replaces real skill files in `skills/` with symlinks to `.agents/skills/`, destroying the source. Use `-g` flag from `/tmp` or another directory.

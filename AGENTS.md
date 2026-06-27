@@ -107,7 +107,7 @@ When modifying skills in this repo:
 
 ## Common Gotchas
 
-- **Embedded Dolt mode** — `bd dolt push/pull/status/show` all fail. No remote configured.
+- **Embedded Dolt mode** — `dolt_mode: embedded` runs the Dolt engine in-process (no sql-server); it does NOT disable sync. `bd dolt status/show/push/pull` work and a remote (`origin`) is configured. (Verified 2026-06-28.) Push failures are setup-specific (diverged history, push-protection) — see `project-init`.
 - **`export.git-add` pollutes branches (v1.0.2 and earlier)** — In beads v1.0.2 and earlier, `export.git-add` defaulted to `true`. In **v1.0.4+**, auto-export is opt-in by default — no workaround needed. Check with `bd config show`.
 - **DCI only works in SKILL.md** — `!` backtick syntax does NOT work in agent `.md` files, `CLAUDE.md`, or rules files.
 - **Never run `npx skills add` from inside this repo** — Destroys skill files with symlinks. Use `-g` from `/tmp`.

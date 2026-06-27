@@ -151,7 +151,7 @@ bd close <id>         # Complete work
    ```bash
    bd close <ids> --reason "<what shipped>"
    git pull --rebase
-   bd dolt push   # embedded-Dolt projects: this fails by default — see bead den0
+   bd dolt push   # syncs the beads DB to the Dolt remote (skip/harmless if no remote configured)
    git push
    git status  # MUST show "up to date with origin"
    ```

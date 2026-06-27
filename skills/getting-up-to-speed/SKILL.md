@@ -76,7 +76,7 @@ Issue all of these commands in **one message, multiple Bash tool calls in parall
 
 If `bd` is not installed or `.beads/` is missing, skip Phase 1 entirely and emit "**Beads:** not installed/initialized — skipped" in the Phase 4 summary.
 
-**Do NOT run `bd dolt status`, `bd dolt show`, or `bd dolt push` here** — these fail in embedded-Dolt-mode repos and are not needed for orientation.
+**Do NOT run `bd dolt status`, `bd dolt show`, or `bd dolt push` here** — they aren't needed for orientation, and `bd dolt push` mutates the remote. Keep orientation read-only.
 
 ## Phase 2 — Codebase exploration (single parallel batch, content varies by path)
 
