@@ -272,10 +272,22 @@ bd close <task-id-1> <task-id-2> ... --reason "Completed: description of what wa
 bd epic status <epic-id>                    # Summary view of completion
 bd epic close-eligible                      # Auto-close epics where all children are done
 # Or manually: bd close <epic-id> --reason "Epic complete: all tasks finished and reviewed"
+```
 
-# 3. File remaining work as new beads (if any)
-bd create "Remaining: description of follow-up work" -t task -p 2
+**3. File remaining work as new beads (if any)**
 
+File remaining work per the **Agent-Filed Bead Discipline** (see `verification-before-completion`):
+
+```bash
+bd create "[spec] Remaining: <title>" -t task -p <priority> \
+  --notes "Severity: <Critical|Important|Minor>
+Confidence: <Confirmed|Speculative>
+Evidence: <file:line / failing test / repro | none>"
+```
+
+Drop the `[spec]` prefix when the item is Confirmed (evidence cited).
+
+```bash
 # 4. Push beads to Dolt remote
 bd dolt push
 
