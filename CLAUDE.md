@@ -315,6 +315,9 @@ claude plugin validate .claude-plugin/plugin.json
 # Verify zero active TodoWrite references (canonical gate)
 bash scripts/check-todowrite.sh
 
+# Verify agent-filed bead discipline convention present at all required sites
+bash scripts/check-agent-bead-stamp.sh
+
 # Verify beads integration (should be 30+)
 grep -r "bd create\|bd close\|bd ready" skills/ | wc -l
 
