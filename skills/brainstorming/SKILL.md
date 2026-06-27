@@ -139,6 +139,8 @@ If a previous memory is now wrong, `bd forget <id>` first.
 
 > When filing a bead for discovered/follow-up work, stamp it per **Agent-Filed Bead Discipline** (`verification-before-completion`).
 
+**Capturing decisions:** if the approved design settles an architecturally-significant choice, offer to record it as an ADR per **Capturing Decisions** (`using-superpowers`) — only when the 3-gate holds. The orchestrator writes it.
+
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
 
