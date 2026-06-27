@@ -149,8 +149,9 @@ bd close <id>         # Complete work
 4. **PUSH TO REMOTE** - This is MANDATORY:
 
    ```bash
+   bd close <ids> --reason "<what shipped>"
    git pull --rebase
-   bd dolt push
+   bd dolt push   # embedded-Dolt projects: this fails by default — see bead den0
    git push
    git status  # MUST show "up to date with origin"
    ```
