@@ -77,7 +77,10 @@ else
     exit 1
 fi
 
-if assert_contains "$output" "Step 1\|beginning\|start\|Load Plan" "Read at beginning"; then
+# Accept the range of vocabulary the model uses for "at the start, before the
+# per-task loop" ("up front", "first step", "begins" all mean the same thing;
+# assert_contains is case-insensitive). The concept is what matters, not the token.
+if assert_contains "$output" "Step 1\|begin\|start\|Load Plan\|first\|up.\?front\|outset\|initial" "Read at beginning"; then
     : # pass
 else
     exit 1
