@@ -131,6 +131,8 @@ git commit -m "feat: add specific feature"
 
 **Beads integration:** When executing this plan, the executing skill creates an epic bead for the plan and a child task bead for each Task N. The `- [ ]` checkboxes remain in the markdown for human readability, but task-level tracking uses beads (`bd create`, `bd update --claim`, `bd close --reason`). Dependencies between tasks should be declared with `bd dep add`.
 
+**Atomic creation:** the executing skill SHOULD create the epic + tasks + dependencies atomically via `bd create --graph` (one JSON plan, `--dry-run` first), not a sequential loop — this avoids orphaned beads on mid-sequence failure (ADR-0030). Falls back to sequential `bd create`/`bd dep add` if unavailable.
+
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
