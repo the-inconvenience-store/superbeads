@@ -9,6 +9,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Agent-Filed Bead Discipline.** When a skill files a bead for discovered/follow-up work, it now stamps the bead with a severity tier (Critical/Important/Minor), an evidence-driven confidence marker (Confirmed when it cites a checkable `file:line`/failing test/repro, else Speculative), and a `[spec]` title prefix for speculative items — so a human can triage agent-filed work at a glance without opening each bead. The convention is single-sourced in `verification-before-completion` and applied at `finishing-a-development-branch` and the `executing-plans`/`subagent-driven-development` blocker-filing sites, with one-line pointers from `code-reviewer`/`brainstorming`/`writing-plans`. A new `scripts/check-agent-bead-stamp.sh` CI gate keeps the convention present at every required site. (ADR-0029)
+
+### Changed
+
+- **Atomic plan creation via `bd create --graph`.** `executing-plans` and `subagent-driven-development` now create a plan's epic + tasks + dependencies in one atomic transaction (validate with `--dry-run` first, then create) instead of a sequential `bd create` loop — eliminating the orphaned-bead failure mode where a mid-sequence crash left a half-built epic polluting `bd ready` (ADR-0010). `writing-plans` documents the pattern; a sequential-loop fallback is noted for older `bd`. Verified working under embedded Dolt v1.0.5. (ADR-0030)
+- **MAST-FC2 pre-fan-out discipline.** `dispatching-parallel-agents` and `subagent-driven-development` (Parallel Batch Mode) gain a short orchestrator-only checklist before fanning out: front-load shared decisions into every agent prompt and share full context, not summaries — because worktrees isolate *files*, not *assumptions* (parallel agents on different files can still diverge on an un-prescribed shared decision). (ADR-0031)
+
 ## [0.7.2] - 2026-06-26
 
 ### Added
