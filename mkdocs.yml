@@ -39,7 +39,24 @@ theme:
 
 plugins:
   - search
-  - social
+  - macros
+  - i18n:
+      docs_structure: suffix
+      reconfigure_material: true
+      reconfigure_search: true
+      fallback_to_default: true
+      languages:
+        - { locale: en, name: English, default: true, build: true }
+        - locale: zh
+          name: 中文
+          build: true
+          nav_translations:
+            Home: 首页
+            Getting Started: 快速开始
+            Methodology: 方法论
+            Skills Reference: 技能参考
+            Example Workflow: 工作流示例
+            Tips & Tricks: 技巧与窍门
   - git-revision-date-localized:
       enable_creation_date: true
       type: date
@@ -47,7 +64,7 @@ plugins:
       full_screen: true
       key: "alt"
       hint_location: "bottom"
-  - macros
+  - social
 
 markdown_extensions:
   - admonition
