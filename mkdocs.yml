@@ -66,6 +66,11 @@ plugins:
       hint_location: "bottom"
   - social
 
+# Build hooks (see mkdocs_hooks.py). Carries the panzoom×static-i18n
+# idempotency shim so the per-locale build passes don't KeyError.
+hooks:
+  - mkdocs_hooks.py
+
 markdown_extensions:
   - admonition
   - pymdownx.details
