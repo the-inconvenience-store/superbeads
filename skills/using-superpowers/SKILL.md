@@ -65,6 +65,22 @@ Above all three, one **hard floor**:
 This is a **floor, not a ceiling** — clearing it is the baseline for every piece
 of work, not going above and beyond.
 
+## Capturing Decisions
+
+When an architecturally-significant decision is made — about approach, architecture, technology choice, or design pattern — capture it as an ADR (Architecture Decision Record). This is a norm, like the doctrine above: it applies wherever a decision or a pivot happens, not just at the design gates.
+
+**Significance gate — record an ADR only when ALL THREE hold:**
+
+- **Hard to reverse** — meaningful cost to change course later.
+- **Surprising without context** — a future reader will ask "why this way?" Read this generously: the test is "would a competent future reader be puzzled," not "is it novel."
+- **The result of a genuine trade-off.**
+
+If any one is missing, skip it. Most decisions, clarifications, and scope questions are NOT ADR-worthy — this gate keeps ADRs scarce and high-value.
+
+**Offer, never auto-create.** Offer to record the ADR; the user confirms. Never write one silently.
+
+**How (orchestrator only — subagents skip this skill):** write `decisions/ADR-NNNN-<kebab-title>.md` (next number = highest existing + 1) in the existing format (`# ADR-NNNN: Title`; bold `**Date:** / **Status:** / **Deciders:**`; then `## Context`, `## Decision`, `## Rationale`, `## Consequences`; optional `## Related`), then update `decisions/INDEX.md` (the `| ADR | Date | Status | Title |` table). The home is `decisions/` at the repo root — not a `docs/` subdirectory. ADRs are gitignored local working docs; do not `git add -f` them. When a subagent surfaces a significant decision in its report, the orchestrator applies the gate and offers the ADR.
+
 ## How to Access Skills
 
 **In Claude Code:** Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you—follow it directly. Never use the Read tool on skill files.
