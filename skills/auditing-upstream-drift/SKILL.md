@@ -123,12 +123,12 @@ grep -q "Jesse Vincent" LICENSE && echo "FAIL: LICENSE still has upstream author
 
 Run ALL runnable tests. Tests are the ground truth — if they fail, nothing else matters.
 
-**Check 2.1 — Brainstorm server tests (25 tests):**
+**Check 2.1 — Brainstorm server tests (32 tests):**
 ```bash
 cd tests/brainstorm-server
 npm install --silent 2>/dev/null
-npm test 2>&1 | tail -1
-# MUST show: --- Results: 25 passed, 0 failed ---
+node server.test.js 2>&1 | tail -1
+# MUST show: --- Results: 32 passed, 0 failed ---
 ```
 
 **Check 2.2 — WebSocket protocol tests (31 tests):**
@@ -138,7 +138,14 @@ node ws-protocol.test.js 2>&1 | tail -1
 # MUST show: --- Results: 31 passed, 0 failed ---
 ```
 
-**Check 2.3 — Claude Code fast skill tests (9 subtests):**
+**Check 2.3 — Auth/security tests (20 tests):**
+```bash
+cd tests/brainstorm-server
+node auth.test.js 2>&1 | tail -1
+# MUST show: --- Results: 20 passed, 0 failed ---
+```
+
+**Check 2.4 — Claude Code fast skill tests (9 subtests):**
 ```bash
 cd <repo-root>
 bash tests/claude-code/run-skill-tests.sh --timeout 600 2>&1 | tail -5
@@ -156,7 +163,7 @@ This runs real Claude API calls (~$0.10, ~165s). Tests verify:
 - Worktree requirement mentioned
 - Main branch warning present
 
-**Check 2.4 — Integration test (OPTIONAL, ~$4-5, 10-30 min):**
+**Check 2.5 — Integration test (OPTIONAL, ~$4-5, 10-30 min):**
 ```bash
 bash tests/claude-code/run-skill-tests.sh --integration --timeout 2400 2>&1
 # Full end-to-end: creates project, executes plan via subagents, verifies output
@@ -435,8 +442,9 @@ Write the report to `.internal/audits/YYYY-MM-DD-upstream-drift.md`:
 - LICENSE: PASS/FAIL
 
 ## Tests
-- Brainstorm server: N/25 passed
+- Brainstorm server: N/32 passed
 - WS protocol: N/31 passed
+- Auth/security: N/20 passed
 - Fast skill tests: PASS/FAIL (N subtests)
 - Integration test: RAN/SKIPPED
 
@@ -490,7 +498,7 @@ echo "Stale paths: $(grep -rn 'docs/superpowers' skills/ tests/ | grep -v 'audit
 echo "Stale namespace: $(grep -rn '"superpowers:' skills/ tests/ | grep -v 'beads-superpowers:' | wc -l)" && \
 echo "Beads density: $(grep -rn 'bd create\|bd close\|bd ready\|bd update\|bd dep\|bd dolt' skills/ | wc -l)" && \
 echo "Version: $(grep '"version"' package.json | grep -o '[0-9.]*')" && \
-cd tests/brainstorm-server && npm test 2>&1 | tail -1 && node ws-protocol.test.js 2>&1 | tail -1 && cd ../.. && \
+cd tests/brainstorm-server && node server.test.js 2>&1 | tail -1 && node ws-protocol.test.js 2>&1 | tail -1 && node auth.test.js 2>&1 | tail -1 && cd ../.. && \
 echo "=== Quick Audit Complete ==="
 ```
 
