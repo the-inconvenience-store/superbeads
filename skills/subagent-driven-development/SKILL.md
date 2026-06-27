@@ -312,7 +312,7 @@ You: I'm using Subagent-Driven Development to execute this plan.
 [Extract all 5 tasks with full text and context]
 [Create epic + tasks + deps atomically via bd create --graph (ADR-0030):]
 [  Build plan.json: {nodes:[{key,title,type,priority,parent_key}],]
-[                   edges:[{from_key:<dependent>,to_key:<dependency>,type}]}]
+[                   edges:[{from_key:<dependent>,to_key:<dependency>,type:"blocks"}]}]
 [  bd create --graph plan.json --dry-run   <- dry-run first]
 [  bd create --graph plan.json]
 [  Fallback: sequential bd create loop + bd dep add if --graph unavailable]

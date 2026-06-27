@@ -31,12 +31,12 @@ Load plan, review critically, execute all tasks, report when complete.
        {"key": "t2", "title": "Task 2: <title>", "type": "task", "priority": 2, "parent_key": "epic1"}
      ],
      "edges": [
-       {"from_key": "t2", "to_key": "t1"}
+       {"from_key": "t2", "to_key": "t1", "type": "blocks"}
      ]
    }
    ```
 
-   Edge direction: `from_key` = dependent task (needs `to_key` done first).
+   Edge direction: `from_key` = dependent task (needs `to_key` done first). `type` is the dependency kind (`blocks`); it is optional and defaults to a blocking dependency.
 
    ```bash
    # Validate structure without writing:
