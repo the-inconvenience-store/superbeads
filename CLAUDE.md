@@ -270,7 +270,7 @@ If `bd setup claude` hooks are installed in any settings file (project or global
 | getting-up-to-speed | Session orientation — bd context + adaptive codebase deep-dive + structured current-state summary |
 | research-driven-development | Parallel research agents → synthesized knowledge base document. Triggers on "research this", "what is X", "how does Y work" |
 | write-documentation | Human-quality prose for all human-facing text — 14-rule writing system with context-first drafting and required checks |
-| memory-curator | Session-close/on-demand memory consolidation — quality-gated extract, dedup, consolidate, prune (evidence-led, ADR-0034) |
+| memory-curator | Session-close/on-demand memory consolidation — quality-gated extract, dedup, consolidate, prune (evidence-led) |
 
 ## Modifying Skills
 

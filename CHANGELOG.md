@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - **Human-facing docs no longer carry internal tracker IDs.** Removed `ADR-NNNN` and `bd-xxxx` references from the README, CHANGELOG, and docs-site pages — they pointed at gitignored local decision records and bead IDs that a reader can't open. `document-release` and `write-documentation` now flag these so they don't creep back into reader-facing prose.
+- **`memory-curator` now organizes memories by a two-level type taxonomy.** Each memory is tagged `@type=<class>:<subtype>` — `semantic` for durable facts (design, lesson, pattern, decision, root-cause, research, correction) or `episodic` for time-bound records (done, continuation, cleanup, review) — so you can filter and rank them (e.g. `bd memories | grep '@type=episodic:'`), and the curator uses the class to prune safely: episodic clusters distil into semantic facts and the most-recent handoff is never dropped. The skill was also streamlined, with its propose-then-apply, secrets, and never-shrink safeguards sharpened.
 
 ## [0.8.0] - 2026-06-28
 
