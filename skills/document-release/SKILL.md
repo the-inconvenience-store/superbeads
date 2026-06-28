@@ -146,7 +146,7 @@ Thresholds: **<2 → rewrite** the entry; **3 → gold** (preserve as-is or mino
 | CHANGELOG.md | ✅ Polished | Voice improvements |
 ```
 
-6. **Documentation Debt (from the Step 1.5 coverage map).** For each judgment-confirmed gap, **offer** a bead (do not auto-create — consistent with "ask before new TODO items"): `bd create "docs-debt: <entity> missing <quadrant>" -t chore -p 3`. Before creating, **check for an existing open `docs-debt` bead for the same entity** (`bd find-duplicates`, or `bd list --status=open | grep docs-debt`) and skip duplicates so the ledger doesn't fill with re-filed gaps. If a PR exists, also append the lightweight always-available form to the PR body:
+6. **Documentation Debt (from the Step 1.5 coverage map).** For each judgment-confirmed gap, **offer** a bead (do not auto-create — consistent with "ask before new TODO items"), stamped per **Agent-Filed Bead Discipline** (`beads-superpowers:verification-before-completion`): `bd create "docs-debt: <entity> missing <quadrant>" -t chore -p 3 --notes "Severity:/Confidence:/Evidence:"`. Before creating, **check for an existing open `docs-debt` bead for the same entity** (`bd find-duplicates`, or `bd list --status=open | grep docs-debt`) and skip duplicates so the ledger doesn't fill with re-filed gaps. If a PR exists, also append the lightweight always-available form to the PR body:
 
    ```text
    ### Documentation Debt
@@ -169,11 +169,10 @@ Thresholds: **<2 → rewrite** the entry; **3 → gold** (preserve as-is or mino
 - **Never early-exit without the coverage map:** the Step 1.5 empty-check may exit only after the coverage map confirms zero new public surface AND zero `.md` changed. When in doubt, run the full audit — a false-skip ships undocumented surface.
 - **Offer doc-debt, don't auto-create:** present coverage gaps; create `docs-debt` beads only on confirmation, and dedupe against existing open ones.
 
-If you discovered something reusable, capture it before closing:
+**Capture what you learned.** At close, record every durable, evidence-backed insight from this work — anything still true next month, tied to a file, test, or command. Don't skip because it feels minor: if it would save a future session time or stop a repeated mistake, record it. Never record guesses, one-offs, or secrets (tokens, keys, PII — every memory is injected into all future sessions). Update an existing memory in place (`bd remember --key <key>`) rather than adding a near-duplicate.
 
 ```bash
-# Only if worth preserving for future sessions:
-bd remember "docs: <documentation pattern or gap found>"
+bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / pattern / design / root-cause / research
 ```
 
 ## Integration
