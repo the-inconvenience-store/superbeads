@@ -22,7 +22,7 @@ memories — and prune the pile — using `bd` over text already in context. No 
 Two classes; **procedural** memory (how-to / workflow) lives in the **skills**, never the memory store.
 
 - **semantic** — durable facts that stay true. Subtypes: `design`, `lesson`, `pattern`, `decision`,
-  `root-cause`, `research`, `correction`. The durable keep.
+  `root-cause`, `research`, `correction`. The durable core of the store.
 - **episodic** — time-bound records of what happened. Subtypes: `done`, `continuation`, `cleanup`,
   `review`. Consolidate and retire as they age; a cluster often distills into one semantic fact.
 
@@ -52,11 +52,11 @@ dedup); cross-cluster consolidation and pruning come after, and only where clear
 1. **Gather** — `bd memories --json` for the full store; `bd dolt status` to record the pre-sweep
    state for rollback.
 2. **Extract** — pull salient, self-contained, date-grounded facts; classify each by the taxonomy and
-   normalize its `@type` to `class:subtype` (fixing stray `type-*` keys and any leaked `class:subtype`
-   placeholder on contact). Store a fact ONLY if it carries checkable evidence (cited `file:line`,
+   normalize its `@type` to `class:subtype` (correcting any malformed `@type` it encounters). Store a
+   fact ONLY if it carries checkable evidence (cited `file:line`,
    passing test, command output, closed bead) — the same bar as Agent-Filed Bead Discipline in
    `verification-before-completion`. No evidence → drop, or store at low `@salience`. Procedural how-to
-   → flag for a skill, don't store. **Never persist secrets, tokens, or PII** — `bd prime` injects every
+   → flag for a skill, don't store. **Never persist secrets, credentials, tokens, keys, or PII** — `bd prime` injects every
    memory into future sessions and Dolt history outlives `bd forget`.
 3. **Reconcile** — ADD new facts; UPDATE a same-topic memory in place with `bd remember --key <existing>`,
    merging so the result keeps the MOST information (never silently shrink); skip what's already present.
