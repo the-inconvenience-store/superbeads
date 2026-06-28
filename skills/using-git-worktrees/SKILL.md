@@ -35,7 +35,7 @@ Raw `git worktree add` misses `.gitignore` setup and safety checks — while bea
 
 > **Note:** Claude Code provides a native `EnterWorktree` tool for worktree management. For non-beads projects, this is a viable alternative. For beads-integrated projects, `bd worktree create` remains mandatory — it handles database sharing and `.gitignore` management that `EnterWorktree` does not provide.
 >
-> **Deliberate divergence from upstream:** superpowers v6.0.3 rewrote this skill to prefer the harness-native worktree tool first (`EnterWorktree` → existing `.worktrees/` → raw `git worktree`). We do **not** adopt that native-tool-first selection order — it bypasses `bd worktree`'s beads-database sharing across worktrees. The Iron Law above (always `bd worktree`) is intentional and takes precedence. (See ADR-0014.)
+> **Deliberate divergence from upstream:** superpowers v6.0.3 rewrote this skill to prefer the harness-native worktree tool first (`EnterWorktree` → existing `.worktrees/` → raw `git worktree`). We do **not** adopt that native-tool-first selection order — it bypasses `bd worktree`'s beads-database sharing across worktrees. The Iron Law above (always `bd worktree`) is intentional and takes precedence.
 
 ## Directory Selection
 
@@ -197,7 +197,7 @@ bd worktree remove <task-name>
 - All task worktrees branch from the same HEAD commit (created before any subagent commits)
 - After merge, run the full test suite on the epic worktree to catch integration issues
 
-**See also:** `superpowers:subagent-driven-development` → Parallel Batch Mode section for the full orchestration flow.
+**See also:** `beads-superpowers:subagent-driven-development` → Parallel Batch Mode section for the full orchestration flow.
 
 ## Quick Reference
 
@@ -256,11 +256,10 @@ Tests passing (47 tests, 0 failures)
 Ready to implement auth feature
 ```
 
-If you discovered something reusable, capture it before closing:
+**Capture what you learned.** At close, record every durable, evidence-backed insight from this work — anything still true next month, tied to a file, test, or command. Don't skip because it feels minor: if it would save a future session time or stop a repeated mistake, record it. Never record guesses, one-offs, or secrets (tokens, keys, PII — every memory is injected into all future sessions). Update an existing memory in place (`bd remember --key <key>`) rather than adding a near-duplicate.
 
 ```bash
-# Only if worth preserving for future sessions:
-bd remember "worktree: <gotcha or workaround>"
+bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / pattern / design / root-cause / research
 ```
 
 ## Red Flags
