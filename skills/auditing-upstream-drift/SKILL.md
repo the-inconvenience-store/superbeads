@@ -7,7 +7,7 @@ description: Use when checking if beads-superpowers is outdated, before a plugin
 
 This is the quality gate for the beads-superpowers plugin. It verifies everything — upstream staleness, test pass rates, documentation accuracy, plugin manifest validity, hook functionality, content integrity, and beads integration completeness.
 
-**Iron Law:** NO PLUGIN RELEASE WITHOUT A FULL AUDIT FIRST. Audit findings with security or material-risk impact are never downgraded to make a release, and phases are never skipped for a date (Production-Grade Doctrine, see using-superpowers).
+**Iron Law:** NO PLUGIN RELEASE WITHOUT A FULL AUDIT FIRST. Audit findings with security or material-risk impact are never downgraded to make a release, and phases are never skipped for a date (Production-Grade Doctrine).
 
 ## When to Use
 
@@ -39,6 +39,7 @@ These shared skills intentionally differ from upstream superpowers. When Phase 5
 | **Beads integration** | CLI-only: call `bd` directly in skills + one SessionStart `bd prime` hook; no beads Claude plugin or beads-mcp server | Claude plugin + MCP server | Lowest overhead; full `bd` command coverage; matches beads' own "CLI + hooks when shell is available" guidance (ADR-0017) |
 | **brainstorming, writing-plans** | stress-test (a fork-only skill) is offered at the approval gate via a 3-option "Approved + stress-test" gate folded into the upstream Approved/Needs-changes review gate | 2-option review gate; no stress-test (stress-test does not exist upstream) | stress-test is one of our 7 fork-unique skills; offering it at every spec/plan gate is intended fork behavior (ADR-0020) |
 | **using-superpowers** | carries a fork-only `## Production-Grade Doctrine` block (treat every project as production-facing; no shortcuts/descope/material-risk; never a security regression) | no such doctrine (obra/superpowers has none) | intended fork behavior (ADR-0023); a future audit marks it SKIP, not Conflict |
+| **All shared skills (namespace)** | cross-skill references use `beads-superpowers:<skill>` | bare `superpowers:<skill>` | upstream's bare namespace points at the upstream plugin; in our fork it must carry our plugin name or it resolves to the wrong plugin (intended; mark SKIP, not Conflict) |
 
 When a CHANGED skill from Phase 5 matches a row here, mark it **SKIP (deliberate divergence)** in the report — not drift.
 
@@ -234,6 +235,13 @@ for f in skills/subagent-driven-development/task-reviewer-prompt.md; do
     [ "$count" -eq 0 ] && echo "PASS: $(basename $f) clean" || echo "FAIL: $(basename $f) has $count bd references"
 done
 ```
+
+**Check 3.8 — Convention-block sync (verbatim canonical blocks):**
+```bash
+bash scripts/check-convention-sync.sh
+```
+
+The cross-cutting convention blocks (doctrine floor, Capture gate, memory convention) are duplicated across skills by design and MUST be byte-identical at every site. Any divergent or missing copy fails this check.
 
 ---
 
@@ -521,11 +529,10 @@ echo "=== Quick Audit Complete ==="
 rm -rf /tmp/superpowers-upstream
 ```
 
-If you discovered something reusable, capture it before closing:
+**Capture what you learned.** At close, record every durable, evidence-backed insight from this work — anything still true next month, tied to a file, test, or command. Don't skip because it feels minor: if it would save a future session time or stop a repeated mistake, record it. Never record guesses, one-offs, or secrets (tokens, keys, PII — every memory is injected into all future sessions). Update an existing memory in place (`bd remember --key <key>`) rather than adding a near-duplicate.
 
 ```bash
-# Only if worth preserving for future sessions:
-bd remember "upstream: <drift finding or new capability>"
+bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / pattern / design / root-cause / research
 ```
 
 ## Integration
