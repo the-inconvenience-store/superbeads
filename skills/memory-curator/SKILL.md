@@ -94,11 +94,11 @@ bd create "Memory curation: <session/sweep>" -t chore
 # after the user approved + you applied:
 bd close <id> --reason "Curated: <N added, M updated, K consolidated, J forgotten>; pre-sweep Dolt <ref>"
 ```
-Only the orchestrating agent runs this (subagents skip `using-superpowers`).
+Run this as the session/ledger-owning agent; a dispatched single-task subagent does not.
 
 ## Integration
-**Invoked by:** the orchestrator at session-close (offered when a session produced ~3+ new memories —
-see `finishing-a-development-branch` Step 7) and the user on-demand.
+**Invoked at:** session-close (offered when a session produced ~3+ new memories —
+see `finishing-a-development-branch` Step 7) and on-demand by the user.
 **Pairs with:** `verification-before-completion` (supplies the evidence bar) and `getting-up-to-speed`
 (its session-start `bd forget` is lightweight cleanup; this skill owns curation).
 
