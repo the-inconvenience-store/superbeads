@@ -69,17 +69,9 @@ of work, not going above and beyond.
 
 When an architecturally-significant decision is made — about approach, architecture, technology choice, or design pattern — capture it as an ADR (Architecture Decision Record). This is a norm, like the doctrine above: it applies wherever a decision or a pivot happens, not just at the design gates.
 
-**Significance gate — record an ADR only when ALL THREE hold:**
+You MUST offer to record an ADR — don't let the rationale evaporate. A decision is significant when it is **hard to reverse** (meaningful cost to change course later), **surprising without context** (a future reader will ask "why this way?" — read generously: "would a competent future reader be puzzled," not "is it novel"), and **the result of a genuine trade-off**. Treat these as recognition marks, not a checklist to wriggle out of: when a decision plausibly fits, offer it. Recording is only an offer the user confirms (never auto-created), so **bias toward offering rather than skipping**, and never rationalize it away ("it's obvious", "I'll remember"). Routine clarifications and scope questions that don't clear the marks are not ADR-worthy.
 
-- **Hard to reverse** — meaningful cost to change course later.
-- **Surprising without context** — a future reader will ask "why this way?" Read this generously: the test is "would a competent future reader be puzzled," not "is it novel."
-- **The result of a genuine trade-off.**
-
-If any one is missing, skip it. Most decisions, clarifications, and scope questions are NOT ADR-worthy — this gate keeps ADRs scarce and high-value.
-
-**Offer, never auto-create.** Offer to record the ADR; the user confirms. Never write one silently.
-
-**How (orchestrator only — subagents skip this skill):** write `decisions/ADR-NNNN-<kebab-title>.md` (next number = highest existing + 1) in the existing format (`# ADR-NNNN: Title`; bold `**Date:** / **Status:** / **Deciders:**`; then `## Context`, `## Decision`, `## Rationale`, `## Consequences`; optional `## Related`), then update `decisions/INDEX.md` (the `| ADR | Date | Status | Title |` table). The home is `decisions/` at the repo root — not a `docs/` subdirectory. ADRs are gitignored local working docs; do not `git add -f` them. When a subagent surfaces a significant decision in its report, the orchestrator applies the gate and offers the ADR.
+**How:** write `decisions/ADR-NNNN-<kebab-title>.md` (next number = highest existing + 1) in the existing format (`# ADR-NNNN: Title`; bold `**Date:** / **Status:** / **Deciders:**`; then `## Context`, `## Decision`, `## Rationale`, `## Consequences`; optional `## Related`), then update `decisions/INDEX.md` (the `| ADR | Date | Status | Title |` table). The home is `decisions/` at the repo root — not a `docs/` subdirectory. ADRs are gitignored local working docs; do not `git add -f` them. A dispatched single-task subagent does not write ADRs — it surfaces the decision in its report, and the dispatching agent applies the gate and records it.
 
 ## How to Access Skills
 
@@ -184,7 +176,7 @@ This skills system uses **bd (beads)** for persistent task tracking across sessi
 - **Bead Lifecycle**: `open` → `in_progress` (via `--claim`) → `closed` (via `bd close`)
 - **The Ledger**: The beads database is the project ledger — persistent, auditable, version-controlled via Dolt.
 - **Dependency Chain**: Tasks with dependencies use `bd dep add <child> <depends-on>`.
-- **Memories**: Use `bd remember "insight"` for persistent learnings across sessions.
+- **Memories**: Use `bd remember "lesson: <durable, evidence-backed insight>"` for persistent learnings — capture durable, evidence-backed facts only; never secrets/PII (every memory is injected into future sessions).
 
 ### Quick Reference
 
@@ -202,13 +194,19 @@ This skills system uses **bd (beads)** for persistent task tracking across sessi
 | Epic completion status | `bd epic status <id>` |
 | Add dependency | `bd dep add <child-id> <depends-on-id>` |
 | View dependency tree | `bd dep tree <epic-id>` |
-| Store a learning | `bd remember "insight"` |
+| Store a learning | `bd remember "lesson: <durable insight>"` |
 | Remove stale memory | `bd forget <id>` |
 | Search memories | `bd memories <keyword>` |
 | Recall specific memory | `bd recall <id>` |
 | Append note to bead | `bd note <id> "context"` |
 | Find duplicate beads | `bd find-duplicates` |
 | Sync to remote | `bd dolt push` |
+
+**Efficient bead creation:**
+
+- Creating an epic with child tasks/deps → you SHOULD use `bd create --graph <plan.json>` (atomic; `--dry-run` first; prevents orphaned beads on mid-sequence failure). A standalone bead MAY use plain `bd create`.
+- Every bead you create MUST carry an actionable description — *why it exists and what "done" looks like* — not a bare title. Use `--acceptance "<criteria>"` for done-criteria and `--validate` to check.
+- Wire dependency chains atomically with `bd batch`; `--silent` returns just the ID (scripting); `--body-file`/`--design`/`--notes` carry rich context.
 
 ### Rules
 
