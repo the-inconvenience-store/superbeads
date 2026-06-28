@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-06-28
+
 ### Changed
 
 - **Skill conventions now hold up in isolation.** Every skill's production-grade doctrine, memory-capture guidance, and decision-capture prompt is now self-contained, so a skill invoked on its own, under a subagent, or after a context compaction no longer points at a `using-superpowers` section that may not be loaded. Skill cross-references use the `beads-superpowers:` plugin namespace so they resolve to this fork rather than the upstream one, and the four decision skills (brainstorming, planning, stress-testing, debugging) now close with a single explicit Capture prompt — record an ADR, a memory, both, or skip — instead of separate, easy-to-miss instructions. A new `scripts/check-convention-sync.sh` gate keeps the shared convention text byte-identical across skills so the copies can't quietly drift apart.
