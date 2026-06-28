@@ -1,5 +1,7 @@
 <p align="center"><a href="README.md">English</a> · <strong>中文</strong></p>
 
+<p align="center"><em>⚠️ 本文档由 AI 机器翻译，可能存在术语或语义偏差。如有疑问，请以<a href="README.md">英文原文</a>为准。</em></p>
+
 <p align="center">
   <img src="assets/banner.svg" alt="beads-superpowers — Process discipline and persistent memory for AI coding agents" width="100%" />
 </p>
@@ -62,9 +64,9 @@
 | `document-release` | 发布后文档审计——保持 README、CHANGELOG 和 ARCHITECTURE 同步 |
 | `project-init` | Beads/Dolt 数据库设置、初始化与恢复 |
 | `getting-up-to-speed` | 会话定向——加载 `bd` 上下文并生成当前状态摘要 |
+| `memory-curator` | 会话结束/按需的记忆整合——对 `bd` 记忆库去重并清理过时记忆 |
 | `research-driven-development` | 并行研究智能体 → 综合知识库文档 |
 | `write-documentation` | 人类品质的文档——14 条规则写作体系，以上下文优先起草 |
-| `memory-curator` | 会话结束/按需的记忆整合——对 `bd` 记忆库去重并清理过时记忆 |
 
 ### 元技能
 

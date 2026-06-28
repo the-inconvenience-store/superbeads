@@ -28,6 +28,7 @@ description: 快速参考 bd 命令速查表、技能路由表、常见问题故
 |---------|------|
 | `bd create "Epic: name" -t epic -p 2` | 新建优先级为 2 的 epic |
 | `bd create "Task: title" -t task --parent <epic>` | 在 epic 下创建任务 |
+| `bd create --graph plan.json` | 原子化创建 epic + 任务 + 依赖（先 dry-run） |
 | `bd q "quick title"` | 快速捕获 |
 
 ### 处理工作
@@ -94,6 +95,7 @@ description: 快速参考 bd 命令速查表、技能路由表、常见问题故
 | 发布后更新文档 | `document-release` |
 | 研究某个主题 | `research-driven-development` |
 | 编写面向用户的文档 | `write-documentation` |
+| 整合或去重记忆 | `memory-curator` |
 
 `using-superpowers` 引导技能（会话开始时自动加载）包含完整的路由逻辑；如有疑问，请让 Claude Code 读取它。
 
