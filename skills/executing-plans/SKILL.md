@@ -11,7 +11,7 @@ Load plan, review critically, execute all tasks, report when complete.
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
-**Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use superpowers:subagent-driven-development instead of this skill.
+**Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use beads-superpowers:subagent-driven-development instead of this skill.
 
 ## The Process
 
@@ -69,7 +69,7 @@ Load plan, review critically, execute all tasks, report when complete.
 ### Step 2: Execute Tasks
 
 For each task:
-1. **Check description quality** before claiming: if the task description is a bare title with no actionable steps or context, STOP — do not claim it. Surface the gap to the user or orchestrator.
+1. **Check description quality** before claiming: if the task description is a bare title with no actionable steps or context, STOP — do not claim it. Surface the gap to the user.
 2. Claim the task: `bd update <task-id> --claim`
 3. Follow each step exactly (plan has bite-sized steps)
 4. Run verifications as specified
@@ -81,7 +81,7 @@ For each task:
 
 After all tasks complete and verified:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
+- **REQUIRED SUB-SKILL:** Use beads-superpowers:finishing-a-development-branch
 - The finishing skill includes the **Land the Plane** session close protocol (`bd close` → `bd dolt push` → `git push` → `git status`)
 - Follow that skill to verify tests, present options, execute choice
 
@@ -120,21 +120,20 @@ After all tasks complete and verified:
 - Reference skills when plan says to
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
-- **Production-Grade Doctrine (see using-superpowers):** you are shipping to a production system with real users. Never skip a verification, drop a task, or accept a security regression to make progress. `bd defer`/`bd human` are for genuine blockers — never a quiet way to descope required work. Surface a warranted shortcut to the user; a security regression is never acceptable.
+- **Production-Grade Doctrine:** Treat this as a production system with real users — no matter how small or internal it looks. You MUST NOT silently take a shortcut, descope a required behavior/edge-case, or accept a material-risk trade-off; if one is genuinely warranted you MUST surface it and let the user decide. You MUST NOT weaken, bypass, or remove a security control or add a vulnerability — a security regression is never acceptable, even for a deadline or "minimal changes." In execution this means never skipping a verification or dropping a task to make progress — `bd defer`/`bd human` are for genuine blockers, never a quiet way to descope required work.
 
-If you discovered something reusable, capture it before closing:
+**Capture what you learned.** At close, record every durable, evidence-backed insight from this work — anything still true next month, tied to a file, test, or command. Don't skip because it feels minor: if it would save a future session time or stop a repeated mistake, record it. Never record guesses, one-offs, or secrets (tokens, keys, PII — every memory is injected into all future sessions). Update an existing memory in place (`bd remember --key <key>`) rather than adding a near-duplicate.
 
 ```bash
-# Only if worth preserving for future sessions:
-bd remember "lesson: <what worked or didn't in plan execution>"
+bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / pattern / design / root-cause / research
 ```
 
 ## Integration
 
 **Required workflow skills:**
-- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **superpowers:writing-plans** - Creates the plan this skill executes
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+- **beads-superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
+- **beads-superpowers:writing-plans** - Creates the plan this skill executes
+- **beads-superpowers:finishing-a-development-branch** - Complete development after all tasks
 
 **Each execution step should use:**
-- **superpowers:test-driven-development** - RED-GREEN-REFACTOR for each task's implementation
+- **beads-superpowers:test-driven-development** - RED-GREEN-REFACTOR for each task's implementation
