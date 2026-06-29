@@ -106,10 +106,11 @@ cat .claude/settings.json | grep -q '"bd prime"' && echo "WARNING: bd setup clau
 
 **Check 1.7 — Skills count:**
 ```bash
-count=$(ls -d skills/*/ | wc -l)
-echo "Skills: $count (expected: 24)"
-[ "$count" -eq 24 ] && echo "PASS" || echo "FAIL: expected 24 skills"
-# Drift-proof alternative (source of truth): ./scripts/sync-skill-count.sh --check
+dirs=$(ls -d skills/*/ | wc -l)
+md=$(find skills -maxdepth 2 -name SKILL.md | wc -l)
+echo "Skills: $dirs dirs, $md SKILL.md"
+[ "$dirs" = "$md" ] && echo "PASS" || echo "FAIL: $dirs skill dirs but $md SKILL.md files"
+# Source of truth (guard): ./scripts/check-skill-count.sh
 ```
 
 **Check 1.8 — LICENSE attribution:**

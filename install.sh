@@ -327,7 +327,7 @@ print_consent() {
   echo
   printf "${BOLD}beads-superpowers v%s — scripted / advanced installer${NC}\n" "$VERSION"
   echo
-  echo "This script installs 24 skills via the best available fallback method."
+  echo "This script installs the beads-superpowers skill suite via the best available fallback method."
   echo "(For Claude Code / Codex / OpenCode, native plugin install is preferred.)"
   if [ "$HAS_CLAUDE" = 1 ] || [ "$HAS_CODEX" = 1 ]; then
     echo "  1. Plugin system (Claude Code / Codex) — used when CLI detected"
@@ -769,12 +769,13 @@ PYEOF
 
 # --- Phase 4: Verify ---
 do_verify() {
-  local count
+  local count md
   count=$(find "$SKILLS_DIR" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
-  if [ "$count" -ge 21 ]; then
+  md=$(find "$SKILLS_DIR" -maxdepth 2 -name SKILL.md 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$count" -gt 0 ] && [ "$count" = "$md" ]; then
     success "Skill count: $count"
   else
-    warn "Expected >= 24 skills, found $count"
+    warn "Skill dir/SKILL.md mismatch: $count dirs vs $md SKILL.md files"
   fi
 
   # Hook checks only for non-plugin tiers (plugin manages its own hooks)
@@ -809,7 +810,7 @@ print_next_steps() {
   echo
   echo "Next steps:"
   echo "  1. Restart Claude Code (or start a new session) to activate skills"
-  echo "  2. Run /skills to verify — you should see 24+ skills available"
+  echo "  2. Run /skills to verify — the beads-superpowers skills should be available"
   if [ "$HAS_BEADS" != true ]; then
     echo
     echo "  3. Install beads for persistent task tracking:"
@@ -906,7 +907,7 @@ print_dry_run() {
   echo
   printf "${BOLD}beads-superpowers v%s installer (dry run)${NC}\n" "$VERSION"
   echo
-  echo "Would install 24 skills using the best available method:"
+  echo "Would install the skill suite using the best available method:"
   if [ "$HAS_CLAUDE" = 1 ] || [ "$HAS_CODEX" = 1 ]; then
     echo "  1. Plugin system (Claude Code / Codex)"
   fi

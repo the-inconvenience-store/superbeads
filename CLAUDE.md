@@ -73,7 +73,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Overview
 
-A plugin for Claude Code, Codex, and OpenCode (verified) plus 7 best-effort harnesses — Cursor, Gemini CLI, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi — that merges [Superpowers](https://github.com/obra/superpowers) skills (v6.0.3) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.0.5). It gives AI coding agents 24 composable process-discipline skills (TDD, brainstorming, systematic debugging, code review, verification) plus persistent task memory via a Dolt-backed database.
+A plugin for Claude Code, Codex, and OpenCode (verified) plus 7 best-effort harnesses — Cursor, Gemini CLI, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi — that merges [Superpowers](https://github.com/obra/superpowers) skills (v6.0.3) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.0.5). It gives AI coding agents composable process-discipline skills (TDD, brainstorming, systematic debugging, code review, verification) plus persistent task memory via a Dolt-backed database.
 
 **Repository:** <https://github.com/DollarDill/beads-superpowers>
 **Version:** 0.8.1
@@ -83,7 +83,7 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 7 best-effort harn
 
 - `.claude-plugin/` — Claude Code plugin manifest (`plugin.json`) and marketplace config (`marketplace.json`). Auto-discovered by Claude Code.
 - `.codex-plugin/` — Codex CLI plugin manifest (`plugin.json`) and marketplace config (`marketplace.json`). Mirrors `.claude-plugin/` for Codex compatibility.
-- `skills/` — 24 skills, each in `skills/<name>/SKILL.md`. Some include prompt templates (`implementer-prompt.md`, `researcher-prompt.md`) or helper scripts. Auto-discovered by Claude Code — do NOT declare in `plugin.json`.
+- `skills/` — one skill per `skills/<name>/SKILL.md` directory. Some include prompt templates (`implementer-prompt.md`, `researcher-prompt.md`) or helper scripts. Auto-discovered by Claude Code — do NOT declare in `plugin.json`.
 - `agents/` — Removed in v0.6.0. Code-reviewer is now dispatched via `skills/requesting-code-review/code-reviewer.md` prompt template. Subagents (implementer, researcher) use prompt templates inside their skills, not standalone agent files.
 - `hooks/` — `session-start` (injects `using-superpowers` + `bd prime`) and `superpowers-reminder.sh` (UserPromptSubmit skill trigger reminders). Multi-format output supports Claude Code, Codex, Cursor, and generic CLIs. Registered in `hooks/hooks.json` (Claude Code) and `hooks/codex-hooks.json` (Codex). Auto-discovered.
 - `opencode/` — Native OpenCode TypeScript plugin (`beads-superpowers-plugin.ts`). In-process hooks for session start, prompt reminders, and compaction resilience. Distributed via `install.sh`.
@@ -92,7 +92,7 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 7 best-effort harn
 - `decisions/` — Architecture Decision Records (ADRs). Local working docs (gitignored).
 - `.internal/` — Working docs (gitignored): specs from brainstorming, plans from writing-plans, research output, audits, reference docs.
 - `tests/` — 6 test suites: brainstorm-server (Node.js), claude-code skill tests, explicit-skill-requests, installer (Docker E2E), skill-triggering, subagent-driven-dev.
-- `scripts/` — `bump-version.sh` (sync version across 9 files), `sync-skill-count.sh` (sync skill counts across all files), `build-docs.sh`, `check-agent-bead-stamp.sh`, `check-zh-docs.sh`, `check-convention-sync.sh` (verify shared convention blocks are byte-identical across skills).
+- `scripts/` — `bump-version.sh` (sync version across 9 files), `check-skill-count.sh` (guard: forbid hardcoded skill counts + structural self-consistency), `build-docs.sh`, `check-agent-bead-stamp.sh`, `check-zh-docs.sh`, `check-convention-sync.sh` (verify shared convention blocks are byte-identical across skills).
 - `install.sh` — curl installer with 3-tier fallback chain (plugin system → npx → tarball/git clone). SHA-256 checksum validation, atomic rollback via staging directory, lazy prerequisites. Auto-detects Claude Code, Codex, OpenCode, and 7 more CLIs (Cursor, Gemini, Copilot, Droid, Antigravity, Kimi, Pi).
 - `mkdocs.yml` + `main.py` + `mkdocs_hooks.py` — MkDocs Material site config, macros plugin, and i18n language-switcher hook.
 
@@ -168,12 +168,12 @@ opencode/
   package.json             # Plugin dependencies
 scripts/
   bump-version.sh          # Sync version across package.json + plugin manifests
-  sync-skill-count.sh      # Sync skill counts across all files (idempotent)
+  check-skill-count.sh     # Guard: forbid hardcoded skill counts + structural self-consistency
   build-docs.sh            # Build MkDocs site
   check-agent-bead-stamp.sh  # Verify agent-filed bead discipline convention
   check-zh-docs.sh           # Verify zh docs structure/term parity
   check-convention-sync.sh   # Verify shared convention blocks are byte-identical across skills
-skills/                    # 24 beads-native skills (auto-discovered, each has SKILL.md)
+skills/                    # beads-native skills (auto-discovered, each has SKILL.md)
 tests/                     # Test infrastructure (6 suites)
 install.sh                 # curl installer — 3-tier fallback (plugin → npx → tarball/git), checksums, atomic rollback
 mkdocs.yml                 # MkDocs Material site config
@@ -223,7 +223,7 @@ This plugin uses `bd` (beads) for ALL task tracking.
 - Include bead IDs in commit messages: `git commit -m "Add feature (bd-a1b2)"`
 - Every session ends with Land the Plane: `bd close` → `bd dolt push` → `git push`
 
-## Skills (24 Total)
+## Skills
 
 | Skill                          | Purpose                                                                                                                     |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
@@ -276,11 +276,8 @@ Skills are plain Markdown. The docs site uses MkDocs Material.
 # Validate plugin manifests
 claude plugin validate .claude-plugin/plugin.json
 
-# Sync skill counts across all files (idempotent)
-./scripts/sync-skill-count.sh
-
-# Verify skill counts are consistent
-./scripts/sync-skill-count.sh --check
+# Guard against hardcoded skill-count drift + structural self-consistency
+./scripts/check-skill-count.sh
 
 # Verify zero active TodoWrite references (canonical gate)
 bash scripts/check-todowrite.sh

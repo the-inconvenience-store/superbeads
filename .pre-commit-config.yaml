@@ -45,9 +45,9 @@ repos:
         language: system
         pass_filenames: false
         files: (package\.json|plugin\.json|marketplace\.json)
-      - id: skill-count-sync
-        name: Skill count sync check
-        entry: bash scripts/sync-skill-count.sh --check
+      - id: skill-count-guard
+        name: Skill count drift guard + structural self-consistency
+        entry: bash scripts/check-skill-count.sh
         language: system
         pass_filenames: false
-        files: (skills/|CLAUDE\.md|README\.md|install\.sh|ci\.yml)
+        always_run: true

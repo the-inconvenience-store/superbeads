@@ -53,5 +53,5 @@ The `CLAUDE.md` provides behavioral guardrails (Think Before Coding, Simplicity 
 ## Learn More
 
 - [Example Workflow docs](https://dollardill.github.io/beads-superpowers/workflow.html) — Full walkthrough with diagrams
-- [Skills Reference](https://dollardill.github.io/beads-superpowers/skills.html) — All 24 skills explained
+- [Skills Reference](https://dollardill.github.io/beads-superpowers/skills.html) — All skills explained
 - [Methodology](https://dollardill.github.io/beads-superpowers/methodology.html) — Why this workflow exists

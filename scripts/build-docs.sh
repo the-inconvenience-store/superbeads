@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
-# build-docs.sh — Full docs build: sync skill counts + mkdocs build
+# build-docs.sh — Full docs build: mkdocs build (skill count is computed by the {{ skill_count }} macro)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
-
-echo "=== Syncing skill counts ==="
-bash scripts/sync-skill-count.sh
 
 echo "=== Building MkDocs site ==="
 mkdocs build --strict
