@@ -144,11 +144,11 @@ Produce **exactly this Markdown structure**. Heading levels are H2; tables and l
 - **Continuity check (in-progress beads only):** resolve the base branch as `git symbolic-ref refs/remotes/origin/HEAD` (strip to branch name), falling back to `main` then `master`; if none resolves, mark the check "unavailable". For each in-progress bead, run `git log --grep="<bead-id>" --oneline <base>`. If the bead ID appears in a commit reachable from the base branch, flag it advisory: `⚠️ <bead> appears in <sha> on <base> — verify it shouldn't be closed`. A multi-commit epic legitimately keeps shipping while open, so judge — do not auto-conclude. A bead whose ID is in no commit is NOT flagged. Skip the check when beads are absent. Deeper hygiene (stale branches, orphans, lint) → point to `bd doctor` / `bd stale` / `bd orphans`; do not reimplement it here.
 - **Handoff freshness + recency check (if a doc was read):** two parts.
   1. *Claims cross-check* (existing): compare the handoff's stated branch / sha / in-progress claims against live `git` + `bd` state; flag divergence **advisory** (e.g. doc says "in progress X" but X is closed/shipped) — never trust the doc over live state.
-  2. *HEAD-recency* — does the doc describe the last session, or an older one HEAD has moved past? Parse the recorded sha from the **first line containing `@`** (the "Current State (TL;DR)" branch line) **only** — not the whole doc, whose "What Shipped" section lists other commit shas:
+  2. *HEAD-recency* — does the doc describe the last session, or an older one HEAD has moved past? Parse the recorded sha from the **`@ <sha>` token** on the "Current State (TL;DR)" branch line — match the hex *immediately after* `@` (through optional spaces/backticks/asterisks), so a bare `@mention` or email earlier in the doc, and the other commit shas in the "What Shipped" section, can't false-match:
 
      ```bash
      DOC="<path>"; HEAD=$(git rev-parse HEAD)
-     DOC_SHA=$(grep -m1 -F '@' "$DOC" | grep -oE '[0-9a-f]{7,40}' | head -1)
+     DOC_SHA=$(grep -m1 -oE '@ *[`*]*[0-9a-f]{7,40}' "$DOC" | grep -oE '[0-9a-f]{7,40}' | head -1)
      if [ -n "$DOC_SHA" ] && [ "$DOC_SHA" = "$HEAD" ]; then
        echo fresh
      elif [ -n "$DOC_SHA" ] && git merge-base --is-ancestor "$DOC_SHA" HEAD 2>/dev/null; then
@@ -158,7 +158,7 @@ Produce **exactly this Markdown structure**. Heading levels are H2; tables and l
        if [ -n "$DOC_MTIME" ] && [ "$DOC_MTIME" -lt "$(git log -1 --format=%ct)" ]; then
          echo possibly-stale           # doc older than the latest commit
        else
-         echo fresh-or-unavailable
+         echo unavailable              # emit the 'unavailable' token in the Last-handoff line
        fi
      fi
      ```
