@@ -65,3 +65,6 @@ skills-lock.json
 # Beads workspace — infrastructure for plugin USERS, not tracked here
 .beads/
 issues.jsonl
+
+# cache
+.cache/

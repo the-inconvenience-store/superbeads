@@ -1,5 +1,3 @@
-<!-- Based on https://github.com/forrestchang/andrej-karpathy-skills (MIT License) -->
-
 # beads-superpowers — Claude Code Plugin
 
 Behavioral guidelines to reduce common LLM coding mistakes, plus project-specific instructions.
@@ -190,33 +188,33 @@ This plugin uses `bd` (beads) for ALL task tracking.
 
 ### Commands Used in Skills
 
-| Action | Command |
-|--------|---------|
-| Create epic | `bd create "Epic: name" -t epic -p 2` |
-| Create task | `bd create "Task: title" -t task --parent <epic-id>` |
-| Quick capture | `bd q "title"` |
-| Claim work | `bd update <id> --claim` |
-| Complete work | `bd close <id> --reason "description"` |
-| Check remaining | `bd ready --parent <epic-id>` |
-| Explain ready/blocked | `bd ready --explain` |
-| Show blocked | `bd blocked` |
-| Compound query (replaces list+jq) | `bd query "status=open AND priority<=1"` |
-| Count, grouped | `bd count --by-status` (or `--by-priority`/`--by-type`) |
-| Epic status | `bd epic status <id>` |
-| Add dependency | `bd dep add <child> <depends-on>` |
-| Store learning | `bd remember "insight"` |
-| Remove stale memory | `bd forget <id>` |
-| Search memories | `bd memories <keyword>` |
-| Append note to bead | `bd note <id> "context"` |
-| Find duplicate beads | `bd find-duplicates` |
-| Lint issue sections | `bd lint [id...]` |
-| Defer work | `bd defer <id> --until="<date>"` |
-| Flag for human decision | `bd human <id>` |
-| Validate parallel readiness | `bd swarm validate <epic-id>` |
-| Atomic batch operations | `bd batch` (stdin or `-f file`) |
-| Run in another directory | `bd -C <path> <command>` |
-| Sync beads | `bd dolt push` |
-| Sync to GitHub Issues | `bd github push` |
+| Action                            | Command                                                 |
+| --------------------------------- | ------------------------------------------------------- |
+| Create epic                       | `bd create "Epic: name" -t epic -p 2`                   |
+| Create task                       | `bd create "Task: title" -t task --parent <epic-id>`    |
+| Quick capture                     | `bd q "title"`                                          |
+| Claim work                        | `bd update <id> --claim`                                |
+| Complete work                     | `bd close <id> --reason "description"`                  |
+| Check remaining                   | `bd ready --parent <epic-id>`                           |
+| Explain ready/blocked             | `bd ready --explain`                                    |
+| Show blocked                      | `bd blocked`                                            |
+| Compound query (replaces list+jq) | `bd query "status=open AND priority<=1"`                |
+| Count, grouped                    | `bd count --by-status` (or `--by-priority`/`--by-type`) |
+| Epic status                       | `bd epic status <id>`                                   |
+| Add dependency                    | `bd dep add <child> <depends-on>`                       |
+| Store learning                    | `bd remember "insight"`                                 |
+| Remove stale memory               | `bd forget <id>`                                        |
+| Search memories                   | `bd memories <keyword>`                                 |
+| Append note to bead               | `bd note <id> "context"`                                |
+| Find duplicate beads              | `bd find-duplicates`                                    |
+| Lint issue sections               | `bd lint [id...]`                                       |
+| Defer work                        | `bd defer <id> --until="<date>"`                        |
+| Flag for human decision           | `bd human <id>`                                         |
+| Validate parallel readiness       | `bd swarm validate <epic-id>`                           |
+| Atomic batch operations           | `bd batch` (stdin or `-f file`)                         |
+| Run in another directory          | `bd -C <path> <command>`                                |
+| Sync beads                        | `bd dolt push`                                          |
+| Sync to GitHub Issues             | `bd github push`                                        |
 
 ### Rules
 
@@ -224,78 +222,42 @@ This plugin uses `bd` (beads) for ALL task tracking.
 - Only the orchestrating agent manages beads — subagents do NOT touch beads
 - Include bead IDs in commit messages: `git commit -m "Add feature (bd-a1b2)"`
 - Every session ends with Land the Plane: `bd close` → `bd dolt push` → `git push`
-- At session-close, if several new memories were captured, offer a `memory-curator` pass (consolidate/dedup/structure; confirm-never-auto) before the push. On-demand sweep via `Skill(memory-curator)`.
-
-### GitHub Issue Sync
-
-This project syncs beads to GitHub Issues. Issues appear at <https://github.com/DollarDill/beads-superpowers/issues>.
-
-```bash
-bd github push              # Push beads to GitHub Issues
-bd github pull              # Pull GitHub Issues into beads
-bd github status            # Check sync configuration
-```
-
-GitHub sync is configured via:
-
-- `bd config set github.token <token>` (or `GITHUB_TOKEN` env var)
-- `bd config set github.repository DollarDill/beads-superpowers`
-
-### Duplicate Hook Detection
-
-If `bd setup claude` hooks are installed in any settings file (project or global), the plugin's session-start hook detects them and automatically skips its own `bd prime` call to avoid duplicate context injection. No manual intervention needed.
 
 ## Skills (23 Total)
 
-| Skill | Purpose |
-|-------|---------|
-| using-superpowers | Bootstrap — loaded at session start, routes to other skills |
-| setup | Post-npx hook installation — configures SessionStart hook |
-| brainstorming | Socratic design before code — creates session beads |
-| stress-test | Adversarial design interrogation with recommended answers |
-| writing-plans | Bite-sized task plans — each task becomes a bead |
-| subagent-driven-development | Fresh agent per task + single task review (spec + quality verdicts); parallel batch mode for independent tasks |
-| executing-plans | Batch execution in single session |
-| test-driven-development | RED-GREEN-REFACTOR — Iron Law: no code without failing test |
-| systematic-debugging | 4-phase root cause analysis before proposing fixes |
-| verification-before-completion | Evidence before claims — bd close requires evidence |
-| requesting-code-review | Dispatches code reviewer subagent |
-| receiving-code-review | Anti-sycophancy review reception |
-| using-git-worktrees | Isolated development branches |
-| finishing-a-development-branch | Merge/PR + Land the Plane (Step 6) |
-| document-release | Post-ship documentation audit and sync |
-| project-init | Beads/Dolt DB setup, bootstrap, and recovery |
-| dispatching-parallel-agents | 2+ independent tasks without shared state |
-| writing-skills | Meta-skill for creating/modifying skills |
-| auditing-upstream-drift | Detect staleness vs upstream superpowers/beads |
-| getting-up-to-speed | Session orientation — bd context + adaptive codebase deep-dive + structured current-state summary |
-| research-driven-development | Parallel research agents → synthesized knowledge base document. Triggers on "research this", "what is X", "how does Y work" |
-| write-documentation | Human-quality prose for all human-facing text — 14-rule writing system with context-first drafting and required checks |
-| memory-curator | Session-close/on-demand memory consolidation — quality-gated extract, dedup, consolidate, prune (evidence-led) |
+| Skill                          | Purpose                                                                                                                     |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| using-superpowers              | Bootstrap — loaded at session start, routes to other skills                                                                 |
+| setup                          | Post-npx hook installation — configures SessionStart hook                                                                   |
+| brainstorming                  | Socratic design before code — creates session beads                                                                         |
+| stress-test                    | Adversarial design interrogation with recommended answers                                                                   |
+| writing-plans                  | Bite-sized task plans — each task becomes a bead                                                                            |
+| subagent-driven-development    | Fresh agent per task + single task review (spec + quality verdicts); parallel batch mode for independent tasks              |
+| executing-plans                | Batch execution in single session                                                                                           |
+| test-driven-development        | RED-GREEN-REFACTOR — Iron Law: no code without failing test                                                                 |
+| systematic-debugging           | 4-phase root cause analysis before proposing fixes                                                                          |
+| verification-before-completion | Evidence before claims — bd close requires evidence                                                                         |
+| requesting-code-review         | Dispatches code reviewer subagent                                                                                           |
+| receiving-code-review          | Anti-sycophancy review reception                                                                                            |
+| using-git-worktrees            | Isolated development branches                                                                                               |
+| finishing-a-development-branch | Merge/PR + Land the Plane (Step 6)                                                                                          |
+| document-release               | Post-ship documentation audit and sync                                                                                      |
+| project-init                   | Beads/Dolt DB setup, bootstrap, and recovery                                                                                |
+| dispatching-parallel-agents    | 2+ independent tasks without shared state                                                                                   |
+| writing-skills                 | Meta-skill for creating/modifying skills                                                                                    |
+| auditing-upstream-drift        | Detect staleness vs upstream superpowers/beads                                                                              |
+| getting-up-to-speed            | Session orientation — bd context + adaptive codebase deep-dive + structured current-state summary                           |
+| research-driven-development    | Parallel research agents → synthesized knowledge base document. Triggers on "research this", "what is X", "how does Y work" |
+| write-documentation            | Human-quality prose for all human-facing text — 14-rule writing system with context-first drafting and required checks      |
+| memory-curator                 | Session-close/on-demand memory consolidation — quality-gated extract, dedup, consolidate, prune (evidence-led)              |
 
 ## Modifying Skills
-
-### Adding a New Skill
-
-1. Create `skills/<skill-name>/SKILL.md` with YAML frontmatter:
-
-   ```yaml
-   ---
-   name: skill-name
-   description: When to use this skill (trigger condition, not workflow summary)
-   ---
-   ```
-
-2. Make it beads-aware: use `bd create`/`bd close`/`bd ready` for task tracking
-3. If it has a checklist, create beads per checklist item
-4. Update CLAUDE.md skills table (count and row) and CHANGELOG.md
 
 ### Modifying an Existing Skill
 
 1. **Do NOT remove** anti-rationalization tables, Iron Laws, or Red Flags sections
 2. **Do NOT add** TodoWrite references — use `bd` commands
-3. **Do NOT modify** the task review prompt (`task-reviewer-prompt.md`) with beads commands — orchestrator only. Exception: `implementer-prompt.md` IS beads-aware by design (includes skill invocations, bead lifecycle, LSP instructions).
-4. Verify after changes: run `bash scripts/check-todowrite.sh` — must report "No active TodoWrite references"
+3. Verify after changes: run `bash scripts/check-todowrite.sh` — must report "No active TodoWrite references"
 
 ### Key Anti-Patterns
 
@@ -385,57 +347,20 @@ Use `scripts/bump-version.sh` to update all at once:
 ./scripts/bump-version.sh --check      # Detect version drift
 ```
 
-## Installation (for users, not contributors)
-
-Native per-CLI plugin install is the recommended path (see README for the full tiered matrix: Verified = Claude Code/Codex/OpenCode; Best-effort = Cursor/Gemini/Copilot). `curl | bash` remains a fully-functional scoped fallback. Install `bd` first (`brew install beads`), then the plugin, then `bd init`.
-
-```bash
-# Option A (recommended): Claude Code Marketplace
-claude plugin marketplace add DollarDill/beads-superpowers
-claude plugin install beads-superpowers@beads-superpowers-marketplace
-
-# Option B: Codex CLI Marketplace
-codex plugin marketplace add DollarDill/beads-superpowers
-codex plugin install beads-superpowers@beads-superpowers-marketplace
-# Then enable hooks: add [features] codex_hooks = true to ~/.codex/config.toml
-
-# Option C: scripted install (scoped fallback — beads/Dolt bootstrap, npx/scripted hook
-# registration, optional yegge.md agent, version pinning via --version, CI)
-curl -fsSL https://raw.githubusercontent.com/DollarDill/beads-superpowers/main/install.sh | bash
-```
-
 ## Example Workflow
 
 The `example-workflow/` directory provides a ready-to-use development workflow:
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | Karpathy's 4 behavioral principles + beads integration (generic template for any project) |
+| File              | Purpose                                                                                                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CLAUDE.md`       | Karpathy's 4 behavioral principles + beads integration (generic template for any project)                                                                                            |
 | `agents/yegge.md` | Orchestrator agent — lean router: triage table, full-flow routing, always-true rules, session protocol. Named after Steve Yegge (beads creator). Installed globally by `install.sh`. |
-
-Subagents (researcher, implementer, code-reviewer) are dispatched via **prompt templates** within their skills — no standalone agent files. The `researcher-prompt.md` is named after Jesse Vincent (superpowers creator).
-
-## Syncing Source to Installed Plugin
-
-After modifying skills, the installed plugin cache at `~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.8.1/` goes stale.
-
-**Recommended:** Symlink the cache to this repo (one-time, survives edits):
-
-```bash
-rm -rf ~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.8.1
-ln -s ~/workplace/beads-superpowers \
-  ~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.8.1
-```
-
-**Quick check for drift:** `diff -rq skills/ ~/.claude/plugins/cache/beads-superpowers-marketplace/beads-superpowers/0.8.1/skills/`
-
-**Note:** `claude plugin update` has a [cache bug](https://github.com/anthropics/claude-code/issues/14061) — use symlink instead.
 
 ## Upstream Sources
 
-| Source | Version | What We Track |
-|--------|---------|---------------|
-| [obra/superpowers](https://github.com/obra/superpowers) | v6.0.3 (baseline) | Skill content, new skills, hook changes |
+| Source                                                    | Version           | What We Track                               |
+| --------------------------------------------------------- | ----------------- | ------------------------------------------- |
+| [obra/superpowers](https://github.com/obra/superpowers)   | v6.0.3 (baseline) | Skill content, new skills, hook changes     |
 | [gastownhall/beads](https://github.com/gastownhall/beads) | v1.0.5 (baseline) | CLI commands, new features, bd prime format |
 
 Use the `auditing-upstream-drift` skill to check for staleness.
