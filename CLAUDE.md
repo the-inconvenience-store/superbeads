@@ -73,7 +73,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Overview
 
-A plugin for Claude Code, Codex, and OpenCode (verified) plus 7 best-effort harnesses — Cursor, Gemini CLI, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi — that merges [Superpowers](https://github.com/obra/superpowers) skills (v6.0.3) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.0.5). It gives AI coding agents 23 composable process-discipline skills (TDD, brainstorming, systematic debugging, code review, verification) plus persistent task memory via a Dolt-backed database.
+A plugin for Claude Code, Codex, and OpenCode (verified) plus 7 best-effort harnesses — Cursor, Gemini CLI, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi — that merges [Superpowers](https://github.com/obra/superpowers) skills (v6.0.3) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.0.5). It gives AI coding agents 24 composable process-discipline skills (TDD, brainstorming, systematic debugging, code review, verification) plus persistent task memory via a Dolt-backed database.
 
 **Repository:** <https://github.com/DollarDill/beads-superpowers>
 **Version:** 0.8.1
@@ -173,7 +173,7 @@ scripts/
   check-agent-bead-stamp.sh  # Verify agent-filed bead discipline convention
   check-zh-docs.sh           # Verify zh docs structure/term parity
   check-convention-sync.sh   # Verify shared convention blocks are byte-identical across skills
-skills/                    # 23 beads-native skills (auto-discovered, each has SKILL.md)
+skills/                    # 24 beads-native skills (auto-discovered, each has SKILL.md)
 tests/                     # Test infrastructure (6 suites)
 install.sh                 # curl installer — 3-tier fallback (plugin → npx → tarball/git), checksums, atomic rollback
 mkdocs.yml                 # MkDocs Material site config
@@ -223,7 +223,7 @@ This plugin uses `bd` (beads) for ALL task tracking.
 - Include bead IDs in commit messages: `git commit -m "Add feature (bd-a1b2)"`
 - Every session ends with Land the Plane: `bd close` → `bd dolt push` → `git push`
 
-## Skills (23 Total)
+## Skills (24 Total)
 
 | Skill                          | Purpose                                                                                                                     |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |

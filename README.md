@@ -13,7 +13,7 @@
 
 ---
 
-A plugin for Claude Code, Codex, OpenCode, and 7 more AI coding agents that makes your agent write tests before code, debug systematically instead of guessing, and remember what it worked on yesterday. 23 skills enforce the practices; a Dolt-backed issue tracker keeps context across sessions.
+A plugin for Claude Code, Codex, OpenCode, and 7 more AI coding agents that makes your agent write tests before code, debug systematically instead of guessing, and remember what it worked on yesterday. 24 skills enforce the practices; a Dolt-backed issue tracker keeps context across sessions.
 
 ## How it works
 
