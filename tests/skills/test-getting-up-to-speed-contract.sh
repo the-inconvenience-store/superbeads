@@ -29,11 +29,12 @@ if grep -Fq -- "> 500" "$SKILL"; then echo "FAIL: stale > 500 band threshold pre
 check_loose "Session-handoff doc"
 check_loose "Last handoff"
 check_loose "ls -t .internal/handoff"
-check_loose "headline"
+check_loose "Headline-only"
 
 # Continuation prune (Change 3)
 check_loose "superseded continuation"
 check_loose "key prefix"
 check_loose "memory-curator"
+check_loose "never guess-delete"
 
 [ "$fail" -eq 0 ] && echo "PASS: getting-up-to-speed contract" || exit 1

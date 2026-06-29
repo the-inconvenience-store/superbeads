@@ -174,7 +174,7 @@ Produce **exactly this Markdown structure**. Heading levels are H2; tables and l
 ## Recent Activity
 - <last 3–5 commits as a narrative of what shipped> [source: git log]
 - <in-progress beads + where they were mid-way> [source: bd query in-progress]
-- <after compaction: the prior in-session thread / decisions>
+- <after compaction: the prior in-session thread / decisions> [source: handoff doc]
 <Backward delta only. Degrades to "Fresh session — no prior in-session delta" when none. Does NOT restate the open-ready bead table above, nor the Last release line.>
 
 **Known operational quirks:** <from `bd memories` keyword scan; from docs/known-issues/* if present> [source: bd memories]
