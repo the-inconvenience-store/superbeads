@@ -44,4 +44,10 @@ check_loose "older unread handoff"
 check_loose "recency"
 check_loose "predates HEAD"   # locks the terminal-line suppression narration
 
+# Consume-on-read (mu0s fix — Task 2)
+check_loose ".internal/handoff/archive"
+check_exact "Archived consumed handoff"
+check_loose "left in inbox"
+check_loose "single local mutation"
+
 [ "$fail" -eq 0 ] && echo "PASS: getting-up-to-speed contract" || exit 1

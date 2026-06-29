@@ -91,6 +91,7 @@ ls -t .internal/handoff/*.md 2>/dev/null | head -1
 ```
 
 - `ls -t` (mtime) is deliberate: handoff naming is `YYYY-MM-DD[-HHMMSS]-<topic>-handoff.md` and `-HHMMSS` is added only when a same-day doc already exists, so a lexical sort mis-orders same-day docs. mtime does not.
+- **Inbox vs archive:** `.internal/handoff/` is an *unread inbox*. The doc read this run is moved to `.internal/handoff/archive/` at close (Phase 4 close steps); the non-recursive `*.md` glob excludes the subdir, so archived docs are never re-detected. Only the newest inbox doc is read — note any leftover count in Phase 4.
 - **If a path is returned:** `Read` it — the `ls` runs first, then the `Read` **joins** the Phase 2 parallel batch (it cannot share the same parallel call as the `ls` that produced its path).
 - **If `.internal/handoff/` is absent or empty** (it is gitignored — absent on fresh clones): skip silently; note "no handoff doc found" in Phase 4.
 - **Headline-only:** surface only the short state headline (branch / sha / topic / WIP one-liner). Never echo doc body sections that could carry secrets — treat the doc like a diff: read for context, quote only the headline.
@@ -236,6 +237,23 @@ If orientation surfaced a Phase-1 memory that is now stale or wrong, remove it: 
 - **Report it** (never silent): "Pruned N superseded continuation pointers; kept `<key>`."
 - This keep-newest policy is shared with **memory-curator** (which forbids dropping the latest continuation/handoff) — keep the two consistent.
 
+**Archive the consumed handoff (final close action).** The close steps run in a **fixed order** — the archive MUST come after the continuation-prune, which needs the doc still in the inbox to link its keeper:
+
+1. Emit the summary.
+2. Capture memories (`bd remember`).
+3. Prune `continuation-*` pointers (the step above).
+4. **Archive the doc read this run** — only if a handoff was read:
+
+   ```bash
+   mkdir -p .internal/handoff/archive && mv -f "<doc>" .internal/handoff/archive/
+   ```
+
+   Move **only the single doc read this run** (older unread inbox docs stay — the recency check catches their staleness if they later surface).
+
+   - **Best-effort, non-fatal, reported.** On success: "Archived consumed handoff `<name>` → `archive/`." On failure (permissions/disk/race): "⚠️ could not archive `<name>` (<reason>); left in inbox" and continue — the doc stays in the inbox and self-heals next session (re-read + recency-flagged).
+   - **Re-run idempotency.** The doc is *moved, not deleted* — it remains readable under `archive/`, and a later run finds an empty inbox and skips.
+   - This `mv` is the **single local mutation** getting-up-to-speed makes — on the gitignored `.internal/` path, non-destructive to tracked state and to beads. (`.internal/handoff/archive/` is covered by the wholesale `.internal/` gitignore — verified.)
+
 ## Edge Cases
 
 | Condition | Behavior |
@@ -256,6 +274,7 @@ If orientation surfaced a Phase-1 memory that is now stale or wrong, remove it: 
 | Handoff written to a non-default path | Not auto-detected; orientation only checks the default `.internal/handoff/` |
 | Newest handoff predates latest commit / last session wrote no handoff | HEAD-recency check marks it **possibly stale**; narration suppresses "last session" — flag, don't mis-attribute (the `mu0s` case) |
 | Inbox holds multiple unread handoffs | Read only the newest; append `+N older unread` to the Last-handoff line; older docs drain over later sessions |
+| `mv` to `archive/` fails at close | Non-fatal: warn "left in inbox" and continue; the doc is re-read and recency-flagged next session |
 
 ## Red Flags / Anti-Rationalization
 
