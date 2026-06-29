@@ -31,4 +31,9 @@ check_loose "Last handoff"
 check_loose "ls -t .internal/handoff"
 check_loose "headline"
 
+# Continuation prune (Change 3)
+check_loose "superseded continuation"
+check_loose "key prefix"
+check_loose "memory-curator"
+
 [ "$fail" -eq 0 ] && echo "PASS: getting-up-to-speed contract" || exit 1

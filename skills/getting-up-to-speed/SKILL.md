@@ -207,6 +207,14 @@ bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / patt
 
 If orientation surfaced a Phase-1 memory that is now stale or wrong, remove it: `bd forget <id>`.
 
+**Prune superseded continuation pointers.** Session-handoff writes a `continuation-*` pointer memory each run; they accumulate. After emitting the summary, cap them at one:
+
+- **Keep** the `continuation-*` memory paired with the handoff doc you just read (content linkage — not a date-string sort).
+- **Forget the rest** — match the `continuation-` **key prefix** only (never memory body text, which could match an unrelated semantic memory): `bd forget <key>` with a cited reason.
+- **Fail safe:** if you cannot unambiguously link the keeper to the doc read, keep ALL `continuation-*` memories and skip the prune this run — never guess-delete.
+- **Report it** (never silent): "Pruned N superseded continuation pointers; kept `<key>`."
+- This keep-newest policy is shared with **memory-curator** (which forbids dropping the latest continuation/handoff) — keep the two consistent.
+
 ## Edge Cases
 
 | Condition | Behavior |
