@@ -74,4 +74,6 @@ tailor Work In Progress / Loose Threads / Suggested Skills.
 
 **Standalone — human-invoked.** This skill is intentionally NOT referenced by any other
 skill or hook, and does not appear in any agent routing or trigger surface. Its read-side
-counterpart is `getting-up-to-speed`, which it does not call and is not called by.
+counterpart is `getting-up-to-speed`, which **reads this skill's output artifact** (the
+latest `.internal/handoff/` doc) but does not invoke it — there is no skill-to-skill call
+in either direction.
