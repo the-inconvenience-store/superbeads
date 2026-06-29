@@ -1,5 +1,5 @@
 ---
-description: Complete reference for 24 composable skills with trigger map, category breakdown, bd command usage, and chaining diagrams showing how skills invoke each other.
+description: Complete reference for the composable skills with trigger map, category breakdown, bd command usage, and chaining diagrams showing how skills invoke each other.
 ---
 
 # Skills Reference
@@ -85,6 +85,7 @@ graph TD
     GUS["getting-up-to-speed"]
     AUD["auditing-drift"]
     MC["memory-curator"]
+    SH["session-handoff"]
   end
   subgraph Setup
     SET["setup"]
@@ -213,7 +214,7 @@ Walks through README, CHANGELOG, CLAUDE.md, CONTRIBUTING, and other docs to find
 
 **Trigger:** Session start, after compaction, or "catch me up" / "where are we".
 
-Runs `bd prime`, deep-dives the codebase (adaptive to repo size), and produces a structured current-state summary. A pre-emit verification gate holds every claim in that summary to a command actually run in the session, and a beads-versus-git check flags work that shipped but was left open.
+Runs `bd prime`, deep-dives the codebase (sub-agent fan-out scales to repo size across `<40` / `40–150` / `>150` tracked-file bands), and produces a structured current-state summary. It reads the newest `.internal/handoff/` doc — written by its counterpart `session-handoff` — as an unread inbox, folding it into the summary and then archiving it at close so a later session doesn't re-read it; a HEAD-recency backstop flags a handoff as stale when `HEAD` has moved past the commit it recorded. A pre-emit verification gate holds every claim in the summary to a command actually run in the session, a beads-versus-git check flags work that shipped but was left open, and superseded `continuation-*` memories are pruned at close.
 
 ### auditing-upstream-drift
 
@@ -253,7 +254,7 @@ Decomposes the topic into sub-questions, dispatches one researcher per sub-quest
 
 ### session-handoff
 
-**Human-invoked only.** Writes a grounded session-handoff document and stores a `bd remember` continuation note so the next session can pick up in-progress work without relying on chat history.
+**Human-invoked only.** Writes a grounded session-handoff document and stores a `bd remember` continuation note so the next session can pick up in-progress work without relying on chat history. Its counterpart `getting-up-to-speed` consumes that document on the next session's orientation, then archives it.
 
 ## Beads commands
 
@@ -271,7 +272,7 @@ Skills use `bd` commands to track work. Only the orchestrating agent manages bea
 | Compound query | `bd query "status=open AND priority<=1"` | getting-up-to-speed (replaces `bd list` + jq) |
 | Grouped counts | `bd count --by-status` | getting-up-to-speed (also `--by-priority`/`--by-type`) |
 | Add dependency | `bd dep add <child> <parent>` | SDD, writing-plans |
-| Store learning | `bd remember "insight"` | 21 of {{ skill_count }} skills prompt for this |
+| Store learning | `bd remember "insight"` | most of the {{ skill_count }} skills prompt for this |
 | Attach evidence | `bd note <id> "context"` | verification |
 | Explain dependencies | `bd ready --explain` | systematic-debugging, executing-plans |
 | Atomic batch ops | `bd batch` (stdin) | SDD, executing-plans, finishing-branch |

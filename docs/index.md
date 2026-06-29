@@ -1,6 +1,6 @@
 ---
 title: beads-superpowers — Process Discipline and Persistent Memory for AI Coding Agents
-description: 24 skills enforce TDD, debugging, and code review for AI agents. Dolt-backed task memory persists across sessions. Verified on Claude Code, Codex, and OpenCode; best-effort on Cursor, Gemini CLI, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi.
+description: Composable skills enforce TDD, debugging, and code review for AI agents. Dolt-backed task memory persists across sessions. Verified on Claude Code, Codex, and OpenCode; best-effort on Cursor, Gemini CLI, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi.
 ---
 
 # beads-superpowers

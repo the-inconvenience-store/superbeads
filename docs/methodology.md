@@ -12,7 +12,7 @@ Two projects attacked each half of this.
 
 ### Process discipline
 
-[Superpowers](https://github.com/obra/superpowers) (Jesse Vincent) shipped 14 composable skills that force agents to brainstorm before coding, write tests before implementation, investigate root causes before proposing fixes, and verify before claiming completion. The skills use bright-line rules — "NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST" — rather than hedged guidance like "consider writing tests", because compliance doubles from 33% to 72% when instructions are absolute rather than suggested (Meincke et al. 2025). Each skill includes an anti-rationalization table that preempts the excuses agents use to skip steps.
+[Superpowers](https://github.com/obra/superpowers) (Jesse Vincent) shipped 14 skills that force agents to brainstorm before coding, write tests before implementation, investigate root causes before proposing fixes, and verify before claiming completion. The skills use bright-line rules — "NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST" — rather than hedged guidance like "consider writing tests", because compliance doubles from 33% to 72% when instructions are absolute rather than suggested (Meincke et al. 2025). Each skill includes an anti-rationalization table that preempts the excuses agents use to skip steps.
 
 ### Persistent memory
 
@@ -130,7 +130,7 @@ graph TD
 
 ## Agent memory
 
-Because beads tracks every process step, the memory types agents need are populated as a side effect of following the workflow. 21 of the {{ skill_count }} skills now prompt for `bd remember` at their natural completion points — root causes after debugging, design decisions after brainstorming, review insights after code review — so memory capture happens within the skill workflow, not as a separate step.
+Because beads tracks every process step, the memory types agents need are populated as a side effect of following the workflow. Most of the {{ skill_count }} skills now prompt for `bd remember` at their natural completion points — root causes after debugging, design decisions after brainstorming, review insights after code review — so memory capture happens within the skill workflow, not as a separate step.
 
 | Memory Type | Beads Feature | What it answers |
 |-------------|---------------|-----------------|
@@ -184,7 +184,7 @@ An empirical finding: when a skill's YAML `description` field summarized the wor
 
 ## Sources
 
-- [obra/superpowers](https://github.com/obra/superpowers) v6.0.3 — 14 composable skills for AI agents (MIT)
+- [obra/superpowers](https://github.com/obra/superpowers) v6.0.3 — 14 skills for AI agents (MIT)
 - [gastownhall/beads](https://github.com/gastownhall/beads) v1.0.5 — Persistent issue tracker for AI agents (MIT)
 - Cialdini, R. B. (2021). *Influence: The Psychology of Persuasion* (New and Expanded Edition). Harper Business.
 - Meincke, L., et al. (2025). AI agent compliance with explicit vs hedged instructions. Referenced in `skills/writing-skills/persuasion-principles.md`.
