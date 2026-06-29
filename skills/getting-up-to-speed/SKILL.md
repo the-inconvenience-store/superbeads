@@ -25,7 +25,7 @@ Orient on the current project before doing any work. Run beads context commands,
 ## Pipeline
 
 ```
-Pre-step: Detect repo scale  →  Phase 1: Beads (parallel)  →  Phase 2: Codebase (parallel, adaptive)
+Pre-step: Detect repo scale  →  Phase 1: Beads (parallel)  →  Phase 2: Handoff doc + Codebase (parallel, adaptive)
                                                                      ↓
                                        Phase 4: Synthesize summary  ←  Phase 3: Top open beads drilldown
 ```
@@ -36,7 +36,7 @@ Copy this into your working response and check each item off as you complete it 
 
 - [ ] Pre-step: repo scale detected (Light / Medium / Heavy)
 - [ ] Phase 1: beads context loaded (or skipped — no beads)
-- [ ] Phase 2: codebase explored (path-appropriate)
+- [ ] Phase 2: handoff doc read (or none) + codebase explored (path-appropriate)
 - [ ] Phase 3: top open beads drilled (or skipped — no beads)
 - [ ] Phase 4: summary emitted + verification gate passed
 
@@ -81,6 +81,20 @@ If `bd` is not installed or `.beads/` is missing, skip Phase 1 entirely and emit
 ## Phase 2 — Codebase exploration (single parallel batch, content varies by path)
 
 Issue **all reads in one message, multiple tool calls in parallel**. Do NOT serialize.
+
+### Session-handoff doc (all paths)
+
+Before the path-specific reads, detect the newest handoff doc:
+
+```bash
+ls -t .internal/handoff/*.md 2>/dev/null | head -1
+```
+
+- `ls -t` (mtime) is deliberate: handoff naming is `YYYY-MM-DD[-HHMMSS]-<topic>-handoff.md` and `-HHMMSS` is added only when a same-day doc already exists, so a lexical sort mis-orders same-day docs. mtime does not.
+- **If a path is returned:** `Read` it — the `ls` runs first, then the `Read` **joins** the Phase 2 parallel batch (it cannot share the same parallel call as the `ls` that produced its path).
+- **If `.internal/handoff/` is absent or empty** (it is gitignored — absent on fresh clones): skip silently; note "no handoff doc found" in Phase 4.
+- **Headline-only:** surface only the short state headline (branch / sha / topic / WIP one-liner). Never echo doc body sections that could carry secrets — treat the doc like a diff: read for context, quote only the headline.
+- The handoff is a synthesized narrative source → cross-check it (Phase 4 freshness check) and tag it ⚠️, **never** "verified".
 
 ### Light path
 
@@ -127,6 +141,7 @@ Produce **exactly this Markdown structure**. Heading levels are H2; tables and l
 
 - **Working tree:** from `git status --porcelain` (full list incl. untracked, status codes `M`/`A`/`D`/`R`/`??`) + `git diff --numstat` (added/deleted per tracked file; binary shows `-`). Rank tracked changes by added+deleted; show top-N with `+X/-Y` counts; render binary as `(binary)`; list the untracked count separately. Never dump the diff.
 - **Continuity check (in-progress beads only):** resolve the base branch as `git symbolic-ref refs/remotes/origin/HEAD` (strip to branch name), falling back to `main` then `master`; if none resolves, mark the check "unavailable". For each in-progress bead, run `git log --grep="<bead-id>" --oneline <base>`. If the bead ID appears in a commit reachable from the base branch, flag it advisory: `⚠️ <bead> appears in <sha> on <base> — verify it shouldn't be closed`. A multi-commit epic legitimately keeps shipping while open, so judge — do not auto-conclude. A bead whose ID is in no commit is NOT flagged. Skip the check when beads are absent. Deeper hygiene (stale branches, orphans, lint) → point to `bd doctor` / `bd stale` / `bd orphans`; do not reimplement it here.
+- **Handoff freshness check (if a doc was read):** compare the handoff's stated branch / sha / in-progress claims against live `git` + `bd` state. Flag divergence **advisory** (e.g. doc says "in progress X" but X is closed/shipped) — do not trust the doc over live state. If no doc was found, the check is "none found".
 
 ```markdown
 ## What `<project>` Is
@@ -150,6 +165,7 @@ Produce **exactly this Markdown structure**. Heading levels are H2; tables and l
 **Last release:** <if version detectable> shipped: <CHANGELOG bullet summary>. `[Unreleased]` <empty | has N entries>.
 **Beads ledger:** <total> total · <closed> · <open> · <in-progress> · <blocked>. (verified, from `bd count --by-status`; <blocked> from `bd blocked`)
 **Continuity check:** <✓ ledger consistent with git | ⚠️ <bead> appears in <sha> on <base> — verify it shouldn't be closed | skipped (no beads) | unavailable>.
+**Last handoff:** <path> (<date>) — <one-line headline>. Freshness: <✓ matches live | ⚠️ doc says X, live is Y | none found>.
 
 | Bead | Pri | Title |
 |---|---|---|
@@ -178,7 +194,8 @@ Validate each line; fix or mark degraded, then re-check. Only emit once all pass
 2. Every inferred claim has a confidence glyph + source tag.
 3. Any section you could not fill from a command → degraded-state language from the Edge Cases table. NEVER invent.
 4. The continuity check ran (or is marked skipped/unavailable).
-5. The Progress Checklist is fully ticked (or items marked skipped with reason).
+5. The latest handoff doc was read and freshness-checked (or marked "none found").
+6. The Progress Checklist is fully ticked (or items marked skipped with reason).
 
 The trailing "I'm ready" line is the **terminal contract**: the skill stops here. Do NOT auto-claim the next bead. Do NOT start working on anything. The user drives the next move.
 
@@ -206,6 +223,8 @@ If orientation surfaced a Phase-1 memory that is now stale or wrong, remove it: 
 | Working tree has hundreds of changed files | Summarize top-N by change-size + "+K more"; never dump the diff |
 | Open/in-progress bead whose ID is in no commit | NOT a divergence — work uncommitted or convention not followed; do not flag |
 | `git log --grep` errors or base branch undetectable | Mark continuity check "unavailable"; do not block the summary |
+| `.internal/handoff/` absent or empty | Skip the handoff read; emit "no handoff doc found" in the Last-handoff line |
+| Handoff written to a non-default path | Not auto-detected; orientation only checks the default `.internal/handoff/` |
 
 ## Red Flags / Anti-Rationalization
 
@@ -223,6 +242,7 @@ These thoughts mean STOP — you're rationalizing skipping orientation:
 | "I'll tag confidence later" | An inferred claim without a glyph + source is an unverified guess. Tag inline. |
 | "Beads and git probably agree" | Run the continuity check. A shipped-but-still-open bead is exactly what it catches. |
 | "I'll suggest they start the top bead" | Suggest the *skill*; don't claim or begin. The terminal contract is absolute. |
+| "I'll skip the handoff — `bd prime` covers it" | The handoff doc holds the narrative thread (WIP, decisions, loose threads) that `bd prime` does not. Read it. |
 
 ## Output Contract
 

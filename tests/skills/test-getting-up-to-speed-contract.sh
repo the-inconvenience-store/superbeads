@@ -25,4 +25,10 @@ check_loose "Output Contract"
 check_loose "> 150"
 if grep -Fq -- "> 500" "$SKILL"; then echo "FAIL: stale > 500 band threshold present"; fail=1; else echo "PASS: no stale > 500 threshold"; fi
 
+# Handoff read (Change 1)
+check_loose "Session-handoff doc"
+check_loose "Last handoff"
+check_loose "ls -t .internal/handoff"
+check_loose "headline"
+
 [ "$fail" -eq 0 ] && echo "PASS: getting-up-to-speed contract" || exit 1
