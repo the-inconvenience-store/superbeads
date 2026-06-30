@@ -17,6 +17,7 @@ check() { # desc | env-assignment | jq-filter that must be non-empty
 }
 check "Cursor → top-level additional_context"        "CURSOR_PLUGIN_ROOT=/x" '.additional_context'
 check "Claude → nested additionalContext"            "CLAUDE_PLUGIN_ROOT=/x" '.hookSpecificOutput.additionalContext'
+check "Codex → nested additionalContext"             "CODEX_PLUGIN_ROOT=/x" '.hookSpecificOutput.additionalContext'
 check "Copilot (with CLAUDE root) → top-level"       "CLAUDE_PLUGIN_ROOT=/x COPILOT_CLI=1" '.additionalContext'
 check "Generic fallback → top-level additionalContext" "" '.additionalContext'
 exit $fail
