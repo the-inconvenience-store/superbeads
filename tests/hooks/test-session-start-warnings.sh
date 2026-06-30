@@ -30,4 +30,18 @@ out=$(HOME="$tmp" bash "$HOOK" 2>&1)
 echo "$out" | grep -qi "obra/superpowers appears installed" && { echo "FAIL: false-positive collision warning"; fail=1; }
 rm -rf "$tmp"
 
+# Case 4: unreadable SKILL.md → hook exits 0, valid JSON, no shell-error text in output.
+tmp=$(mktemp -d)
+mkdir -p "$tmp/hooks" "$tmp/skills/using-superpowers"
+cp -f "$HOOK" "$tmp/hooks/session-start"
+: > "$tmp/skills/using-superpowers/SKILL.md"
+chmod 000 "$tmp/skills/using-superpowers/SKILL.md"
+out=$(HOME="$tmp" bash "$tmp/hooks/session-start" 2>/dev/null); rc=$?
+[ "$rc" -eq 0 ] || { echo "FAIL: hook did not exit 0 with unreadable SKILL.md (rc=$rc)"; fail=1; }
+echo "$out" | jq -e '.' >/dev/null 2>&1 || { echo "FAIL: hook output is not valid JSON with unreadable SKILL.md"; fail=1; }
+echo "$out" | grep -qi "Permission denied" && { echo "FAIL: hook output contains 'Permission denied'"; fail=1; }
+echo "$out" | grep -qi "cat:" && { echo "FAIL: hook output contains 'cat:'"; fail=1; }
+chmod 755 "$tmp/skills/using-superpowers/SKILL.md" 2>/dev/null
+rm -rf "$tmp"
+
 [ "$fail" -eq 0 ] && echo "PASS: session-start warnings" || exit 1
