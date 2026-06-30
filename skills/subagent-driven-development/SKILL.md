@@ -285,11 +285,11 @@ The task reviewer returns a Spec Compliance verdict of ✅, ❌, or ⚠️. A �
 
 Hand task text and review diffs to subagents as **files**, not pasted context — this keeps large text out of your own context and gives subagents a single thing to read.
 
-- Before dispatching an implementer, run `scripts/task-brief <plan-file> <N>` → writes `.superpowers/sdd/task-<N>-brief.md`. Pass that path to the implementer as "read this first — it is your requirements."
-- The implementer writes its full report to `.superpowers/sdd/task-<N>-report.md` (you name the path in the dispatch via `[REPORT_FILE]`); the reviewer reads it as a file.
-- Before dispatching the reviewer, run `scripts/review-package <BASE> <HEAD>` → writes `.superpowers/sdd/review-<base7>..<head7>.diff` (commit log + file stat + unified diff). Pass that path to the reviewer. `BASE` is the commit recorded before the implementer ran — never `HEAD~1`.
+- Before dispatching an implementer, run `scripts/task-brief <plan-file> <N>` → writes `.internal/sdd/task-<N>-brief.md`. Pass that path to the implementer as "read this first — it is your requirements."
+- The implementer writes its full report to `.internal/sdd/task-<N>-report.md` (you name the path in the dispatch via `[REPORT_FILE]`); the reviewer reads it as a file.
+- Before dispatching the reviewer, run `scripts/review-package <BASE> <HEAD>` → writes `.internal/sdd/review-<base7>..<head7>.diff` (commit log + file stat + unified diff). Pass that path to the reviewer. `BASE` is the commit recorded before the implementer ran — never `HEAD~1`.
 - The reviewer is **read-only**: it must not mutate the working tree, the index, HEAD, or branch state.
-- `.superpowers/sdd/` is resolved **per working tree** (`scripts/sdd-workspace`). In Parallel Batch Mode each `bd worktree` therefore gets its own isolated directory — concurrent tasks never collide on brief/report/diff filenames.
+- `.internal/sdd/` is resolved **per working tree** (`scripts/sdd-workspace`). In Parallel Batch Mode each `bd worktree` therefore gets its own isolated directory — concurrent tasks never collide on brief/report/diff filenames.
 
 ## Prompt Templates
 

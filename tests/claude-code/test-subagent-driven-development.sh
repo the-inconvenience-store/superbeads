@@ -135,7 +135,7 @@ echo "Test 7: Task handoff via brief file..."
 
 output=$(run_claude "In subagent-driven-development, how does the controller hand the task to the implementer subagent — by pasting the full task text into the prompt, or by writing a task brief file the implementer reads?" 30)
 
-if assert_contains "$output" "brief\|task-brief\|file\|\.superpowers\|read this first" "Hands off task as a brief file"; then
+if assert_contains "$output" "brief\|task-brief\|file\|\.internal/sdd\|read this first" "Hands off task as a brief file"; then
     : # pass
 else
     exit 1
