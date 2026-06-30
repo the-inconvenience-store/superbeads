@@ -4,6 +4,6 @@
   "version": "0.8.2",
   "type": "module",
   "dependencies": {
-    "@opencode-ai/plugin": "latest"
+    "@opencode-ai/plugin": "1.17.11"
   }
 }
