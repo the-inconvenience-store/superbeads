@@ -16,6 +16,5 @@ def define_env(env):
         version = json.load(f)['version']
 
     env.variables['skill_count'] = len(skill_dirs)
-    env.variables['invocable_count'] = len(skill_dirs) - 1  # minus using-superpowers
     env.variables['version'] = version
     env.variables['skill_names'] = skill_dirs

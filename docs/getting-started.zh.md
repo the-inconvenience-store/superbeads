@@ -116,7 +116,7 @@ npx skills add DollarDill/beads-superpowers -a claude-code -g --copy -y
 # Use -a codex to also install for Codex CLI.
 ```
 
-仅安装技能——不包含钩子。技能激活依赖于你所用智能体自身的原生技能发现机制。如需完整体验（会话启动上下文注入 + 自动 `bd prime`），请使用插件安装方式或[脚本安装](#脚本安装curl--bash)。若要在 npx 安装中获取 beads 上下文，运行 `bd setup claude`（beads 自带的钩子安装器）。
+仅安装技能——不包含钩子。技能激活依赖于你所用智能体自身的原生技能发现机制。如需完整体验（会话启动上下文注入 + 自动 `bd prime`），请使用插件安装方式或上文的脚本安装。若要在 npx 安装中获取 beads 上下文，运行 `bd setup claude`（beads 自带的钩子安装器）。
 
 ## 首次项目设置
 

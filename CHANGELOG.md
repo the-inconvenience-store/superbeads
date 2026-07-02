@@ -28,7 +28,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   (`skills/setup/session-start.sh`, `skills/setup/superpowers-reminder.sh`), the resolver prefers
   them, and a `cmp` guard (now enforced in pre-commit, alongside a skills-only-layout test) keeps the
   copies from drifting. Marketplace-plugin and native installs were unaffected. Existing `--copy`
-  users who installed the broken hook should **re-run the setup skill** to regenerate it.
+  users who installed the broken hook should **re-run `install.sh`** to refresh their hooks (or apply
+  the migration one-liner in the README's npx section).
 - `install.sh` now removes stale UserPromptSubmit registrations on update/uninstall (python3, timestamped backup, foreign hooks preserved). Manual one-liner in the README npx section for users updating from ≤0.8.2.
 
 ## [0.8.2] - 2026-06-30
