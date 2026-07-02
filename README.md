@@ -204,7 +204,7 @@ pi install git:github.com/DollarDill/beads-superpowers
 >
 > ```bash
 > cp ~/.claude/settings.json ~/.claude/settings.json.bak
-> python3 -c "import json,os;p=os.path.expanduser('~/.claude/settings.json');d=json.load(open(p));u=[m for m in d.get('hooks',{}).get('UserPromptSubmit',[]) if not any('superpowers-reminder' in h.get('command','') for h in m.get('hooks',[]))];d.get('hooks',{}).update({'UserPromptSubmit':u}) if u else d.get('hooks',{}).pop('UserPromptSubmit',None);json.dump(d,open(p,'w'),indent=2)"
+> python3 -c "import json,os;p=os.path.expanduser('~/.claude/settings.json');d=json.load(open(p));H=d.get('hooks',{});U=H.get('UserPromptSubmit',[]);[m.update({'hooks':[h for h in m.get('hooks',[]) if 'superpowers-reminder' not in h.get('command','')]}) for m in U];U=[m for m in U if m.get('hooks')];(H.update({'UserPromptSubmit':U}) if U else H.pop('UserPromptSubmit',None));json.dump(d,open(p,'w'),indent=2)"
 > ```
 
 Installs the skills only — no hooks. Skill activation relies on your harness's native skill discovery.
