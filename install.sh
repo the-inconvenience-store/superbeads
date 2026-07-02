@@ -31,11 +31,12 @@ VERSION_FILE="$SKILLS_DIR/.beads-superpowers-version"
 KNOWN_SKILLS=(
   auditing-upstream-drift brainstorming dispatching-parallel-agents
   document-release executing-plans finishing-a-development-branch
-  getting-up-to-speed project-init receiving-code-review
-  requesting-code-review research-driven-development stress-test
-  subagent-driven-development systematic-debugging test-driven-development
-  using-git-worktrees using-superpowers verification-before-completion
-  write-documentation writing-plans writing-skills
+  getting-up-to-speed memory-curator project-init
+  receiving-code-review requesting-code-review research-driven-development
+  session-handoff stress-test subagent-driven-development
+  systematic-debugging test-driven-development using-git-worktrees
+  using-superpowers verification-before-completion write-documentation
+  writing-plans writing-skills
 )
 
 KNOWN_AGENTS=(yegge)
