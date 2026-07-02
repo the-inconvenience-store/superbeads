@@ -24,7 +24,3 @@ truth for what remains; once the conversation gets long, re-read it before start
 each step.
 
 This plugin tracks ALL tasks with the `bd` (beads) CLI run via the shell — Do NOT use TodoWrite. When a skill says to create a todo list or track tasks, use `bd create`, `bd update`, and `bd close` commands via `run_command`. Run `bd prime` at the start of each session to load persistent project memory.
-
-## Beads
-
-prompt-template file (e.g. `beads-superpowers:subagent-driven-development`'s
