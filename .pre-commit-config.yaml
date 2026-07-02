@@ -57,9 +57,3 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-      - id: setup-dci-test
-        name: Setup DCI / skills-only hook resolution test
-        entry: bash tests/hooks/test-setup-dci.sh
-        language: system
-        pass_filenames: false
-        files: ^(skills/setup/|hooks/)

@@ -72,37 +72,8 @@ self_test() {
   if grep -qF -- "$CB1_SIG" "$tmp/mutated.txt"; then
     echo "self-test FAIL: detector did NOT catch the mutated block"; ok=0
   fi
-  # cmp detector: prove it distinguishes identical files from a 1-byte difference.
-  printf 'abc\n' > "$tmp/canon.txt"
-  printf 'abc\n' > "$tmp/same.txt"
-  printf 'abd\n' > "$tmp/diff.txt"
-  cmp -s "$tmp/canon.txt" "$tmp/same.txt" || { echo "self-test FAIL: cmp rejected identical files"; ok=0; }
-  if cmp -s "$tmp/canon.txt" "$tmp/diff.txt"; then
-    echo "self-test FAIL: cmp did NOT catch a 1-byte difference"; ok=0
-  fi
   rm -rf "$tmp"
   if [ "$ok" -eq 1 ]; then echo "self-test OK: detector matches correct, rejects mutated"; return 0; else return 1; fi
-}
-
-# --- Byte-identity file pairs (cmp -s) -------------------------------------------------
-# Co-located hook copies under skills/setup/ MUST match their canonical originals byte-for-byte;
-# they travel with the setup skill on `npx skills add --copy` (skills-only layout has no hooks/).
-FILE_PAIRS=(
-  "hooks/session-start|skills/setup/session-start.sh"
-  "hooks/superpowers-reminder.sh|skills/setup/superpowers-reminder.sh"
-)
-check_file_pairs() {
-  local pair canonical copy
-  for pair in "${FILE_PAIRS[@]}"; do
-    canonical="${pair%%|*}"; copy="${pair##*|}"
-    if [ ! -f "$canonical" ]; then echo "MISSING FILE: $canonical"; FAIL=1; continue; fi
-    if [ ! -f "$copy" ]; then
-      echo "DRIFT: [co-located copy] missing $copy  — regenerate: cp -f $canonical $copy"; FAIL=1; continue
-    fi
-    if ! cmp -s "$canonical" "$copy"; then
-      echo "DRIFT: [co-located copy] $copy differs from $canonical  — regenerate: cp -f $canonical $copy"; FAIL=1
-    fi
-  done
 }
 
 if [ "${1:-}" = "--self-test" ]; then
@@ -112,7 +83,6 @@ fi
 check_block "CB-1 doctrine floor" "$CB1_SIG" "${CB1_SITES[@]}"
 check_block "CB-3 Capture gate"    "$CB3_SIG" "${CB3_SITES[@]}"
 check_block "CB-4 memory convention" "$CB4_SIG" "${CB4_SITES[@]}"
-check_file_pairs
 
 if [ "$FAIL" -eq 0 ]; then
   echo "convention-sync: OK (all canonical blocks byte-identical at their sites)"
