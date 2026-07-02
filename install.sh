@@ -25,7 +25,6 @@ HOOKS_DIR="$HOME/.claude/hooks"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 PLUGINS_FILE="$HOME/.claude/plugins/installed_plugins.json"
 HOOK_SCRIPT="$HOOKS_DIR/beads-superpowers-session-start.sh"
-REMINDER_SCRIPT="$HOOKS_DIR/beads-superpowers-reminder.sh"
 AGENTS_DIR="$HOME/.claude/agents"
 VERSION_FILE="$SKILLS_DIR/.beads-superpowers-version"
 
@@ -33,7 +32,7 @@ KNOWN_SKILLS=(
   auditing-upstream-drift brainstorming dispatching-parallel-agents
   document-release executing-plans finishing-a-development-branch
   getting-up-to-speed project-init receiving-code-review
-  requesting-code-review research-driven-development setup stress-test
+  requesting-code-review research-driven-development stress-test
   subagent-driven-development systematic-debugging test-driven-development
   using-git-worktrees using-superpowers verification-before-completion
   write-documentation writing-plans writing-skills
@@ -423,11 +422,9 @@ install_opencode_from() {
 }
 
 setup_hooks() {
-  local extract_dir="${1:-}"
-
   if [ "$HAS_PYTHON3" = 0 ]; then
     warn "python3 not found — cannot register hooks in settings.json"
-    warn "Run the 'setup' skill in your first Claude Code session to configure hooks"
+    warn "Re-run install.sh once python3 is available to configure hooks"
     return 1
   fi
 
@@ -436,14 +433,6 @@ setup_hooks() {
   info "Creating SessionStart hook..."
   write_hook_script
 
-  info "Creating UserPromptSubmit hook..."
-  if [ -n "$extract_dir" ] && [ -f "$extract_dir/hooks/superpowers-reminder.sh" ]; then
-    cp -f "$extract_dir/hooks/superpowers-reminder.sh" "$REMINDER_SCRIPT"
-    chmod +x "$REMINDER_SCRIPT"
-  else
-    write_reminder_fallback
-  fi
-
   if [ -f "$SETTINGS_FILE" ]; then
     local backup
     backup="${SETTINGS_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
@@ -451,24 +440,12 @@ setup_hooks() {
     info "Settings backup: ${backup/$HOME/\~}"
   fi
 
+  cleanup_stale_reminder "$SETTINGS_FILE"
+
   info "Registering hooks in settings.json..."
   register_hook
 
   return 0
-}
-
-write_reminder_fallback() {
-  cat > "$REMINDER_SCRIPT" << 'REMINDEREOF'
-#!/usr/bin/env bash
-set -euo pipefail
-MSG="SUPERPOWERS REMINDER: Before responding, check if any beads-superpowers skill applies to this task."
-if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || [ -n "${CODEX_PLUGIN_ROOT:-}" ]; then
-  printf '{"hookSpecificOutput":{"additionalContext":"%s"}}\n' "$MSG"
-else
-  printf '{"additionalContext":"%s"}\n' "$MSG"
-fi
-REMINDEREOF
-  chmod +x "$REMINDER_SCRIPT"
 }
 
 try_plugin_install() {
@@ -521,7 +498,7 @@ try_npx_install() {
     success "Skills installed via npx"
 
     # npx doesn't install hooks — do it ourselves
-    setup_hooks || warn "Hook setup failed after npx install — run 'setup' skill manually"
+    setup_hooks || warn "Hook setup failed after npx install — re-run install.sh once python3 is available"
 
     INSTALL_TIER="npx"
     return 0
@@ -570,7 +547,7 @@ try_tarball_install() {
     fi
   done
 
-  setup_hooks "$STAGING_DIR/extracted" || warn "Hook setup failed — run 'setup' skill manually"
+  setup_hooks "$STAGING_DIR/extracted" || warn "Hook setup failed — re-run install.sh once python3 is available"
 
   INSTALL_TIER="tarball"
   return 0
@@ -600,7 +577,7 @@ try_git_install() {
     fi
   done
 
-  setup_hooks "$STAGING_DIR/repo" || warn "Hook setup failed — run 'setup' skill manually"
+  setup_hooks "$STAGING_DIR/repo" || warn "Hook setup failed — re-run install.sh once python3 is available"
 
   INSTALL_TIER="git"
   return 0
@@ -641,7 +618,7 @@ do_auto_uninstall_previous() {
       for skill in "${KNOWN_SKILLS[@]}"; do
         rm -rf "${SKILLS_DIR:?}/$skill" 2>/dev/null
       done
-      rm -f "$HOOK_SCRIPT" "$REMINDER_SCRIPT" 2>/dev/null
+      rm -f "$HOOK_SCRIPT" "$HOOKS_DIR/beads-superpowers-reminder.sh" 2>/dev/null
       if [ -f "$SETTINGS_FILE" ] && [ "$HAS_PYTHON3" = 1 ]; then
         python3 -c "
 import json
@@ -734,7 +711,6 @@ import json, os
 
 sf = "$SETTINGS_FILE"
 hs = "$HOOK_SCRIPT"
-rs = "$REMINDER_SCRIPT"
 
 if os.path.exists(sf):
     with open(sf) as f:
@@ -753,18 +729,49 @@ if not any("beads-superpowers" in json.dumps(e) for e in ss):
         "hooks": [{"type": "command", "command": f"bash {hs}"}]
     })
 
-# UserPromptSubmit hook
-ups = hooks.setdefault("UserPromptSubmit", [])
-if not any("beads-superpowers" in json.dumps(e) for e in ups):
-    ups.append({
-        "matcher": "",
-        "hooks": [{"type": "command", "command": f"bash {rs}"}]
-    })
-
 with open(sf, "w") as f:
     json.dump(settings, f, indent=2)
     f.write("\n")
 PYEOF
+}
+
+cleanup_stale_reminder() {
+  # ADR-0039 migration: remove UserPromptSubmit entries whose command references
+  # superpowers-reminder. Structured parser only; narrow match; backup; foreign
+  # hooks preserved; skip with warning if python3 is unavailable.
+  local settings="$1"
+  [ -f "$settings" ] || return 0
+  grep -q "superpowers-reminder" "$settings" 2>/dev/null || return 0
+  if [ "$HAS_PYTHON3" = 0 ]; then
+    warn "python3 not found — cannot clean the stale UserPromptSubmit hook"
+    warn "Manual fix: remove the UserPromptSubmit entry referencing superpowers-reminder.sh from $settings"
+    return 0
+  fi
+  cp -f "$settings" "${settings}.bak-$(date +%Y%m%d-%H%M%S)"
+  python3 - "$settings" << 'PYEOF'
+import json, sys
+path = sys.argv[1]
+with open(path) as f:
+    data = json.load(f)
+hooks = data.get("hooks", {})
+ups = hooks.get("UserPromptSubmit")
+if isinstance(ups, list):
+    kept_matchers = []
+    for entry in ups:
+        inner = [h for h in entry.get("hooks", [])
+                 if "superpowers-reminder" not in h.get("command", "")]
+        if inner:
+            entry["hooks"] = inner
+            kept_matchers.append(entry)
+    if kept_matchers:
+        hooks["UserPromptSubmit"] = kept_matchers
+    else:
+        hooks.pop("UserPromptSubmit", None)
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+PYEOF
+  success "Removed stale UserPromptSubmit (superpowers-reminder) entry from ${settings/$HOME/\~}"
 }
 
 # --- Phase 4: Verify ---
@@ -872,7 +879,7 @@ do_uninstall() {
       done
       info "Removed agent definitions"
 
-      rm -f "$HOOK_SCRIPT" "$REMINDER_SCRIPT"
+      rm -f "$HOOK_SCRIPT" "$HOOKS_DIR/beads-superpowers-reminder.sh"
       info "Removed hook scripts"
 
       if [ -f "$SETTINGS_FILE" ] && command -v python3 >/dev/null 2>&1; then
@@ -894,6 +901,10 @@ PYEOF
       fi
       ;;
   esac
+
+  # ADR-0039 migration: clean up any stale reminder registration/file, regardless of tier
+  cleanup_stale_reminder "$SETTINGS_FILE"
+  rm -f "$HOOKS_DIR/beads-superpowers-reminder.sh"
 
   uninstall_codex_support
   uninstall_opencode_support
@@ -955,11 +966,11 @@ do_test() {
     error "SessionStart hook: invalid JSON"; fail=$((fail + 1))
   fi
 
-  # Check UserPromptSubmit hook
-  if bash "$test_home/.claude/hooks/beads-superpowers-reminder.sh" 2>/dev/null | python3 -m json.tool > /dev/null 2>&1; then
-    success "UserPromptSubmit hook: valid JSON"; pass=$((pass + 1))
+  # ADR-0039: fresh install must not write a reminder script or register UserPromptSubmit
+  if [ -f "$test_home/.claude/hooks/beads-superpowers-reminder.sh" ]; then
+    error "Fresh install wrote the reminder script (should not exist)"; fail=$((fail + 1))
   else
-    error "UserPromptSubmit hook: invalid JSON"; fail=$((fail + 1))
+    success "Fresh install: no reminder script"; pass=$((pass + 1))
   fi
 
   # Check settings.json
@@ -967,11 +978,11 @@ do_test() {
 import json
 d=json.load(open('$test_home/.claude/settings.json'))
 assert d['hooks']['SessionStart']
-assert d['hooks']['UserPromptSubmit']
+assert 'UserPromptSubmit' not in d.get('hooks', {})
 " 2>/dev/null; then
-    success "settings.json: both hooks registered"; pass=$((pass + 1))
+    success "settings.json: SessionStart registered, no UserPromptSubmit"; pass=$((pass + 1))
   else
-    error "settings.json: hooks missing"; fail=$((fail + 1))
+    error "settings.json: SessionStart missing or UserPromptSubmit present"; fail=$((fail + 1))
   fi
 
   # Check agents
@@ -986,6 +997,58 @@ assert d['hooks']['UserPromptSubmit']
     success "Agents installed: yegge"; pass=$((pass + 1))
   else
     error "Agents missing"; fail=$((fail + 1))
+  fi
+
+  # cleanup_stale_reminder: stale "ours" entry removed, foreign hook preserved, backup written
+  local cleanup_settings="$test_home/cleanup-settings.json"
+  cat > "$cleanup_settings" << 'CLEANUPEOF'
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {"matcher": "", "hooks": [
+        {"type": "command", "command": "bash /home/user/.claude/hooks/beads-superpowers-reminder.sh"},
+        {"type": "command", "command": "bash /home/user/.claude/hooks/somebody-elses-hook.sh"}
+      ]}
+    ]
+  }
+}
+CLEANUPEOF
+  cleanup_stale_reminder "$cleanup_settings"
+  if grep -q "superpowers-reminder" "$cleanup_settings"; then
+    error "cleanup_stale_reminder: stale entry survived cleanup"; fail=$((fail + 1))
+  elif ! grep -q "somebody-elses-hook" "$cleanup_settings"; then
+    error "cleanup_stale_reminder: foreign hook was deleted"; fail=$((fail + 1))
+  elif ! ls "${cleanup_settings}".bak-* > /dev/null 2>&1; then
+    error "cleanup_stale_reminder: no timestamped backup written"; fail=$((fail + 1))
+  else
+    success "cleanup_stale_reminder: stale removed, foreign preserved, backup written"; pass=$((pass + 1))
+  fi
+
+  # cleanup_stale_reminder: skip with warning when python3 is unavailable, file untouched
+  local nopython_settings="$test_home/nopython-settings.json"
+  cat > "$nopython_settings" << 'NOPYEOF'
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {"matcher": "", "hooks": [
+        {"type": "command", "command": "bash /home/user/.claude/hooks/beads-superpowers-reminder.sh"}
+      ]}
+    ]
+  }
+}
+NOPYEOF
+  local before after cleanup_output saved_has_python3="$HAS_PYTHON3"
+  before=$(cat "$nopython_settings")
+  HAS_PYTHON3=0
+  cleanup_output=$(cleanup_stale_reminder "$nopython_settings" 2>&1)
+  HAS_PYTHON3="$saved_has_python3"
+  after=$(cat "$nopython_settings")
+  if [ "$before" != "$after" ]; then
+    error "cleanup_stale_reminder: modified settings without python3"; fail=$((fail + 1))
+  elif ! echo "$cleanup_output" | grep -qi "manual fix"; then
+    error "cleanup_stale_reminder: no manual-fix warning printed"; fail=$((fail + 1))
+  else
+    success "cleanup_stale_reminder: skip-with-warning without python3"; pass=$((pass + 1))
   fi
 
   # Test uninstall

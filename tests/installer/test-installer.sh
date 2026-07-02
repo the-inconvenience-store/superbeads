@@ -181,7 +181,7 @@ assert_file_exists "$HOME/.claude/agents/yegge.md" "agent: yegge"
 
 # Hooks
 assert_file_executable "$HOME/.claude/hooks/beads-superpowers-session-start.sh" "hook: session-start executable"
-assert_file_executable "$HOME/.claude/hooks/beads-superpowers-reminder.sh" "hook: reminder executable"
+assert_file_not_exists "$HOME/.claude/hooks/beads-superpowers-reminder.sh" "hook: reminder NOT installed (ADR-0039)"
 
 # Version file
 assert_file_exists "$HOME/.claude/skills/.beads-superpowers-version" "version file exists"
@@ -191,11 +191,10 @@ assert_file_contains "$HOME/.claude/skills/.beads-superpowers-version" "$VERSION
 assert_json_valid "$HOME/.claude/settings.json" "settings.json valid JSON"
 assert_file_contains "$HOME/.claude/settings.json" "beads-superpowers" "settings has beads-superpowers"
 assert_file_contains "$HOME/.claude/settings.json" "SessionStart" "settings has SessionStart"
-assert_file_contains "$HOME/.claude/settings.json" "UserPromptSubmit" "settings has UserPromptSubmit"
+assert_file_not_contains "$HOME/.claude/settings.json" "UserPromptSubmit" "settings has no UserPromptSubmit (ADR-0039)"
 
 # Hook output
 assert_command_output_valid_json "bash $HOME/.claude/hooks/beads-superpowers-session-start.sh" "session-start hook output valid JSON"
-assert_command_output_valid_json "bash $HOME/.claude/hooks/beads-superpowers-reminder.sh" "reminder hook output valid JSON"
 
 # ============================================================
 echo "=== Group 1b: Multi-CLI Install Verification ==="
@@ -242,15 +241,6 @@ assert_command_output_valid_json "CODEX_PLUGIN_ROOT=/src bash $HOME/.claude/hook
 # Test session-start generic (no env var)
 assert_command_output_valid_json "bash $HOME/.claude/hooks/beads-superpowers-session-start.sh" "session-start generic format valid JSON"
 
-# Test reminder with CLAUDE_PLUGIN_ROOT
-assert_command_output_valid_json "CLAUDE_PLUGIN_ROOT=/src bash $HOME/.claude/hooks/beads-superpowers-reminder.sh" "reminder CC format valid JSON"
-
-# Test reminder with CODEX_PLUGIN_ROOT
-assert_command_output_valid_json "CODEX_PLUGIN_ROOT=/src bash $HOME/.claude/hooks/beads-superpowers-reminder.sh" "reminder Codex format valid JSON"
-
-# Test reminder generic
-assert_command_output_valid_json "bash $HOME/.claude/hooks/beads-superpowers-reminder.sh" "reminder generic format valid JSON"
-
 # ============================================================
 echo "=== Group 2: Idempotent Re-Install ==="
 # ============================================================
@@ -296,6 +286,36 @@ if command -v opencode >/dev/null 2>&1; then
   assert_count_eq "$oc_remaining" 0 "OpenCode skills removed"
   assert_file_not_exists "$HOME/.config/opencode/plugins/beads-superpowers-plugin.ts" "OpenCode plugin removed"
 fi
+
+# ============================================================
+echo "=== Group 3b: Stale Reminder Cleanup (ADR-0039) ==="
+# ============================================================
+
+# Seed a "plugin" tier version marker + a settings.json with a stale reminder
+# entry alongside a foreign hook. do_uninstall's plugin-tier branch does not
+# otherwise touch settings.json, isolating cleanup_stale_reminder()'s own work.
+mkdir -p "$HOME/.claude/skills"
+echo "$VERSION:plugin" > "$HOME/.claude/skills/.beads-superpowers-version"
+cat > "$HOME/.claude/settings.json" << 'EOF'
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {"matcher": "", "hooks": [
+        {"type": "command", "command": "bash /home/user/.claude/hooks/beads-superpowers-reminder.sh"},
+        {"type": "command", "command": "bash /home/user/.claude/hooks/somebody-elses-hook.sh"}
+      ]}
+    ]
+  }
+}
+EOF
+
+bash /src/install.sh --uninstall >/dev/null 2>&1 || true
+
+assert_file_not_contains "$HOME/.claude/settings.json" "superpowers-reminder" "cleanup: stale entry removed"
+assert_file_contains "$HOME/.claude/settings.json" "somebody-elses-hook" "cleanup: foreign hook preserved"
+
+backup_count=$(find "$HOME/.claude" -maxdepth 1 -name 'settings.json.bak-*' 2>/dev/null | wc -l | tr -d ' ')
+assert_count_gte "$backup_count" 1 "cleanup: timestamped backup written"
 
 # ============================================================
 echo "=== Group 4: Checksum Validation ==="
