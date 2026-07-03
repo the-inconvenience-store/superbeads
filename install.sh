@@ -47,6 +47,7 @@ FLAG_DRY_RUN=false
 FLAG_UNINSTALL=false
 FLAG_TEST=false
 FLAG_VERSION=""
+FLAG_SOURCE=""
 # shellcheck disable=SC2034  # FLAG_SKIP_CHECKSUM used in later install tiers
 FLAG_SKIP_CHECKSUM=false
 UPGRADING=false
@@ -210,6 +211,7 @@ Flags:
   --test          Install to /tmp/beads-superpowers-test/ (verifies then cleans up)
   --uninstall     Remove beads-superpowers skills, hook, and settings entry
   --version X.Y.Z Pin to a specific version (default: latest GitHub release)
+  --source DIR    Install from a local checkout (dev/test; bypasses download tiers, no network)
   --skip-checksum   Skip SHA-256 checksum verification (tarball downloads)
   --help, -h      Show this help
 
@@ -226,12 +228,18 @@ parse_flags() {
       --test)            FLAG_TEST=true ;;
       --uninstall)       FLAG_UNINSTALL=true ;;
       --version)         shift; FLAG_VERSION="${1:-}"; [ -z "$FLAG_VERSION" ] && { error "--version requires a value"; exit 1; } ;;
+      --source)          shift; FLAG_SOURCE="${1:-}"; [ -z "$FLAG_SOURCE" ] && { error "--source requires a directory"; exit 1; } ;;
       --skip-checksum)   FLAG_SKIP_CHECKSUM=true ;;
       --help|-h)         usage; exit 0 ;;
       *)                 error "Unknown flag: $1"; usage; exit 1 ;;
     esac
     shift
   done
+
+  if [ -n "$FLAG_SOURCE" ] && [ "$FLAG_TEST" = true ]; then
+    error "--source and --test are mutually exclusive (use the install-shape suite for local testing)"
+    exit 1
+  fi
 }
 
 # --- Phase 1: Checks ---
@@ -282,6 +290,12 @@ except:
 }
 
 resolve_version() {
+  if [ -n "$FLAG_SOURCE" ]; then
+    VERSION=$(grep -m1 '"version"' "$FLAG_SOURCE/package.json" 2>/dev/null | sed -E 's/.*"([0-9][^"]*)".*/\1/')
+    [ -z "$VERSION" ] && { error "--source: cannot read version from $FLAG_SOURCE/package.json"; exit 1; }
+    info "Version $VERSION (from --source checkout)"
+    return 0
+  fi
   if [ -n "$FLAG_VERSION" ]; then
     VERSION="$FLAG_VERSION"
     return
@@ -446,6 +460,37 @@ setup_hooks() {
   info "Registering hooks in settings.json..."
   register_hook
 
+  return 0
+}
+
+try_local_install() {
+  [ -z "$FLAG_SOURCE" ] && return 1
+  [ -d "$FLAG_SOURCE/skills" ] || { error "--source: $FLAG_SOURCE/skills not found"; exit 1; }
+
+  info "Tier 0: Installing from local source: $FLAG_SOURCE"
+  create_staging
+
+  mkdir -p "$STAGING_DIR/repo"
+  cp -rf "$FLAG_SOURCE/skills" "$STAGING_DIR/repo/skills"
+  [ -d "$FLAG_SOURCE/example-workflow" ] && cp -rf "$FLAG_SOURCE/example-workflow" "$STAGING_DIR/repo/example-workflow"
+  [ -d "$FLAG_SOURCE/opencode" ] && cp -rf "$FLAG_SOURCE/opencode" "$STAGING_DIR/repo/opencode"
+  [ -d "$FLAG_SOURCE/hooks" ] && cp -rf "$FLAG_SOURCE/hooks" "$STAGING_DIR/repo/hooks"
+
+  if ! promote_staging "$STAGING_DIR/repo/skills"; then
+    return 1
+  fi
+
+  # Optional: install agent (same block as try_git_install)
+  mkdir -p "$AGENTS_DIR"
+  for agent in "${KNOWN_AGENTS[@]}"; do
+    if [ -f "$STAGING_DIR/repo/example-workflow/agents/$agent.md" ]; then
+      cp -f "$STAGING_DIR/repo/example-workflow/agents/$agent.md" "$AGENTS_DIR/$agent.md"
+    fi
+  done
+
+  setup_hooks "$STAGING_DIR/repo" || warn "Hook setup failed — re-run install.sh once python3 is available"
+
+  INSTALL_TIER="local"
   return 0
 }
 
@@ -646,12 +691,16 @@ do_install() {
   # Auto-uninstall previous tier if switching
   do_auto_uninstall_previous
 
-  # Tier cascade — first success wins
-  try_plugin_install || \
-  try_npx_install || \
-  try_tarball_install || \
-  try_git_install || \
-  all_methods_failed
+  # Tier cascade — first success wins (--source bypasses all download tiers)
+  if [ -n "$FLAG_SOURCE" ]; then
+    try_local_install || all_methods_failed
+  else
+    try_plugin_install || \
+    try_npx_install || \
+    try_tarball_install || \
+    try_git_install || \
+    all_methods_failed
+  fi
 
   # Write version file with tier info
   mkdir -p "$(dirname "$VERSION_FILE")"
