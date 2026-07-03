@@ -5,6 +5,9 @@
 set -uo pipefail
 
 REPO_ROOT="${SHAPE_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+# Yardstick for assert_all_skills — decoupled from the install source so selftest.sh
+# can install from a mutated copy while comparing against the real checkout.
+EXPECTED_SKILLS_ROOT="${SHAPE_EXPECTED_ROOT:-$REPO_ROOT}"
 FAILS=0
 
 _fail() { echo "   FAIL: $*"; FAILS=$((FAILS + 1)); }
@@ -67,7 +70,7 @@ assert_not_in_log() { grep -qF -- "$1" "$SANDBOX/install.log" && _fail "log shou
 # Every skill dir in the checkout must be installed (ground truth = ls skills/).
 assert_all_skills() {
   local target="$1" s d
-  for d in "$REPO_ROOT"/skills/*/; do
+  for d in "$EXPECTED_SKILLS_ROOT"/skills/*/; do
     s=$(basename "$d")
     [ -d "$target/$s" ] || _fail "skill not installed in $target: $s"
   done
