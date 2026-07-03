@@ -179,7 +179,9 @@ promote_staging() {
     install_codex_from "$SKILLS_DIR" || warn "Codex skill install failed — Claude Code install succeeded"
   fi
   if [ "$HAS_OPENCODE" = 1 ]; then
-    install_opencode_from "$SKILLS_DIR" "$source_skills" || warn "OpenCode install failed — Claude Code install succeeded"
+    local extract_root
+    extract_root="$(dirname "$source_skills")"
+    install_opencode_from "$SKILLS_DIR" "$extract_root" || warn "OpenCode install failed — Claude Code install succeeded"
   fi
 
   success "Installed $count skills"
