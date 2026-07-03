@@ -92,7 +92,7 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harn
 - `decisions/` — Architecture Decision Records (ADRs). Local working docs (gitignored).
 - `.internal/` — Working docs (gitignored): specs from brainstorming, plans from writing-plans, research output, audits, reference docs, `.internal/sdd/` (SDD scratch), and `.internal/brainstorm/` (brainstorm server sessions).
 - `tests/` — deterministic suites (hooks, manifests, skills contracts, install-shape, installer Docker E2E, brainstorm-server Node tests) run via the `just` surface; the LLM-driven suites (claude-code, explicit-skill-requests, skill-triggering, subagent-driven-dev) are deprecated in place — see `tests/*/DEPRECATED.md`.
-- `scripts/` — `bump-version.sh` (sync version across 9 files), `check-skill-count.sh` (guard: forbid hardcoded skill counts + structural self-consistency), `build-docs.sh`, `check-agent-bead-stamp.sh`, `check-zh-docs.sh`, `check-convention-sync.sh` (verify shared convention blocks are byte-identical across skills).
+- `scripts/` — `bump-version.sh` (sync version across 8 files), `check-skill-count.sh` (guard: forbid hardcoded skill counts + structural self-consistency), `build-docs.sh`, `check-agent-bead-stamp.sh`, `check-zh-docs.sh`, `check-convention-sync.sh` (verify shared convention blocks are byte-identical across skills).
 - `install.sh` — curl installer with 3-tier fallback chain (plugin system → npx → tarball/git clone). SHA-256 checksum validation, atomic rollback via staging directory, lazy prerequisites. Auto-detects Claude Code, Codex, OpenCode, and 6 more CLIs (Cursor, Copilot, Droid, Antigravity, Kimi, Pi).
 - `mkdocs.yml` + `main.py` + `mkdocs_hooks.py` — MkDocs Material site config, macros plugin, and i18n language-switcher hook.
 
@@ -310,7 +310,7 @@ external eval-harness project. Each suite's `DEPRECATED.md` explains why it was 
 
 ## Version Management
 
-Version is declared in 9 files that must stay in sync:
+Version is declared in 8 files that must stay in sync:
 
 - `package.json`
 - `.claude-plugin/plugin.json`
@@ -319,7 +319,6 @@ Version is declared in 9 files that must stay in sync:
 - `.codex-plugin/marketplace.json`
 - `opencode/package.json`
 - `.cursor-plugin/plugin.json`
-- `gemini-extension.json`
 - `.kimi-plugin/plugin.json`
 
 Use `scripts/bump-version.sh` to update all at once:

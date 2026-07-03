@@ -22,7 +22,7 @@ git switch -c feat/my-improvement
 
 **Hooks and scripts:** The session-start hook is bash on Unix, batch on Windows (polyglot via `run-hook.cmd`). See `.internal/windows/polyglot-hooks.md` for cross-platform details.
 
-**Plugin manifests:** Nine files must stay in sync: `package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`, `.codex-plugin/marketplace.json`, `opencode/package.json`, `.cursor-plugin/plugin.json`, `gemini-extension.json`, and `.kimi-plugin/plugin.json`. Use `./scripts/bump-version.sh <version>` to update all nine, or use `--check` to detect drift.
+**Plugin manifests:** Eight files must stay in sync: `package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`, `.codex-plugin/marketplace.json`, `opencode/package.json`, `.cursor-plugin/plugin.json`, and `.kimi-plugin/plugin.json`. Use `./scripts/bump-version.sh <version>` to update all eight, or use `--check` to detect drift.
 
 ## Tests
 

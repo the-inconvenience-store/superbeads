@@ -108,7 +108,7 @@ ls -t .internal/handoff/*.md 2>/dev/null | head -1
 Light path, plus:
 
 - `Read` of any of these that exist: `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `Gemfile`, `composer.json`
-- `Read` of any of these that exist: `CHANGELOG.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`
+- `Read` of any of these that exist: `CHANGELOG.md`, `CLAUDE.md`, `AGENTS.md`
 - `Read` of project-specific manifests when relevant (e.g., `.claude-plugin/plugin.json` for plugin repos)
 - `find` on any of these dirs that exist: `skills/`, `agents/`, `commands/`, `docs/`, `hooks/`, `tests/`, `src/`, `lib/`, `app/`
 
