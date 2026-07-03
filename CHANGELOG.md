@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-03
+
 ### Added
 
 - **`justfile` check surface (tool, not gate).** `just check` runs the deterministic set — guards, hook tests, manifest validation, skill-contract tests, and the new install-shape suite — on demand when harness plumbing changes. `just selftest` (guard-the-guards: 4 must-fail mutations), `just server`, `just docker`, and `just docs` are opt-in. Nothing is CI-enforced by design.
