@@ -63,6 +63,20 @@ drift_check() {
   return $rc
 }
 
+known_skills_check() {
+  local root="$1" rc=0
+  local array_skills fs_skills
+  array_skills=$(sed -n '/^KNOWN_SKILLS=(/,/^)/p' "$root/install.sh" \
+    | grep -vE '^KNOWN_SKILLS=\(|^\)' | tr -s ' \t' '\n' | sed '/^$/d' | sort)
+  fs_skills=$(find "$root/skills" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
+  if [ "$array_skills" != "$fs_skills" ]; then
+    echo "FAIL known-skills: install.sh KNOWN_SKILLS != skills/ directories"
+    diff <(echo "$array_skills") <(echo "$fs_skills") | sed 's/^/  /'
+    rc=1
+  fi
+  return $rc
+}
+
 self_test() {
   local tmp rc=0
   tmp=$(mktemp -d)
@@ -87,6 +101,21 @@ self_test() {
   # (c) missing SKILL.md is caught by the structural check
   rm -f "$tmp/skills/beta/SKILL.md"; git -C "$tmp" add -A
   if structural_check "$tmp" >/dev/null 2>&1; then echo "SELF-TEST FAIL: missing SKILL.md not caught"; rc=1; fi
+  # (d) KNOWN_SKILLS drift is caught, and a matching array passes
+  cat > "$tmp/install.sh" << 'FIX'
+KNOWN_SKILLS=(
+  alpha
+)
+FIX
+  if known_skills_check "$tmp" >/dev/null; then
+    echo "SELF-TEST FAIL: KNOWN_SKILLS missing 'beta' should be caught"; rc=1; fi
+  cat > "$tmp/install.sh" << 'FIX'
+KNOWN_SKILLS=(
+  alpha beta
+)
+FIX
+  if ! known_skills_check "$tmp" >/dev/null; then
+    echo "SELF-TEST FAIL: matching KNOWN_SKILLS should pass"; rc=1; fi
   [ "$rc" -eq 0 ] && echo "SELF-TEST PASS"
   return $rc
 }
@@ -96,7 +125,8 @@ case "${1:-}" in
   "")
     structural_check "$REPO_ROOT"; s=$?
     drift_check "$REPO_ROOT"; d=$?
-    if [ "$s" -eq 0 ] && [ "$d" -eq 0 ]; then echo "OK: skill-count guard passed"; exit 0; else exit 1; fi
+    known_skills_check "$REPO_ROOT"; k=$?
+    if [ "$s" -eq 0 ] && [ "$d" -eq 0 ] && [ "$k" -eq 0 ]; then echo "OK: skill-count guard passed"; exit 0; else exit 1; fi
     ;;
   *) echo "usage: $0 [--self-test]" >&2; exit 2 ;;
 esac
