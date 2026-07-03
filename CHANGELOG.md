@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING: the `yegge.md` orchestrator agent is now opt-in.** `install.sh` no longer copies `yegge.md` to `~/.claude/agents/` by default — pass `--with-yegge` to install it. When the flag is set, the plugin and npx tiers are skipped (they have no checkout to copy the agent from; same precedent as `--version`), so install lands on the tarball/git/local tier. `--test` verifies whichever mode it is invoked with, and uninstall removes the agent in both modes. Upgrades never delete an existing `yegge.md`, but it is only refreshed when you upgrade with `--with-yegge`; `--uninstall` still removes it. README and docs (EN+ZH) now present yegge/example-workflow as a suggested-workflow optional add-on. (beads-superpowers-3krn)
+
 ## [0.9.0] - 2026-07-03
 
 ### Added
