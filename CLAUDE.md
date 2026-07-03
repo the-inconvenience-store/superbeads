@@ -270,59 +270,43 @@ This plugin uses `bd` (beads) for ALL task tracking.
 
 Skills are plain Markdown. The docs site uses MkDocs Material.
 
-### Validation
+### Validation — the `just` surface (tool, not gate)
+
+Run `just check` after touching harness plumbing (hooks/, install.sh, manifests, opencode/).
+Pre-commit covers commit-time hygiene; nothing here is CI-enforced by design.
 
 ```bash
-# Validate plugin manifests
-claude plugin validate .claude-plugin/plugin.json
+just            # = just check: guards + hooks + manifests + contracts + shape
+just guards     # all guard scripts (todowrite, bead-stamp, zh-docs, convention-sync,
+                #   skill-count + KNOWN_SKILLS drift, version sync, frontmatter)
+just hooks      # tests/hooks/* (node tests SKIP visibly if node absent)
+just shape      # install-shape: 9 harnesses (Tier A full artifacts; Tier B hint+manifest)
+just shape codex  # one harness
+just selftest   # guard-the-guards: 4 mutations that must fail
+just server     # brainstorm-server Node tests (opt-in)
+just docker     # installer Docker E2E (opt-in, slow)
+just docs       # mkdocs build --strict (opt-in; needs the deploy-docs.yml pip set incl.
+                #   mkdocs-panzoom-plugin + mkdocs-git-revision-date-localized-plugin)
+```
 
-# Guard against hardcoded skill-count drift + structural self-consistency
-./scripts/check-skill-count.sh
-
-# Verify zero active TodoWrite references (canonical gate)
-bash scripts/check-todowrite.sh
-
-# Verify agent-filed bead discipline convention present at all required sites
-bash scripts/check-agent-bead-stamp.sh
-
-# Verify zh docs structure/term parity
-bash scripts/check-zh-docs.sh
-
-# Verify shared convention blocks are byte-identical across skills
-bash scripts/check-convention-sync.sh
-
+```bash
 # Verify beads integration (should be 30+)
 grep -r "bd create\|bd close\|bd ready" skills/ | wc -l
-
-# Test hook output
-bash hooks/session-start 2>&1 | python3 -m json.tool
-
-# Build docs site locally
-pip install mkdocs-material mkdocs-macros-plugin mkdocs-static-i18n  # one-time
-mkdocs build --strict                              # build
-mkdocs serve                                       # preview at http://localhost:8000
 ```
+
+For a quick, no-Docker installer smoke test outside the `just` surface: `bash install.sh --test`
+(installs to `/tmp`, verifies, cleans up).
+
+Skill *behavior* testing (the 4 LLM suites under tests/) is deprecated in place —
+successor: the external eval-harness project. See tests/*/DEPRECATED.md.
+
+**Release process (no GHA):** `./scripts/bump-version.sh <ver>` → update CHANGELOG →
+tag `v<ver>` → `git push --tags`. Docs deploy stays manual via `.github/workflows/deploy-docs.yml` (workflow_dispatch).
 
 ### Running Skill Tests
 
-```bash
-# Fast tests (skill content verification, ~2 min)
-cd tests/claude-code && ./run-skill-tests.sh
-
-# Integration tests (full workflow execution, 10-30 min)
-cd tests/claude-code && ./run-skill-tests.sh --integration
-```
-
-### Running Installer E2E Test
-
-```bash
-# Requires Docker. Tests install/re-install/uninstall + checksum validation,
-# fallback chain, atomic rollback, and bd integration in a clean container.
-./tests/installer/run-tests.sh
-
-# Quick local test (no Docker required) — install/verify/uninstall in /tmp
-bash install.sh --test
-```
+Deprecated in place (see "Validation" above) — skill *behavior* measurement now lives in the
+external eval-harness project. Each suite's `DEPRECATED.md` explains why it was pulled out of `just check`.
 
 ## Version Management
 

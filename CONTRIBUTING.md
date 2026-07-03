@@ -26,19 +26,15 @@ git switch -c feat/my-improvement
 
 ## Tests
 
+Run `just check` before submitting changes that touch harness plumbing (hooks/, install.sh, manifests, opencode/). See CLAUDE.md § Build & Test.
+
 ```bash
-# Skill content verification (~2 min)
-cd tests/claude-code && ./run-skill-tests.sh
-
-# Full workflow integration (10-30 min)
-cd tests/claude-code && ./run-skill-tests.sh --integration
-
-# Installer E2E (requires Docker) — install/uninstall + checksum/fallback/rollback
-./tests/installer/run-tests.sh
-
-# Quick installer test (no Docker) — install/verify/uninstall in /tmp
-bash install.sh --test
+just check      # deterministic set: guards + hooks + manifests + contracts + install-shape
+just selftest   # guard-the-guards: mutations that must fail
+just docker     # installer E2E (requires Docker, slow)
 ```
+
+The LLM-driven suites under `tests/` are deprecated in place — skill behavior testing moved to the external eval-harness project. See `tests/*/DEPRECATED.md`.
 
 ## Before you open a PR
 
