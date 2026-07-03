@@ -260,7 +260,6 @@ detect_tools() {
   command -v python3  >/dev/null 2>&1 && HAS_PYTHON3=1
   command -v bd       >/dev/null 2>&1 && HAS_BEADS=true
   command -v cursor-agent >/dev/null 2>&1 && HAS_CURSOR=1 || HAS_CURSOR=0
-  command -v gemini       >/dev/null 2>&1 && HAS_GEMINI=1 || HAS_GEMINI=0
   command -v copilot      >/dev/null 2>&1 && HAS_COPILOT=1 || HAS_COPILOT=0
   command -v droid        >/dev/null 2>&1 && HAS_DROID=1 || HAS_DROID=0
   command -v agy          >/dev/null 2>&1 && HAS_AGY=1 || HAS_AGY=0
@@ -895,7 +894,6 @@ print_next_steps() {
     echo "    Plugin installed — skills and hooks are active automatically."
   fi
   echo
-  if [ "$HAS_GEMINI" = 1 ]; then info "Gemini CLI detected — native install: gemini extensions install https://github.com/DollarDill/beads-superpowers"; fi
   if [ "$HAS_COPILOT" = 1 ]; then info "Copilot CLI detected — native install: copilot plugin marketplace add DollarDill/beads-superpowers && copilot plugin install beads-superpowers@beads-superpowers-marketplace"; fi
   if [ "$HAS_CURSOR" = 1 ]; then info "Cursor detected — native install: /add-plugin beads-superpowers (in Cursor Agent)"; fi
   if [ "$HAS_DROID" = 1 ]; then info "Factory Droid detected — native: droid plugin marketplace add https://github.com/DollarDill/beads-superpowers && droid plugin install beads-superpowers@beads-superpowers-marketplace"; fi
