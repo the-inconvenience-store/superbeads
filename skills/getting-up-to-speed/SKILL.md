@@ -68,7 +68,7 @@ Issue all of these commands in **one message, multiple Bash tool calls in parall
 - `bd prime`
 - `bd ready`
 - `bd blocked`
-- `bd query "status=open OR status=in_progress"` — compound-query open + in-progress work in one call (the v1.0.5 query language replaces `bd list` + jq)
+- `bd query "status=open"` and `bd query "status=in_progress"` — two separate calls (bd v1.0.5 silently drops rows when `OR` spans status clauses — never combine these into one `OR` query)
 - `bd memories`
 - `bd stats`
 - `bd count --by-status` — ledger counts grouped by status; feeds the Phase 4 "Beads ledger" line
@@ -149,7 +149,8 @@ Produce **exactly this Markdown structure**. Heading levels are H2; tables and l
      ```bash
      DOC="<path>"; HEAD=$(git rev-parse HEAD)
      DOC_SHA=$(grep -m1 -oE '@ *[`*]*[0-9a-f]{7,40}' "$DOC" | grep -oE '[0-9a-f]{7,40}' | head -1)
-     if [ -n "$DOC_SHA" ] && [ "$DOC_SHA" = "$HEAD" ]; then
+     case "$HEAD" in "$DOC_SHA"*) SHA_IS_HEAD=1 ;; *) SHA_IS_HEAD=0 ;; esac  # prefix-aware: handoffs record the SHORT sha
+     if [ -n "$DOC_SHA" ] && [ "$SHA_IS_HEAD" = 1 ]; then
        echo fresh
      elif [ -n "$DOC_SHA" ] && git merge-base --is-ancestor "$DOC_SHA" HEAD 2>/dev/null; then
        echo possibly-stale            # HEAD has moved past the handoff's sha
