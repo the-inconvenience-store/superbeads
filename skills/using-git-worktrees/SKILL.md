@@ -73,7 +73,7 @@ if [ "$GIT_DIR" != "$GIT_COMMON" ]; then
 fi
 ```
 
-If already in a worktree, warn and use `AskUserQuestion` to ask whether to proceed (creating a nested worktree) or abort.
+If already in a worktree, warn and ask via your structured question tool whether to proceed (creating a nested worktree) or abort.
 
 ### Submodule Guard
 
@@ -90,7 +90,7 @@ If inside a submodule, warn and **stop**. Do NOT create worktrees inside submodu
 
 ### Consent Flow
 
-- **User-initiated** (manual worktree creation): Use `AskUserQuestion` before creating — "I'd like to create a worktree at `<path>`. Proceed?"
+- **User-initiated** (manual worktree creation): Ask via your structured question tool before creating — "I'd like to create a worktree at `<path>`. Proceed?"
 - **Dispatched by subagent-driven-development**: Consent is implicit — the orchestrator authorized worktree creation. Skip the prompt.
 
 ## Creation Steps
@@ -155,9 +155,10 @@ pytest
 go test ./...
 ```
 
-**If tests fail:** Report failures, then **use the `AskUserQuestion` tool** to ask:
+**If tests fail:** Report failures, then **use your structured question tool** to ask:
   Question: "Baseline tests failing in worktree (<N> failures). How should I proceed?"
   Options: "Investigate failures" (debug before starting feature work), "Proceed anyway" (start implementation despite pre-existing failures)
+  A skipped, dismissed, or auto-resolved answer is not consent — stop and ask in plain text.
 
 **If tests pass:** Report ready.
 
