@@ -73,7 +73,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Overview
 
-A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harnesses — Cursor, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi — that merges [Superpowers](https://github.com/obra/superpowers) skills (v6.0.3) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.0.5). It gives AI coding agents composable process-discipline skills (TDD, brainstorming, systematic debugging, code review, verification) plus persistent task memory via a Dolt-backed database.
+A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harnesses — Cursor, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi — that merges [Superpowers](https://github.com/obra/superpowers) skills (v6.1.1) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.1.0). It gives AI coding agents composable process-discipline skills (TDD, brainstorming, systematic debugging, code review, verification) plus persistent task memory via a Dolt-backed database.
 
 **Repository:** <https://github.com/DollarDill/beads-superpowers>
 **Version:** 0.9.0
@@ -341,7 +341,7 @@ The `example-workflow/` directory provides a ready-to-use development workflow:
 
 | Source                                                    | Version           | What We Track                               |
 | --------------------------------------------------------- | ----------------- | ------------------------------------------- |
-| [obra/superpowers](https://github.com/obra/superpowers)   | v6.0.3 (baseline) | Skill content, new skills, hook changes     |
-| [gastownhall/beads](https://github.com/gastownhall/beads) | v1.0.5 (baseline) | CLI commands, new features, bd prime format |
+| [obra/superpowers](https://github.com/obra/superpowers)   | v6.1.1 (baseline) | Skill content, new skills, hook changes     |
+| [gastownhall/beads](https://github.com/gastownhall/beads) | v1.1.0 (baseline) | CLI commands, new features, bd prime format |
 
 Use the `auditing-upstream-drift` skill to check for staleness.

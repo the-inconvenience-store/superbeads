@@ -22,8 +22,8 @@ This is the quality gate for the beads-superpowers plugin. It verifies everythin
 
 | Source | Repository | Our Baseline | What We Track |
 |--------|-----------|-------------|---------------|
-| **Superpowers** | [obra/superpowers](https://github.com/obra/superpowers) | v6.0.3 | Skills content, new skills, hook structure, plugin manifest |
-| **Beads** | [gastownhall/beads](https://github.com/gastownhall/beads) | v1.0.5 | CLI commands, new features, bd prime format, deprecations |
+| **Superpowers** | [obra/superpowers](https://github.com/obra/superpowers) | v6.1.1 | Skills content, new skills, hook structure, plugin manifest |
+| **Beads** | [gastownhall/beads](https://github.com/gastownhall/beads) | v1.1.0 | CLI commands, new features, bd prime format, deprecations |
 
 ## Known Deliberate Divergences
 
@@ -49,7 +49,7 @@ When a CHANGED skill from Phase 5 matches a row here, mark it **SKIP (deliberate
 
 ## The Audit Process
 
-You MUST create an audit bead and complete ALL 7 phases in order:
+You MUST create an audit bead and complete ALL 8 phases in order:
 
 ```bash
 bd create "Audit: full plugin health check" -t chore -p 1
@@ -70,14 +70,10 @@ claude plugin validate .claude-plugin/plugin.json
 
 If validation fails, the plugin CANNOT be installed. Fix before proceeding.
 
-**Check 1.2 — Version consistency across 6 files:**
+**Check 1.2 — Version consistency across 8 files:**
 ```bash
-grep '"version"' package.json \
-  .claude-plugin/plugin.json .claude-plugin/marketplace.json \
-  .codex-plugin/plugin.json .codex-plugin/marketplace.json \
-  opencode/package.json
-# ALL SIX must show the same version string (Claude Code + Codex + OpenCode manifests).
-# Or use the source of truth: ./scripts/bump-version.sh --check
+./scripts/bump-version.sh --check
+# ALL 8 must show the same version string.
 ```
 
 If versions drift, run: `./scripts/bump-version.sh <version>`
@@ -273,8 +269,8 @@ grep -q "finishing-a-development-branch" skills/executing-plans/SKILL.md && echo
 # finishing-a-development-branch has Land the Plane
 grep -q "Land the Plane" skills/finishing-a-development-branch/SKILL.md && echo "PASS: finishing has Land the Plane" || echo "FAIL"
 
-# using-superpowers has Beads Issue Tracking section
-grep -q "Beads Issue Tracking" skills/using-superpowers/SKILL.md && echo "PASS: bootstrap has beads awareness" || echo "FAIL"
+# using-superpowers has ## Beads section
+grep -q "^## Beads" skills/using-superpowers/SKILL.md && echo "PASS: bootstrap has beads awareness" || echo "FAIL"
 
 # verification-before-completion has Beads Completion section
 grep -q "Beads Completion" skills/verification-before-completion/SKILL.md && echo "PASS: verification has beads completion" || echo "FAIL"
@@ -293,7 +289,7 @@ git clone --depth 1 https://github.com/obra/superpowers.git /tmp/superpowers-ups
 **Check 5.1 — Version gap:**
 ```bash
 upstream_ver=$(grep '"version"' /tmp/superpowers-upstream/package.json | grep -o '[0-9.]*')
-echo "Upstream: v$upstream_ver | Our baseline: v6.0.3"
+echo "Upstream: v$upstream_ver | Our baseline: v6.1.1"
 ```
 
 **Check 5.2 — New skills in upstream:**
@@ -354,7 +350,7 @@ Check if beads has new capabilities our skills should use.
 **Check 6.1 — Beads version:**
 ```bash
 bd version
-# Compare against our baseline (v1.0.5)
+# Compare against our baseline (v1.1.0)
 ```
 
 **Check 6.2 — New or changed bd commands:**
@@ -421,7 +417,7 @@ grep -q "beads-superpowers@beads-superpowers-marketplace" .internal/SETUP-GUIDE.
 **Check 7.6 — Copied upstream docs don't have stale references:**
 ```bash
 # These docs were adapted from superpowers — verify no stale refs
-for f in .internal/testing.md .internal/windows/polyglot-hooks.md tests/claude-code/README.md; do
+for f in .internal/testing.md .internal/windows/polyglot-hooks.md; do
     stale=$(grep -c "superpowers" "$f" | head -1)
     allowed=$(grep -c "beads-superpowers\|obra/superpowers\|upstream" "$f" | head -1)
     raw=$((stale - allowed))
@@ -470,8 +466,8 @@ Write the report to `.internal/audits/YYYY-MM-DD-upstream-drift.md`:
 - Skill chain: PASS/FAIL
 
 ## Upstream Drift
-- Superpowers: vX.Y.Z (baseline v6.0.3) — N changes
-- Beads: vX.Y.Z (baseline v1.0.5) — N new features
+- Superpowers: vX.Y.Z (baseline v6.1.1) — N changes
+- Beads: vX.Y.Z (baseline v1.1.0) — N new features
 - New skills: N (action: copy/skip for each)
 - Changed skills: N (action: merge/conflict/skip for each)
 
