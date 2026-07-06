@@ -53,12 +53,12 @@ Identify every decision branch in the target:
 
 ### Phase 3: Interrogate One Branch at a Time
 
-For each branch, present your question and recommendation as text, then use the `AskUserQuestion` tool for structured response.
+For each branch, present your question and recommendation as text, then use your structured question tool for the response.
 
 **Per-branch flow:**
 
 1. Present the **question + recommendation** as text in the message body (reasoning needs room to breathe)
-2. Immediately follow with `AskUserQuestion`:
+2. Immediately follow with a structured question (content below; shape shown in Claude Code schema — adapt to your tool):
 
 ```json
 {
@@ -78,8 +78,8 @@ For each branch, present your question and recommendation as text, then use the 
 **Response handling:**
 
 - **Agree** — Mark branch resolved, emit status line, advance to next branch
-- **Disagree** — Ask "What's your alternative?" as text (open-ended — disagreements need space). Iterate until the branch resolves, then re-ask the same 3-option `AskUserQuestion` on the revised position.
-- **Discuss further** — Explore deeper (code, docs, implications), present updated analysis, then re-ask the same `AskUserQuestion`
+- **Disagree** — Ask "What's your alternative?" as text (open-ended — disagreements need space). Iterate until the branch resolves, then re-ask the same 3-option structured question on the revised position.
+- **Discuss further** — Explore deeper (code, docs, implications), present updated analysis, then re-ask the same structured question
 
 **Branch tracking:** After each branch resolves, emit a status line:
 
@@ -90,7 +90,7 @@ Remaining: Error handling, Scale, Rollback, Testing strategy
 
 **Rules:**
 - One branch at a time — never batch. Wait for the user's response on each branch before presenting the next; surfacing several at once is bewildering and dilutes the recommendation each one deserves.
-- Always state your recommendation in the message body BEFORE the `AskUserQuestion` — the recommendation is the substance; the click is just the gate
+- Always state your recommendation in the message body BEFORE the structured question — the recommendation is the substance; the click is just the gate
 - If you can answer by exploring the codebase, do that instead of asking
 - When the user agrees, move on. When they push back, explore deeper.
 
@@ -102,7 +102,7 @@ After all branches are resolved, write the findings. The output mode depends on 
 
 - **Mode A** applies when: the stress-test was invoked by brainstorming or writing-plans (caller passes the artifact path), OR the user explicitly points at a `.internal/specs/` or `.internal/plans/` file.
 - **Mode B** applies for everything else: user-initiated "grill me" with no artifact, stress-testing a conversation or decision, or targeting documents that shouldn't be edited inline (README, CLAUDE.md, etc.).
-- **When ambiguous:** Use `AskUserQuestion` to ask:
+- **When ambiguous:** Use your structured question tool to ask:
 
 ```json
 {
@@ -228,7 +228,7 @@ Route: **ADR / ADR+memory** → write the ADR per the 3-mark gate (`decisions/AD
 | "We already brainstormed this" | Brainstorming proposes; stress-testing challenges |
 | "I don't want to slow things down" | Catching a flaw now saves 10x the time later |
 | "They clicked Agree fast, so this is going well" | Speed ≠ depth — fast agreement might mean they're not reading your recommendation carefully. Don't reduce rigor. |
-| "I can shorten my recommendation since they just need to click" | The recommendation IS the value. AskUserQuestion replaces how the user responds, not how thoroughly you interrogate. |
+| "I can shorten my recommendation since they just need to click" | The recommendation IS the value. The structured question replaces how the user responds, not how thoroughly you interrogate. |
 | "It's a reasonable trade-off" | Name the downside and its blast radius. A material-risk trade-off is surfaced to the user, never waved through — and a security regression is never acceptable. |
 | "Security's out of scope for this design" | Security is in scope for every design. If a branch touches auth, data, input, or secrets, interrogate it. |
 
@@ -240,7 +240,7 @@ Route: **ADR / ADR+memory** → write the ADR per the 3-mark gate (`decisions/AD
 - Ask multiple questions in one message
 - Forget to provide your own recommended answer
 - End without a findings summary
-- Present the `AskUserQuestion` without a substantive recommendation preceding it in the message body
+- Present the structured question without a substantive recommendation preceding it in the message body
 - Wave through a shortcut, a silent descope, a material-risk trade-off, or a security regression — these fail the stress test by default (Production-Grade Doctrine)
 
 **Always:**
