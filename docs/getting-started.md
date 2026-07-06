@@ -102,7 +102,7 @@ Use the scripted install when you need any of:
 
 - **Beads/Dolt bootstrap** — auto-detects whether `bd` is installed and guides setup
 - **Hook registration** — writes the SessionStart entry to `settings.json` (required when using npx or manual install paths)
-- **`yegge.md` orchestrator** — optional add-on: installed only when you pass `--with-yegge`
+- **`yegge.md` orchestrator** — optional add-on: installed only when you pass `--with-yegge`. The flag forces the scripted tarball/git install tier (the plugin and npx tiers are skipped for that run), so it can't be combined with a plugin-managed install in one command
 - **Version pinning** — `--version X.Y.Z` for reproducible CI installs
 - **CI environments** — use `--yes --skip-checksum` for unattended runs
 

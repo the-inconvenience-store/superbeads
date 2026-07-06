@@ -30,6 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **The upstream-drift audit's self-checks work again.** The audit skill now counts all 8 phases (was "7"), checks version sync across the real 8-file registry via `bump-version.sh --check` (was a hardcoded 6-file grep), greps the renamed `## Beads` bootstrap section (the old check could never match and silently failed), and drops a reference to a deleted test README.
 - **Codex hook limitation documented instead of silently broken.** README and the getting-started guide now state it plainly: Codex plugin-channel installs do not register the SessionStart hook (codex-cli rejects manifest hook objects) — use the scripted `install.sh`, which wires the hook explicitly.
+- **project-init's manual bootstrap no longer hides migration-gate refusals.** The `bd migrate --yes` step in the Path B manual remote-bootstrap fallback dropped its stderr suppression, so a beads v1.1.0 remote-migrate-gate refusal is visible instead of silently leaving the freshly cloned database unmigrated — and the step now points at the Path C gate guidance for what to do next.
 
 ## [0.9.0] - 2026-07-03
 

@@ -85,7 +85,7 @@
 最快路径——Claude Code 原生插件安装：
 
 ```bash
-brew install beads                    # 1. Install bd (requires beads v1.0.5+)
+brew install beads                    # 1. Install bd (requires beads v1.1.0+)
 # From your shell:
 claude plugin marketplace add DollarDill/beads-superpowers
 claude plugin install beads-superpowers@beads-superpowers-marketplace
@@ -230,7 +230,7 @@ curl -fsSL https://raw.githubusercontent.com/DollarDill/beads-superpowers/main/i
 
 - **Beads/Dolt 初始化** — 自动检测 `bd` 是否已安装并引导设置
 - **钩子注册** — 将 SessionStart 条目写入 settings.json（使用脚本安装路径时必需）
-- **`yegge.md` 编排器** — 可选附加组件：仅在传入 `--with-yegge` 时安装
+- **`yegge.md` 编排器** — 可选附加组件：仅在传入 `--with-yegge` 时安装。该标志会强制使用脚本化的 tarball/git 安装层级（该次运行会跳过 plugin 和 npx 层级），因此无法在一条命令中与插件管理的安装方式组合使用
 - **版本锁定** — `--version X.Y.Z` 用于可重现的 CI 安装
 - **CI 环境** — 使用 `--yes --skip-checksum` 进行无人值守运行
 

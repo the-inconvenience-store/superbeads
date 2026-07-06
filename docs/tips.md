@@ -118,7 +118,7 @@ Skills are pure Markdown with no platform-specific code. Only the hook wrapper h
 
 | Source | Baseline | Tracking |
 |--------|----------|----------|
-| [obra/superpowers](https://github.com/obra/superpowers) | v6.0.3 | Skill content, new skills, hooks |
-| [gastownhall/beads](https://github.com/gastownhall/beads) | v1.0.5 | CLI commands, `bd prime` format |
+| [obra/superpowers](https://github.com/obra/superpowers) | v6.1.1 | Skill content, new skills, hooks |
+| [gastownhall/beads](https://github.com/gastownhall/beads) | v1.1.0 | CLI commands, `bd prime` format |
 
 Run `auditing-upstream-drift` before a release or after a long gap to check for changes to port.

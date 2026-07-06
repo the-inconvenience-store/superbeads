@@ -185,7 +185,7 @@ graph TD
 
 ## 来源
 
-- [obra/superpowers](https://github.com/obra/superpowers) v6.0.3 — 14个适用于 AI 智能体的可组合技能（MIT）
-- [gastownhall/beads](https://github.com/gastownhall/beads) v1.0.5 — 适用于 AI 智能体的持久化问题追踪器（MIT）
+- [obra/superpowers](https://github.com/obra/superpowers) v6.1.1 — 适用于 AI 智能体的可组合技能（MIT）
+- [gastownhall/beads](https://github.com/gastownhall/beads) v1.1.0 — 适用于 AI 智能体的持久化问题追踪器（MIT）
 - Cialdini, R. B. (2021). *Influence: The Psychology of Persuasion*（新增扩展版）. Harper Business.
 - Meincke, L., et al. (2025). AI 智能体对明确指令与模糊指令的合规性研究。参见 `skills/writing-skills/persuasion-principles.md`。

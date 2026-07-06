@@ -212,7 +212,8 @@ Flags:
   --yes, -y       Skip consent prompt (CI mode)
   --dry-run       Print what would happen without doing it
   --test          Install to /tmp/beads-superpowers-test/ (verifies then cleans up)
-  --with-yegge    Also install the yegge.md orchestrator agent (default: not installed)
+  --with-yegge    Also install the yegge.md orchestrator agent (default: not installed;
+                  forces the tarball/git install tier — plugin/npx tiers are skipped)
   --uninstall     Remove beads-superpowers skills, hook, and settings entry
   --version X.Y.Z Pin to a specific version (default: latest GitHub release)
   --source DIR    Install from a local checkout (dev/test; bypasses download tiers, no network)

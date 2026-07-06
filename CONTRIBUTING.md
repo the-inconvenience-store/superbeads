@@ -30,6 +30,7 @@ Run `just check` before submitting changes that touch harness plumbing (hooks/, 
 
 ```bash
 just check      # deterministic set: guards + hooks + manifests + contracts + install-shape
+just lint       # shellcheck gate over tracked .sh (baseline'd; skips visibly if shellcheck absent)
 just selftest   # guard-the-guards: mutations that must fail
 just docker     # installer E2E (requires Docker, slow)
 ```
@@ -42,7 +43,7 @@ The LLM-driven suites under `tests/` are deprecated in place — skill behavior 
 - [ ] No TodoWrite references in skills
 - [ ] No hardcoded skill counts: `./scripts/check-skill-count.sh` passes
 - [ ] Anti-rationalization tables, Iron Laws, Red Flags untouched
-- [ ] Version bumped in all 9 manifests if metadata changed (`./scripts/bump-version.sh --check`)
+- [ ] Version bumped in all 8 manifests if metadata changed (`./scripts/bump-version.sh --check`)
 - [ ] `CHANGELOG.md` updated under `[Unreleased]`
 
 ## Security

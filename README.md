@@ -79,7 +79,7 @@ Underneath all of it is a production-grade standard: the agent treats every task
 The fastest path — Claude Code with native plugin install:
 
 ```bash
-brew install beads                    # 1. Install bd (requires beads v1.0.5+)
+brew install beads                    # 1. Install bd (requires beads v1.1.0+)
 # From your shell:
 claude plugin marketplace add DollarDill/beads-superpowers
 claude plugin install beads-superpowers@beads-superpowers-marketplace
@@ -226,7 +226,7 @@ The script's role is broader than just copying files. Use it when you need any o
 
 - **Beads/Dolt bootstrap** — auto-detects whether `bd` is installed and guides setup
 - **Hook registration** — writes the SessionStart entry to settings.json (required when using the install-script path)
-- **`yegge.md` orchestrator** — optional add-on: installed only when you pass `--with-yegge`
+- **`yegge.md` orchestrator** — optional add-on: installed only when you pass `--with-yegge`. The flag forces the scripted tarball/git install tier (the plugin and npx tiers are skipped for that run), so it can't be combined with a plugin-managed install in one command
 - **Version pinning** — `--version X.Y.Z` for reproducible CI installs
 - **CI environments** — use `--yes --skip-checksum` for unattended runs
 
