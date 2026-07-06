@@ -95,7 +95,7 @@ Classify each update as **auto-update** (factual, obvious) or **ask-user** (narr
 Make factual corrections directly. Each edit gets a specific one-line summary — not "updated README" but "README: added /new-skill to skills table, updated count 15 to 16".
 
 ### Step 4: Ask About Risky Changes
-Use the `AskUserQuestion` tool for risky changes. Provide context, recommendation, and options.
+Use your structured question tool for risky changes. Provide context, recommendation, and options.
 
 ### Step 5: CHANGELOG Voice Polish
 **Critical rules:**
@@ -126,8 +126,8 @@ Thresholds: **<2 → rewrite** the entry; **3 → gold** (preserve as-is or mino
 3. Ask whether inline code comments (`TODO`, `FIXME`, `HACK`) represent meaningful deferred work
 
 ### Step 8: VERSION Bump Decision
-**Critical rule:** Never bump silently — always use `AskUserQuestion`.
-- **If already bumped:** verify the bump scope matches the shipped changes via `AskUserQuestion` — A) bump is correct → proceed; B) too conservative → escalate to user; C) too aggressive → escalate. A feature-A bump must not silently absorb feature-B.
+**Critical rule:** Never bump silently — always ask via your structured question tool. A skipped, dismissed, or auto-resolved answer is not consent — stop and ask in plain text.
+- **If already bumped:** verify the bump scope matches the shipped changes via a structured question — A) bump is correct → proceed; B) too conservative → escalate to user; C) too aggressive → escalate. A feature-A bump must not silently absorb feature-B.
 - **If not bumped:** ask whether to bump PATCH/MINOR — and accept **"this project batches releases → record under `[Unreleased]`, defer the bump to release time"** as a first-class, no-friction answer. Do not nag for a per-PR bump on repos that deliberately batch. Never bump silently either way.
 - Use `scripts/bump-version.sh` if available. (Note: it may not sync every prose mention of the version — e.g. root `CLAUDE.md` — so spot-check after a real bump.)
 
