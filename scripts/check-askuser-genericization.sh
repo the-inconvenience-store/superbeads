@@ -10,7 +10,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT" || exit 1
 SEARCH_ROOT="${1:-skills}"   # override for self-testing against a fixture
-ALLOW_RE='^.*skills/using-superpowers/references/'
+ALLOW_RE='^[^:]*skills/using-superpowers/references/'   # path-field anchored: content substrings cannot exempt a line
 VIOLATIONS="$(grep -rn "AskUserQuestion" "$SEARCH_ROOT/" 2>/dev/null | grep -Ev "$ALLOW_RE" || true)"
 if [ -n "$VIOLATIONS" ]; then
   echo "askuser-genericization: FAIL — literal AskUserQuestion outside the reference-file allowlist (ADR-0041):"
