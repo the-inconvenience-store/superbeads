@@ -121,7 +121,9 @@ rm -rf ".beads/embeddeddolt/$DB_NAME/"     # Remove empty database
 cd .beads/embeddeddolt
 dolt clone git@github.com:<owner>/<repo>.git "$DB_NAME"
 cd ../..
-bd migrate --yes 2>/dev/null               # Apply any pending migrations
+bd migrate --yes                           # Apply pending migrations — do NOT silence stderr: on a
+                                           # remote-backed clone the v1.1.0 gate may refuse; if it does,
+                                           # STOP and read "The v1.1.0 remote-migrate gate" (Path C)
 bd dolt remote add origin git+ssh://git@github.com/<owner>/<repo>.git 2>/dev/null  # May already exist
 bd list                                    # Verify
 ```
