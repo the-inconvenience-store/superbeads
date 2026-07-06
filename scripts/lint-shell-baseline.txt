@@ -1,0 +1,2 @@
+# lint-shell baseline — findings present at adoption (burn-down bead tracks removal)
+# generated with: version: 0.11.0

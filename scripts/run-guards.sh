@@ -13,4 +13,5 @@ run "convention sync"       bash scripts/check-convention-sync.sh
 run "skill count guard"     bash scripts/check-skill-count.sh
 run "version sync"          bash scripts/bump-version.sh --check
 run "skill frontmatter"     python3 scripts/check-skill-frontmatter.py
+run "shell lint"            bash scripts/lint-shell.sh
 exit "$rc"
