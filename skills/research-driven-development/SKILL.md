@@ -49,7 +49,7 @@ Step 6: Close bead
 
 If the question is already specific, **skip this step**. Fire it **only when you cannot name the sources you'd search or the decision the answer informs** — e.g. "research databases" (too vague). Do NOT fire when scope is already present — e.g. "compare Postgres vs SQLite for our embedded Dolt use case".
 
-When it fires, ask 2–3 clarifying questions via `AskUserQuestion` (scope · use-case · the decision it informs), then weave the answers into the research question before Step 1. This is disambiguation, not a quality gate — mandatory scope-gating just duplicates what a capable model already does. The "When NOT to Use" list still applies.
+When it fires, ask 2–3 clarifying questions via your structured question tool (scope · use-case · the decision it informs), then weave the answers into the research question before Step 1. This is disambiguation, not a quality gate — mandatory scope-gating just duplicates what a capable model already does. The "When NOT to Use" list still applies.
 
 ## Step 1: Create a Bead + Calibrate Effort
 

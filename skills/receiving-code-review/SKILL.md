@@ -77,7 +77,7 @@ IF suggestion seems wrong:
   Push back with technical reasoning
 
 IF can't easily verify:
-  Use `AskUserQuestion` tool to ask for direction:
+  Use your structured question tool to ask for direction:
   Question: "I can't verify this suggestion without [X]. How should I proceed?"
   Options: "Investigate" (dig deeper to verify), "Ask reviewer" (request clarification from reviewer), "Proceed anyway" (implement without full verification)
 
