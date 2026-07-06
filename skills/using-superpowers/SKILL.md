@@ -71,6 +71,10 @@ If your harness appears here, read its reference file for special instructions:
 - Pi: `references/pi-tools.md`
 - Antigravity: `references/antigravity-tools.md`
 
+## Asking the User
+
+When a skill says to ask the user or present options: use your harness's structured question tool if it has one (multiple-choice with an "Other" escape); if it doesn't, print the options as a numbered list in plain text and STOP for the user's reply. If the tool errors, or an answer comes back skipped, dismissed, or auto-resolved (headless and auto modes do this), treat it as NO answer — never as consent: fall back to numbered plain text and stop. JSON question blocks in skills show Claude Code's schema — render the same content through your tool's shape.
+
 ## User Instructions
 
 User instructions (CLAUDE.md, AGENTS.md, etc, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.
