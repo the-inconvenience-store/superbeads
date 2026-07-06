@@ -6,68 +6,31 @@ description: Quick-reference bd command cheat sheet, skill routing table, troubl
 
 ## Beads cheat sheet
 
-### Finding work
+The commands this workflow leans on day-to-day. Everything else — housekeeping,
+recovery, coordination — lives in the upstream reference linked below.
 
 | Command | Does |
 |---------|------|
-| `bd ready` | Unblocked beads ready to work |
-| `bd ready --parent <epic>` | Remaining tasks in an epic |
-| `bd list --status=open` | All open beads |
-| `bd query "status=open AND priority<=1"` | Compound query — replaces `bd list` + jq (v1.0.5) |
-| `bd count --by-status` | Grouped counts (`--by-priority` / `--by-type`) (v1.0.5) |
-| `bd show <id>` | Full details for one bead |
+| `bd ready` / `--parent <epic>` / `--explain` | Unblocked work / epic remainder / why (not) ready |
 | `bd blocked` | Beads waiting on dependencies |
+| `bd show <id>` | Full details for one bead |
+| `bd query "status=open AND priority<=1"` | Compound query — replaces `bd list` + jq |
+| `bd count --by-status` | Grouped counts (`--by-priority` / `--by-type`) |
 | `bd epic status <id>` | Epic progress summary |
-
-### Creating
-
-| Command | Does |
-|---------|------|
 | `bd create "Epic: name" -t epic -p 2` | New epic at priority 2 |
 | `bd create "Task: title" -t task --parent <epic>` | Task under an epic |
 | `bd create --graph plan.json` | Atomic epic + tasks + deps (dry-run first) |
 | `bd q "quick title"` | Quick capture |
-
-### Working
-
-| Command | Does |
-|---------|------|
 | `bd update <id> --claim` | Claim as in-progress |
 | `bd close <id> --reason "..."` | Complete with evidence |
 | `bd dep add <child> <depends-on>` | Add dependency |
-| `bd batch` (stdin or `-f`) | Atomic multi-op transactions (close, dep, update) |
-| `bd -C <path> <command>` | Run bd against another directory without cd |
-| `bd ready --explain` | Show why tasks are/aren't ready |
-| `bd merge-slot acquire` / `release` | Serialize merges across concurrent orchestrators (v1.0.5) |
-
-### Memory
-
-| Command | Does |
-|---------|------|
-| `bd remember "insight"` | Persist a learning across sessions |
-| `bd forget <id>` | Remove stale memory |
-| `bd memories <keyword>` | Search learnings |
-
-### Sync
-
-| Command | Does |
-|---------|------|
-| `bd dolt push` / `pull` | Sync beads DB to/from Dolt remote |
-| `bd github push` / `pull` | Sync beads to/from GitHub Issues |
-
-### Housekeeping
-
-| Command | Does |
-|---------|------|
-| `bd stats` | Open/closed/blocked counts |
-| `bd doctor` | Diagnose config problems |
-| `bd lint [id...]` | Check issues for missing required sections |
 | `bd note <id> "context"` | Append evidence to a bead |
-| `bd stale` | Beads with no recent activity |
-| `bd find-duplicates` | Semantically similar beads |
-| `bd defer <id> --until="..."` | Defer work to a future date |
-| `bd human <id>` | Flag issue for human decision |
-| `bd swarm validate <epic>` | Analyze parallel work graph |
+| `bd remember "insight"` / `bd memories <kw>` / `bd forget <id>` | Persist / search / remove learnings |
+| `bd dolt push` / `pull` | Sync beads DB to/from Dolt remote |
+
+!!! info "Go deeper — upstream Beads docs"
+    - [CLI reference](https://gastownhall.github.io/beads/cli-reference) — every `bd` command and flag, including the housekeeping and coordination commands trimmed from this sheet (`list`, `stats`, `doctor`, `lint`, `stale`, `find-duplicates`, `defer`, `human`, `swarm`, `batch`, `merge-slot`, `github`, `-C`)
+    - [Recovery guides](https://gastownhall.github.io/beads/recovery) — diverged Dolt history, failed syncs
 
 **Land the Plane:** Every session ends with `bd close` → `bd dolt push` → `git push`. The `finishing-a-development-branch` skill enforces this.
 

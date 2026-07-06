@@ -9,68 +9,30 @@ description: 快速参考 bd 命令速查表、技能路由表、常见问题故
 
 ## Beads 速查表
 
-### 查找工作
+本工作流日常依赖的核心命令。其余命令——日常维护、恢复、协调——见下方链接的上游参考文档。
 
 | 命令 | 功能 |
 |---------|------|
-| `bd ready` | 未被阻塞、可立即处理的 beads |
-| `bd ready --parent <epic>` | 某个 epic 中的剩余任务 |
-| `bd list --status=open` | 所有开放的 beads |
-| `bd query "status=open AND priority<=1"` | 复合查询——替代 `bd list` + jq（v1.0.5） |
-| `bd count --by-status` | 分组计数（`--by-priority` / `--by-type`）（v1.0.5） |
-| `bd show <id>` | 某个 bead 的完整详情 |
+| `bd ready` / `--parent <epic>` / `--explain` | 未被阻塞的工作 / epic 剩余任务 / 就绪原因 |
 | `bd blocked` | 等待依赖项的 beads |
+| `bd show <id>` | 某个 bead 的完整详情 |
+| `bd query "status=open AND priority<=1"` | 复合查询——替代 `bd list` + jq |
+| `bd count --by-status` | 分组计数（`--by-priority` / `--by-type`） |
 | `bd epic status <id>` | Epic 进度摘要 |
-
-### 创建
-
-| 命令 | 功能 |
-|---------|------|
 | `bd create "Epic: name" -t epic -p 2` | 新建优先级为 2 的 epic |
 | `bd create "Task: title" -t task --parent <epic>` | 在 epic 下创建任务 |
 | `bd create --graph plan.json` | 原子化创建 epic + 任务 + 依赖（先 dry-run） |
 | `bd q "quick title"` | 快速捕获 |
-
-### 处理工作
-
-| 命令 | 功能 |
-|---------|------|
 | `bd update <id> --claim` | 认领为进行中 |
 | `bd close <id> --reason "..."` | 附带证据完成任务 |
 | `bd dep add <child> <depends-on>` | 添加依赖关系 |
-| `bd batch`（stdin 或 `-f`） | 原子多操作事务（close、dep、update） |
-| `bd -C <path> <command>` | 在其他目录运行 bd，无需 cd |
-| `bd ready --explain` | 显示任务为何就绪或未就绪 |
-| `bd merge-slot acquire` / `release` | 跨并发编排器串行化合并（v1.0.5） |
-
-### 记忆
-
-| 命令 | 功能 |
-|---------|------|
-| `bd remember "insight"` | 跨会话持久化一条学习内容 |
-| `bd forget <id>` | 删除过时的记忆 |
-| `bd memories <keyword>` | 搜索学习内容 |
-
-### 同步
-
-| 命令 | 功能 |
-|---------|------|
-| `bd dolt push` / `pull` | 将 beads 数据库同步到/从 Dolt 远程 |
-| `bd github push` / `pull` | 将 beads 同步到/从 GitHub Issues |
-
-### 日常维护
-
-| 命令 | 功能 |
-|---------|------|
-| `bd stats` | 开放/已关闭/被阻塞的计数 |
-| `bd doctor` | 诊断配置问题 |
-| `bd lint [id...]` | 检查 issues 是否缺少必填章节 |
 | `bd note <id> "context"` | 向 bead 追加证据 |
-| `bd stale` | 近期无活动的 beads |
-| `bd find-duplicates` | 语义相似的 beads |
-| `bd defer <id> --until="..."` | 将工作推迟到未来某个日期 |
-| `bd human <id>` | 将 issue 标记为需要人工决策 |
-| `bd swarm validate <epic>` | 分析并行工作图 |
+| `bd remember "insight"` / `bd memories <kw>` / `bd forget <id>` | 持久化 / 搜索 / 删除学习内容 |
+| `bd dolt push` / `pull` | 将 beads 数据库同步到/从 Dolt 远程 |
+
+!!! info "深入了解 — 上游 Beads 文档"
+    - [CLI 参考](https://gastownhall.github.io/beads/cli-reference) — 每个 `bd` 命令及其全部参数，包括本表精简掉的维护与协调命令（`list`、`stats`、`doctor`、`lint`、`stale`、`find-duplicates`、`defer`、`human`、`swarm`、`batch`、`merge-slot`、`github`、`-C`）
+    - [恢复指南](https://gastownhall.github.io/beads/recovery) — Dolt 历史分叉、同步失败
 
 **Land the Plane：** 每次会话结束时执行 `bd close` → `bd dolt push` → `git push`。`finishing-a-development-branch` 技能负责强制执行此流程。
 
