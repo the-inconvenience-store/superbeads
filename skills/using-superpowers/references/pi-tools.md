@@ -12,3 +12,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 Pi core does not ship a standard subagent tool. The `pi-subagents` package is a strong optional companion and provides a `subagent` tool with single-agent, chain, parallel, async, forked-context, and resume/status workflows. If no subagent tool is available, do not fabricate `Task` calls; execute sequentially in the current session or explain that the optional subagent capability is not installed.
 
 This plugin tracks ALL tasks with the `bd` (beads) CLI run via the shell — Do NOT use TodoWrite. Use `bd create`, `bd update`, and `bd close` commands via `bash`. Run `bd prime` at the start of each session to load persistent project memory.
+
+## Structured questions
+
+- Structured questions: pi has **no built-in question tool** (unless a question extension is installed) — always present numbered plain-text options + STOP for the user's reply.
