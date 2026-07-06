@@ -131,7 +131,7 @@ After installing, enable hooks in `~/.codex/config.toml`:
 codex_hooks = true
 ```
 
-Codex plugin-channel installs do not register the SessionStart hook — use the scripted installer (`install.sh`), which wires it explicitly.
+To get the SessionStart hook under Codex, use the scripted installer (`install.sh`) rather than the plugin channel — the plugin channel installs the skills but does not wire the hook.
 
 #### OpenCode
 

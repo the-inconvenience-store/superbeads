@@ -72,7 +72,7 @@ After installing, enable hooks in `~/.codex/config.toml`:
 codex_hooks = true
 ```
 
-Codex plugin-channel installs do not register the SessionStart hook — use the scripted installer (`install.sh`), which wires it explicitly.
+To get the SessionStart hook under Codex, use the scripted installer (`install.sh`) rather than the plugin channel — the plugin channel installs the skills but does not wire the hook.
 
 ### OpenCode
 
@@ -178,7 +178,7 @@ If skills aren't showing, the plugin may not be installed for your CLI. If `bd r
 
 ## How the hooks work
 
-Claude Code and Codex share one hook, registered via `hooks/hooks.json`: **SessionStart**. It fires on every session start, clear, and compact. It reads the `using-superpowers` skill (which routes to all other skills), runs `bd prime` to capture beads state and persistent memories, and outputs the combined context (~2–3k tokens). If `bd prime` is already registered as a hook elsewhere, this step is skipped automatically.
+Claude Code and Codex share one hook script — **SessionStart** — registered via `hooks/hooks.json` for Claude Code and wired by `install.sh` for Codex. It fires on every session start, clear, and compact. It reads the `using-superpowers` skill (which routes to all other skills), runs `bd prime` to capture beads state and persistent memories, and outputs the combined context (~2–3k tokens). If `bd prime` is already registered as a hook elsewhere, this step is skipped automatically.
 
 ```mermaid
 sequenceDiagram

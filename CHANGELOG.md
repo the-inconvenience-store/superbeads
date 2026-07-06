@@ -9,14 +9,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Shell-lint gate.** `just lint` (also wired into `just guards`/`just check`) runs shellcheck over every git-tracked shell script and fails only on findings not in the committed baseline — which shipped **empty**: all 56 tracked scripts are already warning-clean. Skips visibly when shellcheck isn't installed, so fresh clones aren't blocked.
+- **Codex marketplace manifest.** A repo-root `.agents/plugins/marketplace.json` lets Codex marketplace sources actually discover and install the plugin (`codex plugin add <source>` then install) — previously Codex could add the marketplace but found zero installable entries.
+
 ### Changed
 
-- Production-Grade Doctrine consolidated: the 3 byte-identical CB-1 paragraph sites (brainstorming, writing-plans, executing-plans) are now self-contained woven floor lines (incl. an explicit security clause); CB-1 retired from `check-convention-sync.sh`; `auditing-upstream-drift` now protects the doctrine as a divergence *class* (canonical block + woven lines) on re-sync. Doctrine content and all security-gate rules unchanged. (ADR-0040)
-- **BREAKING: the `yegge.md` orchestrator agent is now opt-in.** `install.sh` no longer copies `yegge.md` to `~/.claude/agents/` by default — pass `--with-yegge` to install it. When the flag is set, the plugin and npx tiers are skipped (they have no checkout to copy the agent from; same precedent as `--version`), so install lands on the tarball/git/local tier. `--test` verifies whichever mode it is invoked with, and uninstall removes the agent in both modes. Upgrades never delete an existing `yegge.md`, but it is only refreshed when you upgrade with `--with-yegge`; `--uninstall` still removes it. README and docs (EN+ZH) now present yegge/example-workflow as a suggested-workflow optional add-on. (beads-superpowers-3krn)
+- Production-Grade Doctrine consolidated: the 3 byte-identical CB-1 paragraph sites (brainstorming, writing-plans, executing-plans) are now self-contained woven floor lines (incl. an explicit security clause); CB-1 retired from `check-convention-sync.sh`; `auditing-upstream-drift` now protects the doctrine as a divergence *class* (canonical block + woven lines) on re-sync. Doctrine content and all security-gate rules unchanged.
+- **BREAKING: the `yegge.md` orchestrator agent is now opt-in.** `install.sh` no longer copies `yegge.md` to `~/.claude/agents/` by default — pass `--with-yegge` to install it. When the flag is set, the plugin and npx tiers are skipped (they have no checkout to copy the agent from; same precedent as `--version`), so install lands on the tarball/git/local tier. `--test` verifies whichever mode it is invoked with, and uninstall removes the agent in both modes. Upgrades never delete an existing `yegge.md`, but it is only refreshed when you upgrade with `--with-yegge`; `--uninstall` still removes it. README and docs (EN+ZH) now present yegge/example-workflow as a suggested-workflow optional add-on.
+- **project-init now teaches the beads v1.1.0 migration gate.** Since beads v1.1.0 refuses to silently migrate a remote-backed database, the recovery guide walks you through the real decision — one designated migrator (`bd export --all -o backup.jsonl`, then `BD_ALLOW_REMOTE_MIGRATE=1 bd migrate`, then push) while every other machine adopts via `bd bootstrap` — and points at bd's printed recovery recipe when Dolt refuses a primary-key fork. `bd recompute-blocked` is now part of the post-pull routine.
+- **Leaner per-harness reference files.** The Copilot and OpenCode tool-mapping references drop the generic rename rows agents already infer (Read→view and friends), keeping only what carries real weight: capability gaps with workarounds, agent-type mappings, async shell sessions, and `bd` usage. Smaller injected context, same guidance.
+- Audited upstream baselines advanced: skill content now tracked against superpowers **v6.1.1**, beads integration against **v1.1.0**.
 
 ### Removed
 
-- **BREAKING: Gemini CLI harness support removed entirely.** Google EOLed the Gemini CLI on 2026-06-18; its successor, Google Antigravity, is already a supported best-effort harness. Deleted `gemini-extension.json` and `GEMINI.md`, dropped Gemini detection and the native-install hint from `install.sh`, and shrank the synced version registry from nine files to eight. Historical CHANGELOG entries are unchanged. (beads-superpowers-z9vb)
+- **BREAKING: Gemini CLI harness support removed entirely.** Google EOLed the Gemini CLI on 2026-06-18; its successor, Google Antigravity, is already a supported best-effort harness. Deleted `gemini-extension.json` and `GEMINI.md`, dropped Gemini detection and the native-install hint from `install.sh`, and shrank the synced version registry from nine files to eight. Historical CHANGELOG entries are unchanged.
+
+### Fixed
+
+- **The upstream-drift audit's self-checks work again.** The audit skill now counts all 8 phases (was "7"), checks version sync across the real 8-file registry via `bump-version.sh --check` (was a hardcoded 6-file grep), greps the renamed `## Beads` bootstrap section (the old check could never match and silently failed), and drops a reference to a deleted test README.
+- **Codex hook limitation documented instead of silently broken.** README and the getting-started guide now state it plainly: Codex plugin-channel installs do not register the SessionStart hook (codex-cli rejects manifest hook objects) — use the scripted `install.sh`, which wires the hook explicitly.
 
 ## [0.9.0] - 2026-07-03
 
