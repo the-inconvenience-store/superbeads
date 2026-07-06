@@ -7,8 +7,6 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 | `Task` tool (dispatch subagent) | `task` tool + `@mention` syntax |
 | Multiple `Task` calls (parallel) | Multiple `@agent` dispatches |
 | `Skill` tool (invoke a skill) | Native `skill` tool (compatible) |
-| `Read`, `Write`, `Edit` (files) | Use your native file tools |
-| `Bash` (run commands) | Use your native shell tools |
 | `AskUserQuestion` | Not available — use generic prompting |
 | `bd` CLI (task tracking via beads) | Use native shell tools with `bd` commands |
 
