@@ -23,6 +23,8 @@ Every project goes through this process. A todo list, a single-function utility,
 
 You MUST create the session bead + step children atomically via `bd create --graph` (one JSON: session node `-t task` titled "Brainstorming: <topic>", each checklist step a `-t chore` child node with `parent_key` pointing to the session; `--dry-run` first), then complete them in order. Fall back to sequential `bd create "Brainstorming: <topic>" -t task` + `bd create "Step N: <title>" -t chore --parent <session-bead-id>` only if `--graph` is unavailable:
 
+The session bead always stays permanent (it's the audit trail). Graph JSON nodes do not accept an `ephemeral` field (verified: `bd create --graph ... --dry-run` silently drops unknown node fields with a warning), so step children created via `--graph` are permanent chores. If the operator prefers hidden ceremony beads for the step children instead, create them individually: `bd create "Step N: <title>" -t chore --parent <session-bead-id> --ephemeral` — trade-off: `--graph` is one call and permanent; individual creation is N calls and ephemeral. Ephemeral beads are hidden from `bd ready`/`bd list`/`bd count` by default and do not self-clean — sweep them eventually with `bd purge`.
+
 1. **Explore project context** — check files, docs, recent commits
 2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
