@@ -21,7 +21,7 @@ SESSION-SUMMARY.md
 .sessions/
 .claude/session-log.jsonl
 # Local hook/permission settings — hook is registered globally; a tracked copy double-injected (beads-superpowers-jb3u)
-.claude/settings.json
+.claude/settings.local.json
 
 # Dependencies
 node_modules/
@@ -30,9 +30,6 @@ node_modules/
 .worktrees/
 
 # npx skills install artifacts (symlinks created by Vercel Skills CLI)
-.agents/
-.claude/skills/
-skills-lock.json
 
 # Agent-specific directories created by npx skills (28+ dotdirs)
 .adal/
