@@ -99,9 +99,39 @@ Write a bd graph JSON file with one epic node, one task node per task, and depen
 - Edge direction: `from_key` is the dependent task; `to_key` is the prerequisite task. `{"from_key":"t2","to_key":"t1","type":"blocks"}` means Task 2 waits for Task 1.
 - The graph schema has no separate criteria field. `bd lint` requires `## Success Criteria` in the epic's `description` and `## Acceptance Criteria` in each task's `description`.
 - The graph schema does not import separate `acceptance`, `context`, `skills`, `spec-id`, or `external-ref` fields. Put them in markdown sections inside `description`.
-- Put all implementation detail in task descriptions. A task's implementer sees only that bead; include context, files, interfaces, exact test commands, exact expected outputs, skills to use, and concrete steps.
+- The graph JSON is the plan of record. Put the complete task plan in each task node's `description`; do not rely on a separate markdown plan body to carry implementation details.
+- Put all implementation detail in task descriptions. A task's implementer sees only that bead via `bd show <task-id>`; include context, files, interfaces, exact test commands, exact expected outputs, skills to use, and concrete steps.
 
-## Description Sections
+## Task Description Contract
+
+Each task description MUST contain the full implementation plan for that task, in this order:
+
+1. Opening summary: what this task changes and the user-visible or system-visible outcome.
+2. `## Context`: spec path, external reference, why this task exists, and constraints the implementer must preserve.
+3. `## Files`: exact files to create, modify, and test.
+4. `## Interfaces`: exact functions, commands, schemas, types, flags, data shapes, or contracts consumed and produced.
+5. `## Acceptance Criteria`: externally observable done conditions.
+6. `## Skills`: task-specific skills to invoke, when, and why. Omit this section only when no task-specific skill applies.
+7. `## Steps`: bite-sized RED-GREEN-REFACTOR implementation steps with exact code, exact commands, and expected output.
+
+The sections below define how to write the parts that are easy to under-specify. They add to the full task plan; they do not replace `## Files`, `## Interfaces`, or `## Steps`.
+
+### Files
+
+Name every file path the implementer needs before they start.
+
+- `Create:` new files, with purpose.
+- `Modify:` existing files, with line numbers when known.
+- `Test:` exact test files or fixtures.
+- `Reference:` files to read for local patterns, only when they materially help.
+
+### Interfaces
+
+Write the contracts the task must preserve or create.
+
+- Include exact function signatures, CLI flags, config keys, JSON shapes, database fields, events, or component props.
+- State what comes from earlier tasks and what later tasks will consume.
+- If a name is invented by this task, define it here once and reuse it consistently in later tasks.
 
 ### Acceptance Criteria
 
@@ -137,6 +167,15 @@ Use skill names only; do not use `@` links or file paths that force-load skill b
 ```
 
 If no task-specific skill applies, do not include the Skills section.
+
+### Steps
+
+Steps are the executable plan. They must be specific enough that a fresh implementer can follow them without reopening the original spec.
+
+- Start with the failing test or verification that proves the missing behavior.
+- Include exact commands and expected failure/pass output.
+- Include code snippets for non-trivial edits; do not say "implement X" without showing the intended shape.
+- End with verification and a commit command.
 
 ## Create Beads
 
@@ -190,9 +229,11 @@ bd ready --parent <epic-id> --explain                                  # confirm
 
 **1. Spec coverage:** Skim each requirement in the spec. Every one MUST map to a task bead — point to it. A requirement with no task bead is either added as a task bead or surfaced to the user as an explicit, acknowledged cut. Silent omission is a plan failure.
 
-**2. Placeholder scan:** Search the graph JSON and created bead descriptions for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
+**2. Full-plan payload:** Check every child task bead description contains `## Context`, `## Files`, `## Interfaces`, `## Acceptance Criteria`, and `## Steps`. If a task needs task-specific skills, it also contains `## Skills`. Missing sections mean the plan was not written into the bead graph; fix the graph JSON and bead descriptions before review.
 
-**3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+**3. Placeholder scan:** Search the graph JSON and created bead descriptions for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
+
+**4. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
 If you find issues, fix the graph JSON and the created beads. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task bead.
 
