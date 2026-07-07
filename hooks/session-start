@@ -10,7 +10,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# shellcheck disable=SC2034  # consumed by Task 2's composer wiring (this task adds it inert)
 BSP_MEM_CEILING=8192
 
 # Selection input is `bd memories --json`: one `"key": "body"` entry per line
@@ -69,17 +68,39 @@ ${body}
         "$injected" "$total_count" "$ceiling"
 }
 
+# Static bd workflow pointer (onboard-style; ~250 tok)
+bsp_bd_pointer() {
+    cat <<'PTR'
+## Issue Tracking (bd)
+
+This workspace uses **bd (beads)**. Core commands:
+- `bd ready -n 10` — unblocked work · `bd show --short <id>` — skim an issue
+- `bd create "Title" -t task -p 2` — create · `bd close <id> --reason "..."` — complete
+- `bd query "status=open"` — search · `bd remember "insight"` — persist a memory
+- `bd batch` / `bd create --graph` — many writes, one call
+Full reference: `bd human`. If beads context was not injected this session: `bd prime`.
+PTR
+}
+
 # Test seam: when sourced with BSP_SOURCED=1, expose functions and stop.
 if [ "${BSP_SOURCED:-0}" = "1" ]; then
     # shellcheck disable=SC2317  # exit 0 is the non-sourced fallback; unreachable when `.`-sourced
     return 0 2>/dev/null || exit 0
 fi
 
+# --- flag parsing (before any output) ---
+BSP_EMIT_PLAIN=0
+for arg in "$@"; do
+    [ "$arg" = "--emit-plain" ] && BSP_EMIT_PLAIN=1
+done
+
 # Check if legacy skills directory exists and build warning
-warning_message=""
+warning_message_raw=""
 legacy_skills_dir="${HOME}/.config/superpowers/skills"
 if [ -d "$legacy_skills_dir" ]; then
-    warning_message="\n\n<important-reminder>IN YOUR FIRST REPLY AFTER SEEING THIS MESSAGE YOU MUST TELL THE USER:⚠️ **WARNING:** Superpowers now uses Claude Code's skills system. Custom skills in ~/.config/superpowers/skills will not be read. Move custom skills to ~/.claude/skills instead. To make this message go away, remove ~/.config/superpowers/skills</important-reminder>"
+    warning_message_raw="
+
+<important-reminder>IN YOUR FIRST REPLY AFTER SEEING THIS MESSAGE YOU MUST TELL THE USER:⚠️ **WARNING:** Superpowers now uses Claude Code's skills system. Custom skills in ~/.config/superpowers/skills will not be read. Move custom skills to ~/.claude/skills instead. To make this message go away, remove ~/.config/superpowers/skills</important-reminder>"
 fi
 
 # Detect if bd prime is already registered as a hook elsewhere (e.g. bd setup claude).
@@ -99,10 +120,12 @@ done
 # Read using-superpowers content
 using_superpowers_content=$(cat "${PLUGIN_ROOT}/skills/using-superpowers/SKILL.md" 2>/dev/null) || using_superpowers_content="beads-superpowers: using-superpowers skill unreadable"
 
-# Run bd prime if available AND not already hooked elsewhere
+# Compose beads section (skipped if an external bd prime hook owns injection)
 beads_context=""
-if [ "$bd_prime_already_hooked" -eq 0 ] && command -v bd &>/dev/null; then
-    beads_context=$(bd prime 2>/dev/null || true)
+if [ "$bd_prime_already_hooked" -eq 0 ] && command -v bd &>/dev/null && bd memories --json >/dev/null 2>&1; then
+    beads_context="$(bsp_bd_pointer)
+
+$(bsp_compose_memories "$BSP_MEM_CEILING")"
 fi
 
 # Escape string for JSON embedding using bash parameter substitution.
@@ -116,28 +139,40 @@ escape_for_json() {
     printf '%s' "$s"
 }
 
-using_superpowers_escaped=$(escape_for_json "$using_superpowers_content")
-beads_escaped=$(escape_for_json "$beads_context")
-warning_escaped=$(escape_for_json "$warning_message")
+# Build combined session context: skills + beads workflow.
+# RAW strings only (real newlines) — escape_for_json is applied exactly once,
+# at the output boundary below, per dialect.
+session_context_raw="<EXTREMELY_IMPORTANT>
+You have beads-superpowers.
 
-# Build combined session context: skills + beads workflow
-session_context="<EXTREMELY_IMPORTANT>\nYou have beads-superpowers.\n\n**Below is the full content of your 'beads-superpowers:using-superpowers' skill - your introduction to using skills. For all other skills, use the 'Skill' tool:**\n\n${using_superpowers_escaped}\n\n${warning_escaped}\n</EXTREMELY_IMPORTANT>"
+**Below is the full content of your 'beads-superpowers:using-superpowers' skill - your introduction to using skills. For all other skills, use the 'Skill' tool:**
+
+${using_superpowers_content}
+${warning_message_raw}
+</EXTREMELY_IMPORTANT>"
 
 # Append beads context if available
 if [ -n "$beads_context" ]; then
-    session_context="${session_context}\n\n<beads-context>\n${beads_escaped}\n</beads-context>"
+    session_context_raw="${session_context_raw}
+
+<beads-context>
+${beads_context}
+</beads-context>"
 fi
 
-# Output context injection as JSON.
+# Output context injection.
+# --emit-plain: raw text, no JSON envelope (consumed by OpenCode plugin / install.sh shims).
 # Cursor hooks expect additional_context (snake_case).
 # Claude Code hooks expect hookSpecificOutput.additionalContext (nested).
 # Copilot CLI (v1.0.11+) and others expect additionalContext (top-level, SDK standard).
-if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
-  printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
+if [ "$BSP_EMIT_PLAIN" = "1" ]; then
+  printf '%s\n' "$session_context_raw"
+elif [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{\n  "additional_context": "%s"\n}\n' "$(escape_for_json "$session_context_raw")"
 elif { [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || [ -n "${CODEX_PLUGIN_ROOT:-}" ]; } && [ -z "${COPILOT_CLI:-}" ]; then
-  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$(escape_for_json "$session_context_raw")"
 else
-  printf '{\n  "additionalContext": "%s"\n}\n' "$session_context"
+  printf '{\n  "additionalContext": "%s"\n}\n' "$(escape_for_json "$session_context_raw")"
 fi
 
 # bd-absent hint (non-fatal, one line to stderr)
