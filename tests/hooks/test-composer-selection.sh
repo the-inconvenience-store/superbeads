@@ -27,7 +27,8 @@ cat > "$TMP/fixtures/memories.json" <<'FIX'
   "long-refs-lesson": "@type=semantic:lesson @created=2026-07-03 @refs=aaaa,bbbb,cccc,dddd,eeee,ffff,gggg,hhhh,iiii,jjjj,kkkk,llll,mmmm,nnnn @tags=alpha,beta,gamma,delta,epsilon @salience=4 late-salience body",
   "low-note": "@type=episodic:done @created=2026-07-03 @salience=2 @tags=z low note body",
   "continuation-2026-07-06-old": "continuation old body",
-  "continuation-2026-07-07-new": "continuation new body"
+  "continuation-2026-07-07-new": "continuation new body",
+  "schema_version": 1
 }
 FIX
 printf 'FULL BODY OF BIG LESSON (salience 5)\n' > "$TMP/fixtures/recall-big-lesson.txt"
@@ -64,11 +65,13 @@ echo "$out" | grep -q "more core memories over budget" || { echo "FAIL: no +N ta
 cat > "$TMP/fixtures/memories.json" <<'FIX'
 {
   "plain-one": "some memory body without headers",
-  "plain-two": "another memory body without headers"
+  "plain-two": "another memory body without headers",
+  "schema_version": 1
 }
 FIX
 out=$(bsp_compose_memories 8192)
 echo "$out" | grep -q "curation sweep" || { echo "FAIL: pre-sweep notice absent"; exit 1; }
+echo "$out" | grep -q "2 memories stored" || { echo "FAIL: pre-sweep count included schema_version"; exit 1; }
 
 # 5. ceiling counts BYTES, not chars: em-dash body is 30 chars but 90 bytes.
 # Ceiling 60: continuation (20B, exempt) + 90B = 110 > 60 -> must be clipped
@@ -77,7 +80,8 @@ echo "$out" | grep -q "curation sweep" || { echo "FAIL: pre-sweep notice absent"
 cat > "$TMP/fixtures/memories.json" <<'FIX'
 {
   "utf8-lesson": "@type=semantic:lesson @created=2026-07-07 @salience=5 multi-byte body",
-  "continuation-2026-07-07-x": "continuation x body"
+  "continuation-2026-07-07-x": "continuation x body",
+  "schema_version": 1
 }
 FIX
 { printf '—%.0s' {1..30}; echo; } > "$TMP/fixtures/recall-utf8-lesson.txt"
@@ -106,5 +110,12 @@ printf 'EARLY SALIENT FULL BODY\n' > "$TMP/fixtures/recall-salient-early.txt"
 out=$(bsp_compose_memories 8192)
 echo "$out" | grep -q "curation sweep" && { echo "FAIL: pre-sweep misfired on large store (pipefail SIGPIPE)"; exit 1; }
 echo "$out" | grep -q "EARLY SALIENT FULL BODY" || { echo "FAIL: salient body absent from large-store composition"; exit 1; }
+
+# 7. shape-drift tripwire: compact JSON with @salience is a real listing shape
+# drift for the sed fallback. It should warn loudly rather than degrade silently.
+printf '{"compact-lesson":"@type=semantic:lesson @salience=5 compact body","schema_version":1}\n' > "$TMP/fixtures/memories.json"
+stderr="$TMP/shape-drift.err"
+out=$(bsp_compose_memories 8192 2>"$stderr")
+grep -q "shape drift" "$stderr" || { echo "FAIL: compact JSON shape drift did not warn"; exit 1; }
 
 echo "PASS: composer selection/ceiling"

@@ -1,6 +1,6 @@
 ---
 name: memory-curator
-description: Use at session-close when a session captured several new memories, or on-demand, to consolidate, deduplicate, prune, and structure the beads memory store. Triggers on "curate memories", "clean up memories", "memory sweep".
+description: Use when session-close captured several new memories, or when memory cleanup is requested. Triggers on "curate memories", "clean up memories", "memory sweep".
 ---
 
 # Memory Curator

@@ -171,7 +171,7 @@ State the correction factually and move on.
 bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / pattern / design / root-cause / research
 ```
 
-If a previous memory is now wrong, `bd forget <id>` first.
+If a previous memory is now wrong, `bd forget <key>` first.
 
 ## Common Mistakes
 

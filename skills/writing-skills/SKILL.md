@@ -215,9 +215,10 @@ Use words your agent would search for:
 **Problem:** getting-started and frequently-referenced skills load into EVERY conversation. Every token counts.
 
 **Target word counts:**
-- getting-started workflows: <150 words each
-- Frequently-loaded skills: <200 words total
-- Other skills: <500 words (still be concise)
+- Session-injected skills: hard budget enforced by repo guard (for this repo, see `scripts/check-injection-budget.sh`)
+- Frequently-loaded workflow summaries: <200 words when they are injected ambiently
+- Routine on-demand skills: <500 words when practical
+- Discipline/meta/reference-heavy skills: no hard cap, but move heavy reference material to sidecar files and keep the main scan path concise
 
 **Techniques:**
 
@@ -261,8 +262,9 @@ You: Searching...
 **Verification:**
 ```bash
 wc -w skills/path/SKILL.md
-# getting-started workflows: aim for <150 each
-# Other frequently-loaded: aim for <200 total
+# session-injected skills: must satisfy the repo guard
+# routine skills: aim for <500 when practical
+# meta/reference-heavy skills: justify sidecar files, don't pad the main path
 ```
 
 **Name by what you DO or core insight:**
@@ -313,7 +315,7 @@ digraph when_flowchart {
 - Linear instructions → Numbered lists
 - Labels without semantic meaning (step1, helper2)
 
-See @graphviz-conventions.dot for graphviz style rules.
+See `graphviz-conventions.dot` in this directory for graphviz style rules.
 
 **Visualizing for your human partner:** Use `render-graphs.js` in this directory to render a skill's flowcharts to SVG:
 ```bash
@@ -584,7 +586,7 @@ Full pressure-scenario runs are the final gate, but they are slow and expensive 
 
 Micro-tests verify wording; they do not replace pressure scenarios for discipline skills.
 
-**Testing methodology:** See @testing-skills-with-subagents.md for the complete testing methodology:
+**Testing methodology:** See `testing-skills-with-subagents.md` in this directory for the complete testing methodology:
 - How to write pressure scenarios
 - Pressure types (time, sunk cost, authority, exhaustion)
 - Plugging holes systematically

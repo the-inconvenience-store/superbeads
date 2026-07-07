@@ -18,6 +18,23 @@ echo "$out2" | grep -q 'additionalContext' && { echo "FAIL: duplicate event inje
 out3=$(printf '{"session_id":"sess-abc","source":"compact"}' | CLAUDE_PLUGIN_ROOT=x bash "$HOOK")
 echo "$out3" | grep -q 'additionalContext' || { echo "FAIL: compact re-injection suppressed"; exit 1; }
 
+# pretty-printed multi-line JSON payload still extracts session_id/source.
+pretty_payload=$(printf '{\n  "session_id": "sess-pretty",\n  "source": "startup"\n}\n')
+out_pretty_1=$(printf '%s' "$pretty_payload" | CLAUDE_PLUGIN_ROOT=x bash "$HOOK")
+echo "$out_pretty_1" | grep -q 'additionalContext' || { echo "FAIL: pretty JSON first run did not inject"; exit 1; }
+out_pretty_2=$(printf '%s' "$pretty_payload" | CLAUDE_PLUGIN_ROOT=x bash "$HOOK")
+[ "$out_pretty_2" = "{}" ] || { echo "FAIL: pretty JSON duplicate did not hit same marker"; exit 1; }
+
+# >=64KB stdin cap: the line that crosses the cap must be appended once, not
+# duplicated by the final-partial-line path. The duplicate bug creates an
+# oversized marker payload internally; this case keeps the parsed marker stable.
+big_pad=$(printf 'x%.0s' $(seq 1 66000))
+big_payload=$(printf '{"session_id":"sess-big","source":"startup","pad":"%s"}\n{"source":"ignored"}\n' "$big_pad")
+out_big_1=$(printf '%s' "$big_payload" | CLAUDE_PLUGIN_ROOT=x bash "$HOOK")
+echo "$out_big_1" | grep -q 'additionalContext' || { echo "FAIL: >=64KB first run did not inject"; exit 1; }
+out_big_2=$(printf '%s' "$big_payload" | CLAUDE_PLUGIN_ROOT=x bash "$HOOK")
+[ "$out_big_2" = "{}" ] || { echo "FAIL: >=64KB duplicate did not hit same marker"; exit 1; }
+
 # empty stdin: TTL-only dedup still suppresses an immediate duplicate.
 # File-redirect, NOT $() capture: the nosid fallback is keyed on $PPID (same parent
 # process = same event bucket), and bash forks a fresh subshell per $() capture,

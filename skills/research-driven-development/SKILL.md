@@ -1,6 +1,6 @@
 ---
 name: research-driven-development
-description: Use when the user asks a question about a topic, requests research, or when you need to understand something before planning. Dispatches parallel research agents, synthesizes findings into a persistent document, and writes it to the project's research directory. Triggers on "research this", "what is X", "how does Y work", "compare A vs B", "investigate", "deep dive", "look into".
+description: Use when the user asks a question about a topic, requests research, or when understanding is needed before planning. Triggers on "research this", "what is X", "how does Y work", "compare A vs B", "investigate", "deep dive", "look into".
 ---
 
 # Research-Driven Development

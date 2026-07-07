@@ -279,31 +279,17 @@ After the work is settled, present the Capture gate (you MUST present it; the us
 
 ```json
 {
-  "questions": [
-    {
-      "question": "This produced something worth preserving — what should I capture?",
-      "header": "Capture",
-      "options": [
-        {
-          "label": "ADR + memory",
-          "description": "Record an ADR for the decision AND a durable bd-remember memory"
-        },
-        {
-          "label": "ADR only",
-          "description": "Record an ADR for the architecturally-significant decision"
-        },
-        {
-          "label": "Memory only",
-          "description": "Capture a durable lesson/insight via bd remember"
-        },
-        {
-          "label": "Skip",
-          "description": "Nothing here is durable enough to preserve"
-        }
-      ],
-      "multiSelect": false
-    }
-  ]
+  "questions": [{
+    "question": "This produced something worth preserving — what should I capture?",
+    "header": "Capture",
+    "options": [
+      {"label": "ADR + memory", "description": "Record an ADR for the decision AND a durable bd-remember memory"},
+      {"label": "ADR only", "description": "Record an ADR for the architecturally-significant decision"},
+      {"label": "Memory only", "description": "Capture a durable lesson/insight via bd remember"},
+      {"label": "Skip", "description": "Nothing here is durable enough to preserve"}
+    ],
+    "multiSelect": false
+  }]
 }
 ```
 

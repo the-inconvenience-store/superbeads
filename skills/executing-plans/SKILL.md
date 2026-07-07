@@ -75,7 +75,7 @@ Load plan, review critically, execute all tasks, report when complete.
 
 For each task:
 1. Get and claim the next task in one call: `bd ready --parent <epic-id> --claim` (use `bd ready --explain` to see dependency reasoning if task ordering is unclear)
-2. **Check description quality** before implementing: if the claimed task's description is a bare title with no actionable steps or context, STOP — do not proceed with implementation. The task is now claimed: flag it for human decision (`bd human <task-id>`, per Structured blocker handling below) so it doesn't dangle in-progress, and surface to the user what the description is missing.
+2. **Check description quality** before implementing: if the claimed task's description is a bare title with no actionable steps or context, STOP — do not proceed with implementation. The task is now claimed: flag it for human decision (`bd update <task-id> --add-label human`, per Structured blocker handling below) so it doesn't dangle in-progress, and surface to the user what the description is missing.
 3. Follow each step exactly (plan has bite-sized steps)
 4. Run verifications as specified
 5. Close the task: `bd close <task-id> --reason "description of what was completed"`
@@ -96,7 +96,7 @@ For each task:
 After all tasks complete and verified:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use beads-superpowers:finishing-a-development-branch
-- The finishing skill includes the **Land the Plane** session close protocol (`bd close` → `bd dolt push` → `git push` → `git status`)
+- The finishing skill includes the **Land the Plane** session close protocol (`bd close` → `bd dolt push` → `git pull --rebase && git push` → `git status`)
 - Follow that skill to verify tests, present options, execute choice
 
 ## When to Stop and Ask for Help
@@ -113,7 +113,7 @@ After all tasks complete and verified:
 |---|---|---|
 | **Time-based** (waiting on deploy, external process) | Defer the task for later | `bd defer <task-id> --until="<date>"` |
 | **Missing work** (prerequisite not built yet) | Create the missing task and wire dependency | `bd create "Missing: <title>" -t task --parent <epic-id>` then `bd dep add <blocked-id> <new-id>` |
-| **Human decision needed** (architecture choice, ambiguous requirement) | Flag for human input | `bd human <task-id>` |
+| **Human decision needed** (architecture choice, ambiguous requirement) | Flag for human input | `bd update <task-id> --add-label human` |
 
 > **Discovered-work bead stamp:** `bd create "[spec] <title>" -t task --parent <epic-id> --notes "Severity:/Confidence:/Evidence:"` — see `verification-before-completion` → Agent-Filed Bead Discipline.
 

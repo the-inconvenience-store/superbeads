@@ -25,41 +25,33 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 
 ## Skill Priority
 
-When multiple skills apply, process skills come first — they set the approach, then implementation skills carry it out. Brainstorming and systematic-debugging are the most common process skills, but the rule holds for any of them.
+When multiple skills apply, process skills come first — they set the approach, then implementation skills carry it out.
 
 - "Let's build X" → beads-superpowers:brainstorming first, then implementation skills.
 - "Fix this bug" → beads-superpowers:systematic-debugging first, then domain skills.
 
 ## Red Flags
 
-These thoughts mean STOP—you're rationalizing:
+These thoughts mean STOP — you're rationalizing:
 
 | Thought | Reality |
 |---------|---------|
-| "This is just a simple question" | Questions are tasks. Check for skills. |
-| "I need more context first" | Skill check comes BEFORE clarifying questions. |
-| "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
-| "I can check git/files quickly" | Files lack conversation context. Check for skills. |
-| "Let me gather information first" | Skills tell you HOW to gather information. |
+| "Simple question / need context / quick file check first" | Action = task. Check skills first. |
 | "This doesn't need a formal skill" | If a skill exists, use it. |
-| "I remember this skill" | Skills evolve. Read current version. |
-| "This doesn't count as a task" | Action = task. Check for skills. |
 | "The skill is overkill" | Simple things become complex. Use it. |
-| "I'll just do this one thing first" | Check BEFORE doing anything. |
-| "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
-| "I know what that means" | Knowing the concept ≠ using the skill. Invoke it. |
+| "I remember it / know what it means" | Skills evolve. Read current version. |
 
 ## Production-Grade Doctrine
 
-Treat every project as a production system with real users, no matter how small it looks. You MUST NOT silently take a shortcut, descope a required behavior/edge-case, or accept a material-risk trade-off — surface it and let your human partner decide. You MUST NOT weaken, bypass, or remove a security control or introduce a vulnerability; a security regression is never acceptable, even for a deadline.
+Treat every project as production. No silent shortcuts, descopes, material-risk trade-offs, or security regressions. See `references/bootstrap-policy.md`.
 
 ## Capturing Decisions
 
-When a decision is hard to reverse, surprising without context, and a genuine trade-off, you MUST offer to record an ADR in `docs/decisions` (the user confirms; never auto-create). Bias toward offering rather than skipping. Routine clarifications and scope questions don't qualify.
+For hard-to-reverse, surprising trade-offs, offer an ADR in `docs/decisions`; never auto-create. See `references/bootstrap-policy.md`.
 
 ## Beads
 
-`bd` (beads) is the task tracker for ALL work — TodoWrite is forbidden, as are TaskCreate and markdown TODOs. The session hook injects composed beads context (curated memories + workflow pointer) at session start; if none was injected this session, run `bd prime`. Only the orchestrating agent manages beads — subagents never touch them. Include bead IDs in commit messages. Session close = land the plane: `bd close` → `bd dolt push` → `git push`.
+`bd` (beads) is the task tracker for ALL work — TodoWrite is forbidden, as are TaskCreate and markdown TODOs. The session hook injects composed beads context (curated memories + workflow pointer) at session start; if none was injected this session, run `bd prime`. Only the orchestrating agent manages beads — subagents never touch them. Include bead IDs in commit messages. Session close = land the plane: `bd close` → `bd dolt push` → `git pull --rebase && git push` → `git status`.
 
 ## Platform Adaptation
 
@@ -73,7 +65,7 @@ If your harness appears here, read its reference file for special instructions:
 
 ## Asking the User
 
-When a skill says to ask the user or present options: use your harness's structured question tool if it has one (multiple-choice with an "Other" escape); if it doesn't, print the options as a numbered list in plain text and STOP for the user's reply. If the tool errors, or an answer comes back skipped, dismissed, or auto-resolved (headless and auto modes do this), treat it as NO answer — never as consent: fall back to numbered plain text and stop. JSON question blocks in skills show Claude Code's schema — render the same content through your tool's shape.
+When a skill says to ask or present options, use the harness's structured question tool if available; otherwise print numbered options and STOP. Tool errors, skips, dismissals, or auto-resolutions are not consent. See `references/bootstrap-policy.md`.
 
 ## User Instructions
 

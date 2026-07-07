@@ -9,6 +9,18 @@ fail=0
 # Temp CWD with no .claude directory — prevents relative-path settings files
 # from interfering with the HOME-based check we're testing.
 tmp_cwd=$(mktemp -d)
+tmp_bin=$(mktemp -d)
+mkdir -p "$tmp_bin"
+cat > "$tmp_bin/bd" <<'FAKE'
+#!/usr/bin/env bash
+case "$1" in
+  memories) printf '{\n  "memory-a": "@salience=5 remembered body",\n  "schema_version": 1\n}\n' ;;
+  recall) printf 'RECALLED %s\n' "$2" ;;
+  config) printf '' ;;
+  *) exit 0 ;;
+esac
+FAKE
+chmod +x "$tmp_bin/bd"
 
 # --- DEDUP CASE: HOME settings contain "bd prime" → no <beads-context> block ---
 tmp_home=$(mktemp -d)
@@ -16,7 +28,7 @@ mkdir -p "$tmp_home/.claude"
 printf '{"hooks":{"SessionStart":[{"command":"bd prime"}]}}\n' \
   > "$tmp_home/.claude/settings.json"
 
-out=$(cd "$tmp_cwd" && env -i HOME="$tmp_home" PATH="$PATH" CLAUDE_PLUGIN_ROOT=/x \
+out=$(cd "$tmp_cwd" && env -i HOME="$tmp_home" PATH="$tmp_bin:$PATH" CLAUDE_PLUGIN_ROOT=/x \
   bash "$HOOK" 2>/dev/null)
 if echo "$out" | grep -q '<beads-context>'; then
   echo "FAIL: dedup — output contains <beads-context> even though 'bd prime' is in settings"
@@ -26,6 +38,36 @@ else
   echo "PASS: dedup — output does not contain <beads-context> when 'bd prime' is in settings"
 fi
 rm -rf "$tmp_home"
+
+# --- FALSE POSITIVE: bd prime on a non-SessionStart event must not suppress ---
+tmp_home_stop=$(mktemp -d)
+mkdir -p "$tmp_home_stop/.claude"
+printf '{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"bd prime"}]}]}}\n' \
+  > "$tmp_home_stop/.claude/settings.json"
+out_stop=$(cd "$tmp_cwd" && env -i HOME="$tmp_home_stop" PATH="$tmp_bin:$PATH" CLAUDE_PLUGIN_ROOT=/x \
+  bash "$HOOK" 2>/dev/null)
+if echo "$out_stop" | grep -q '<beads-context>'; then
+  echo "PASS: event-scope — Stop bd prime did not suppress SessionStart beads context"
+else
+  echo "FAIL: event-scope — Stop bd prime suppressed SessionStart beads context"
+  fail=1
+fi
+rm -rf "$tmp_home_stop"
+
+# --- FALSE NEGATIVE: SessionStart bd prime with flags must suppress ---
+tmp_home_flags=$(mktemp -d)
+mkdir -p "$tmp_home_flags/.claude"
+printf '{"hooks":{"SessionStart":[{"hooks":[{"type":"command","command":"bd prime --export"}]}]}}\n' \
+  > "$tmp_home_flags/.claude/settings.json"
+out_flags=$(cd "$tmp_cwd" && env -i HOME="$tmp_home_flags" PATH="$tmp_bin:$PATH" CLAUDE_PLUGIN_ROOT=/x \
+  bash "$HOOK" 2>/dev/null)
+if echo "$out_flags" | grep -q '<beads-context>'; then
+  echo "FAIL: flags — SessionStart 'bd prime --export' did not suppress beads context"
+  fail=1
+else
+  echo "PASS: flags — SessionStart 'bd prime --export' suppresses beads context"
+fi
+rm -rf "$tmp_home_flags"
 
 # --- NEGATIVE CONTROL (informational, never fails) ---
 # If bd is installed and bd prime returns non-empty context, verify <beads-context>
@@ -48,4 +90,5 @@ else
 fi
 
 rm -rf "$tmp_cwd"
+rm -rf "$tmp_bin"
 exit $fail

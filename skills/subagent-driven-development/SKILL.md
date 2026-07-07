@@ -326,12 +326,12 @@ Dispatch via the `Agent` tool:
 ```
 You: I'm using Subagent-Driven Development to execute this plan.
 
-[Read plan file once: docs/plans/feature-plan.md]
+[Read graph plan once: docs/plans/2026-07-07-feature-plan.graph.json, or read the epic bead that owns the task graph]
 [Extract all 5 tasks with full text and context]
 [Create epic + tasks + deps atomically via bd create --graph:]
 [  Build plan.json: {nodes:[{key,title,type,priority,parent_key,description}],]
 [                   edges:[{from_key:<dependent>,to_key:<dependency>,type:"blocks"}]}]
-[  Each description embeds the bd lint-required section: epic -> "## Success Criteria",]
+[  Each description embeds the sections `bd lint` requires: epic -> "## Success Criteria",]
 [  task -> "## Acceptance Criteria" (copied from the plan; no separate graph field exists)]
 [  bd create --graph plan.json]
 [  Fallback: sequential bd create loop + bd dep add if --graph unavailable]

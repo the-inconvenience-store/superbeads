@@ -210,13 +210,13 @@ This plugin uses `bd` (beads) for ALL task tracking.
 | Epic status                       | `bd epic status <id>`                                   |
 | Add dependency                    | `bd dep add <child> <depends-on>`                       |
 | Store learning                    | `bd remember "insight"`                                 |
-| Remove stale memory               | `bd forget <id>`                                        |
+| Remove stale memory               | `bd forget <key>`                                       |
 | Search memories                   | `bd memories <keyword>`                                 |
 | Append note to bead               | `bd note <id> "context"`                                |
 | Find duplicate beads              | `bd find-duplicates`                                    |
 | Lint issue sections               | `bd lint [id...]`                                       |
 | Defer work                        | `bd defer <id> --until="<date>"`                        |
-| Flag for human decision           | `bd human <id>`                                         |
+| Flag for human decision           | `bd update <id> --add-label human`                      |
 | Validate parallel readiness       | `bd swarm validate <epic-id>`                           |
 | Atomic batch operations           | `bd batch` (stdin or `-f file`)                         |
 | Run in another directory          | `bd -C <path> <command>`                                |
@@ -228,7 +228,7 @@ This plugin uses `bd` (beads) for ALL task tracking.
 - Use `bd` for ALL task tracking — never TodoWrite, TaskCreate, or markdown TODOs
 - Only the orchestrating agent manages beads — subagents do NOT touch beads
 - Include bead IDs in commit messages: `git commit -m "Add feature (bd-a1b2)"`
-- Every session ends with Land the Plane: `bd close` → `bd dolt push` → `git push`
+- Every session ends with Land the Plane: `bd close` → `bd dolt push` → `git pull --rebase && git push` → `git status`
 
 ## Skills
 

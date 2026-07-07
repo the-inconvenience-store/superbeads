@@ -1,6 +1,6 @@
 ---
 name: getting-up-to-speed
-description: Orients on an unfamiliar or stale codebase at the start of a session, after compaction, or whenever the project state is unclear. Loads beads context, deep-dives the codebase, and produces a structured 'current state' summary. Triggers on phrases like "catch me up", "where are we", "orient me", "what's the state of this project", "bring me up to speed", "load context", "session orientation".
+description: Use when project state is unclear, at the start of a session on an unfamiliar or stale codebase, or after compaction. Triggers on "catch me up", "where are we", "orient me", "what's the state of this project", "bring me up to speed", "load context", "session orientation".
 ---
 
 # Getting Up to Speed
@@ -233,7 +233,7 @@ The trailing "I'm ready" line is the **terminal contract**: the skill stops here
 bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / pattern / design / root-cause / research
 ```
 
-If orientation surfaced a Phase-1 memory that is now stale or wrong, remove it: `bd forget <id>`.
+If orientation surfaced a Phase-1 memory that is now stale or wrong, remove it: `bd forget <key>`.
 
 **Prune superseded continuation pointers.** Session-handoff writes a `continuation-*` pointer memory each run; they accumulate. After emitting the summary, cap them at one:
 
