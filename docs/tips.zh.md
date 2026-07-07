@@ -69,7 +69,7 @@ description: 快速参考 bd 命令速查表、技能路由表、常见问题故
 
 **`bd: command not found`** — 运行 `brew install beads` 或 `npm install -g @beads/bd`。
 
-**双重 `bd prime`** — 插件会自动检测 `bd setup claude` hooks，并跳过自身的 `bd prime` 调用。若仍出现重复，请运行 `bd setup claude --remove`。
+**重复上下文注入** — 插件会检测 `bd setup claude` hooks，并跳过自身的 beads 上下文部分；同一事件的重复触发会由去重标记抑制。若仍出现重复，请运行 `bd setup claude --remove`。
 
 **`bd dolt push` 失败** — 未配置 Dolt 远程。如果不需要远程同步，此错误无害。
 

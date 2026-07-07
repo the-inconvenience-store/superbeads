@@ -118,7 +118,7 @@ npx skills add DollarDill/beads-superpowers -a claude-code -g --copy -y
 # Use -a codex to also install for Codex CLI.
 ```
 
-Installs the skills only — no hooks. Skill activation relies on your harness's native skill discovery. For the full experience (session-start context injection + automatic `bd prime`), use the plugin install or the scripted install above. To get beads context on an npx install, run `bd setup claude` (beads' own hook installer).
+Installs the skills only — no hooks. Skill activation relies on your harness's native skill discovery. For the full experience (session-start injection of skill context + a composed beads context), use the plugin install or the scripted install above. To get beads context on an npx install, run `bd setup claude` (beads' own hook installer).
 
 ## First project setup
 
@@ -129,7 +129,7 @@ cd your-project
 bd init
 ```
 
-This creates `.beads/` (config, metadata, git hooks), `CLAUDE.md`, and `AGENTS.md`. The plugin's session-start hook automatically detects if `bd setup claude` hooks are present and skips its own `bd prime` call, so no manual cleanup is needed.
+This creates `.beads/` (config, metadata, git hooks), `CLAUDE.md`, and `AGENTS.md`. The plugin's session-start hook automatically detects if `bd setup claude` hooks are present and skips its own beads-context section, so no manual cleanup is needed.
 
 ### Dolt remote (optional)
 
@@ -185,7 +185,7 @@ If skills aren't showing, the plugin may not be installed for your CLI. If `bd r
 
 ## How the hooks work
 
-Claude Code and Codex share one hook script — **SessionStart** — registered via `hooks/hooks.json` for Claude Code and wired by `install.sh` for Codex. It fires on every session start, clear, and compact. It reads the `using-superpowers` skill (which routes to all other skills), runs `bd prime` to capture beads state and persistent memories, and outputs the combined context (~2–3k tokens). If `bd prime` is already registered as a hook elsewhere, this step is skipped automatically.
+Claude Code and Codex share one hook script — **SessionStart** — registered via `hooks/hooks.json` for Claude Code and wired by `install.sh` for Codex. It fires on every session start, clear, and compact. It reads the `using-superpowers` skill (which routes to all other skills), then composes a lean beads context: a short `bd` command pointer plus curated core memories (salience ≥ 4 and the latest continuation, selected under a hard 8 KB byte ceiling), with a disclosure line stating how many of the store's memories made it in. The combined context is ~3–4k tokens — the hook no longer runs `bd prime`. If `bd prime` is already registered as a hook elsewhere, the beads section is skipped automatically.
 
 ```mermaid
 sequenceDiagram
@@ -195,7 +195,7 @@ sequenceDiagram
 
   CC->>SH: Session begins
   SH->>SH: Read using-superpowers skill
-  SH->>SH: Run bd prime
+  SH->>SH: Compose beads context (bd pointer + core memories)
   SH-->>Agent: Inject skills context + beads state
   Note over Agent: Agent is now skill-aware
 ```
@@ -222,7 +222,9 @@ To override a skill's behaviour, add instructions to your project's `CLAUDE.md` 
 
 **No `.beads` directory** — Run `bd init` in your project directory. The plugin automatically handles duplicate hook detection.
 
-**Double context injection** — The plugin detects `bd setup claude` hooks in project and global settings and automatically skips its own `bd prime` call. If you still see duplicates, run `bd setup claude --remove`.
+**Double context injection** — The plugin detects `bd setup claude` hooks in project and global settings and automatically skips its own beads-context section; same-event double-firing under multi-scope hook registration is suppressed by a dedup marker. If you still see duplicates, run `bd setup claude --remove`.
+
+**A `.beads/PRIME.md` file appeared** — that's the plugin's guarded safety net: it makes a stray `bd prime` call emit a lean pointer instead of the full memory dump. It is only written when `.beads/` exists and never overwrites an existing file. Disable with `bd config set custom.prime-safety-net false`.
 
 **Stale plugin cache** — The cache doesn't update when you edit skill files locally. Either symlink the cache to your checkout:
 

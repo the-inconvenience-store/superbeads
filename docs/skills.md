@@ -213,7 +213,7 @@ Walks through README, CHANGELOG, CLAUDE.md, CONTRIBUTING, and other docs to find
 
 **Trigger:** Session start, after compaction, or "catch me up" / "where are we".
 
-Runs `bd prime`, deep-dives the codebase (sub-agent fan-out scales to repo size across `<40` / `40–150` / `>150` tracked-file bands), and produces a structured current-state summary. It reads the newest `.internal/handoff/` doc — written by its counterpart `session-handoff` — as an unread inbox, folding it into the summary and then archiving it at close so a later session doesn't re-read it; a HEAD-recency backstop flags a handoff as stale when `HEAD` has moved past the commit it recorded. A pre-emit verification gate holds every claim in the summary to a command actually run in the session, a beads-versus-git check flags work that shipped but was left open, and superseded `continuation-*` memories are pruned at close.
+Gathers beads state and the newest handoff in one `orient.sh` call, deep-dives the codebase (sub-agent fan-out scales to repo size across `<40` / `40–150` / `>150` tracked-file bands), and produces a structured current-state summary. It reads the newest `.internal/handoff/` doc — written by its counterpart `session-handoff` — as an unread inbox, folding it into the summary and then archiving it at close so a later session doesn't re-read it; a HEAD-recency backstop flags a handoff as stale when `HEAD` has moved past the commit it recorded. A pre-emit verification gate holds every claim in the summary to a command actually run in the session, a beads-versus-git check flags work that shipped but was left open, and superseded `continuation-*` memories are pruned at close.
 
 ### auditing-upstream-drift
 

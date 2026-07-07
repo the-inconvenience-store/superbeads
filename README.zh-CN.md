@@ -218,7 +218,7 @@ pi install git:github.com/DollarDill/beads-superpowers
 npx skills add DollarDill/beads-superpowers -g --copy -y
 ```
 
-如需完整体验（会话启动上下文注入 + 自动 `bd prime`），请使用插件安装方式（上文的 Claude Code / Codex / OpenCode）或脚本安装。若要在 npx 安装中获取 beads 上下文，运行 `bd setup claude`（beads 自带的钩子安装器）。
+如需完整体验（会话启动时注入技能上下文 + 组合式 beads 上下文），请使用插件安装方式（上文的 Claude Code / Codex / OpenCode）或脚本安装。若要在 npx 安装中获取 beads 上下文，运行 `bd setup claude`（beads 自带的钩子安装器）。
 
 ### 替代方案：脚本安装（`curl | bash`）
 

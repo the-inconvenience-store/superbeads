@@ -16,7 +16,7 @@ Two projects attacked each half of this.
 
 ### Persistent memory
 
-Superpowers tracked tasks with `TodoWrite`, which vanishes when a session ends. [Beads](https://github.com/gastownhall/beads) (Steve Yegge) replaced that with a Dolt-backed issue tracker where every task is a bead with a hash-based ID that survives session boundaries. Beads handles dependency tracking, cell-level merges for conflict-free multi-agent work, a full audit trail via the events table, and `bd remember` for persistent learnings. At every session start, `bd prime` injects the current task state so the agent picks up where it left off.
+Superpowers tracked tasks with `TodoWrite`, which vanishes when a session ends. [Beads](https://github.com/gastownhall/beads) (Steve Yegge) replaced that with a Dolt-backed issue tracker where every task is a bead with a hash-based ID that survives session boundaries. Beads handles dependency tracking, cell-level merges for conflict-free multi-agent work, a full audit trail via the events table, and `bd remember` for persistent learnings. At every session start, the plugin's hook injects a composed beads context — a task-state pointer plus curated memories — so the agent picks up where it left off.
 
 !!! info "Go deeper — upstream Beads docs"
     - [Core concepts](https://gastownhall.github.io/beads/core-concepts) — issues, dependencies, hash IDs, and the memory model
@@ -128,7 +128,7 @@ graph TD
 
 **Step 10 — Close branch.** `finishing-a-development-branch` detects the current environment — normal repository, named-branch worktree, or detached HEAD — and presents context-aware options: 4 choices for normal and worktree contexts, 3 for detached HEAD where merge is unavailable. Provenance-based cleanup only removes worktrees inside `.worktrees/`, leaving externally created worktrees alone. The skill ends with the Land the Plane protocol: if the session produced several new memories, offer a `memory-curator` pass before `bd dolt push`; then `bd close` → `bd dolt push` → `git push` → `git status`. Branch paths terminate here — work is not done until both task state and code reach the remote.
 
-**Step 11 — Session close.** Fires only on non-branch paths (research queries, quick tasks that didn't create a branch). Runs the same close ritual as Step 10's Land the Plane: close beads, offer a `memory-curator` pass if the session produced several new memories, push to remotes, verify clean state. The next session runs `bd prime` to restore the full picture.
+**Step 11 — Session close.** Fires only on non-branch paths (research queries, quick tasks that didn't create a branch). Runs the same close ritual as Step 10's Land the Plane: close beads, offer a `memory-curator` pass if the session produced several new memories, push to remotes, verify clean state. The next session's start-hook injection restores the full picture.
 
 ## Agent memory
 
@@ -138,7 +138,7 @@ Because beads tracks every process step, the memory types agents need are popula
 |-------------|---------------|-----------------|
 | Working | `bd show --current` | What am I doing right now? |
 | Short-term | `bd list --status=in_progress` | What's active? |
-| Long-term | `bd remember` + `bd prime` | What did I learn last week? |
+| Long-term | `bd remember` + curated injection + `bd memories` | What did I learn last week? |
 | Procedural | Skill checklists + `bd ready` | How do I do this kind of task? |
 | Episodic | `events` table | What happened and when? |
 | Semantic | `bd search`, `bd query` | Where's the related work? |
@@ -176,7 +176,7 @@ An empirical finding: when a skill's YAML `description` field summarized the wor
 
 ## Design decisions
 
-**Plugin subsumes beads hooks.** Beads' `bd setup claude` installs hooks that run `bd prime`. The plugin also needs to inject skill context. Rather than fire both and waste 3–4k tokens on redundant context, the plugin's hook does both jobs and warns if the standalone hooks are still installed.
+**Plugin subsumes beads hooks.** Beads' `bd setup claude` installs hooks that run `bd prime`. The plugin also needs to inject skill context. Rather than fire both and waste tokens on redundant context, the plugin's hook does both jobs — composing a salience-curated beads context under a hard 8 KB ceiling instead of injecting the full `bd prime` dump (measured −91.6% on a 218-memory store) — and yields its beads section, with a warning, if the standalone hooks are still installed.
 
 **Land the Plane in the branch skill.** The session close protocol lives in `finishing-a-development-branch` (Step 6) rather than a separate skill. Branch paths terminate at S10, which includes the full push ritual. Non-branch paths (research queries) use S11 (SESSION_CLOSE) for the same ritual without the branch decision tree.
 

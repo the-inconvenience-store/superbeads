@@ -115,7 +115,7 @@ graph TD
 
 ### 会话关闭（Session close）
 
-在非分支路径上——研究查询、从未创建分支的快速任务——相同的收尾流程在没有合并步骤的情况下运行：`bd close` → `bd dolt push` → `git push` → `git status`。若本次会话产生了多条新记忆，编排者会在 `bd dolt push` 之前提供一次 `memory-curator` 整理。下一个会话运行 `bd prime` 以恢复完整上下文。
+在非分支路径上——研究查询、从未创建分支的快速任务——相同的收尾流程在没有合并步骤的情况下运行：`bd close` → `bd dolt push` → `git push` → `git status`。若本次会话产生了多条新记忆，编排者会在 `bd dolt push` 之前提供一次 `memory-curator` 整理。下一个会话由启动钩子注入恢复完整上下文。
 
 ## 审查门控 <a id="review-gate"></a>
 
@@ -160,6 +160,6 @@ sequenceDiagram
 
 ## 会话协议
 
-**开始：** SessionStart 钩子自动触发，注入技能上下文并运行 `bd prime`。这会显示未阻塞的 bead、前一会话的进行中工作以及持久化记忆。先定位，后认领；先认领，后实现。
+**开始：** SessionStart 钩子自动触发，注入技能上下文以及一份组合式 beads 上下文——一个 `bd` 命令指引加上显著度最高的持久化记忆。运行 `bd ready` 以显示未阻塞的 bead 和前一会话的进行中工作。先定位，后认领；先认领，后实现。
 
 **结束：** 代码路径执行完成（Finish），非分支路径执行会话关闭（Session close）。用证据关闭每个 bead；若本次会话产生了多条新记忆，在推送前提供一次 `memory-curator` 整理。推送 Beads 远程，推送 git，验证干净的工作树。有未提交工作或未推送提交的会话尚未落地——推送才意味着完成。

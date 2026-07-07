@@ -214,7 +214,7 @@ Installs the skills only — no hooks. Skill activation relies on your harness's
 npx skills add DollarDill/beads-superpowers -g --copy -y
 ```
 
-For the full experience (session-start context injection + automatic `bd prime`), use the plugin install (Claude Code / Codex / OpenCode above) or the install script. To get beads context on an npx install, run `bd setup claude` (beads' own hook installer).
+For the full experience (session-start injection of skill context + a composed beads context), use the plugin install (Claude Code / Codex / OpenCode above) or the install script. To get beads context on an npx install, run `bd setup claude` (beads' own hook installer).
 
 ### Alternative: scripted install (`curl | bash`)
 

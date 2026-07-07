@@ -112,7 +112,7 @@ When several tasks are unblocked, **parallel batch mode** runs up to five concur
 
 ### Session close
 
-On non-branch paths — research queries, quick tasks that never created a branch — the same close ritual runs without the merge step: `bd close` → `bd dolt push` → `git push` → `git status`. If the session produced several new memories, the orchestrator offers a `memory-curator` pass before `bd dolt push`. The next session runs `bd prime` to restore the full picture.
+On non-branch paths — research queries, quick tasks that never created a branch — the same close ritual runs without the merge step: `bd close` → `bd dolt push` → `git push` → `git status`. If the session produced several new memories, the orchestrator offers a `memory-curator` pass before `bd dolt push`. The next session's start-hook injection restores the full picture.
 
 ## Review gate
 
@@ -157,6 +157,6 @@ Two interrupts can fire at any point. They suspend the current step, handle the 
 
 ## Session protocol
 
-**Start:** The SessionStart hook fires automatically, injecting skill context and running `bd prime`. That surfaces unblocked beads, in-progress work from previous sessions, and persistent memories. Orient before claiming; claim before implementing.
+**Start:** The SessionStart hook fires automatically, injecting skill context plus a composed beads context — a `bd` command pointer and the highest-salience persistent memories. Run `bd ready` to surface unblocked beads and in-progress work from previous sessions. Orient before claiming; claim before implementing.
 
 **End:** Finish for code paths, Session close for non-branch paths. Close every bead with evidence; if the session produced several new memories, offer a `memory-curator` pass before the push. Push the beads remote, push git, verify a clean tree. A session with uncommitted work or unpushed commits hasn't landed — the push is what completion means.
