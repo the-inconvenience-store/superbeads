@@ -2,7 +2,7 @@
 
 > **Read this FIRST on resume.** The session hook already injected beads context automatically;
 > if no `<beads-context>` block is visible, run `bd prime`. This file + the continuation
-> memory give full orientation. Gitignored (`.internal/`), local-only.
+> memory give full orientation.
 
 ## Current State (TL;DR)
 - Repo / branch @ <sha>, sync status, working tree, version, backlog counts.

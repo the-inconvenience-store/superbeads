@@ -41,8 +41,8 @@ These shared skills intentionally differ from upstream superpowers. When Phase 5
 | **using-superpowers + judgment/gate skills (doctrine class)** | fork-only Production-Grade Doctrine: canonical `## Production-Grade Doctrine` block in `using-superpowers` PLUS self-contained woven doctrine-floor lines (incl. the security floor) in judgment/gate skills | no such doctrine (obra/superpowers has none) | intended fork behavior (ADR-0023/0036/0040); on re-sync PRESERVE every woven doctrine-floor line; mark SKIP, not Conflict |
 | **using-superpowers + question-gate skills (ask-user class)** | fork-only ask-user convention: `## Asking the User` block in `using-superpowers`, self-contained consent lines at the 3 destructive gates (finishing-a-development-branch, document-release, using-git-worktrees), adapt parentheticals on the 6 JSON gate lead-ins, quirk rows in `references/{opencode,codex,pi}-tools.md` | upstream uses bare generic phrasing with no convention block (zero in-skill tool refs) | intended fork behavior (ADR-0041); on re-sync PRESERVE all four elements; mark SKIP, not Conflict |
 | **All shared skills (namespace)** | cross-skill references use `beads-superpowers:<skill>` | bare `superpowers:<skill>` | upstream's bare namespace points at the upstream plugin; in our fork it must carry our plugin name or it resolves to the wrong plugin (intended; mark SKIP, not Conflict) |
-| **brainstorming** | brainstorm session dir + auth-token files live under `.internal/brainstorm/` (self-ignored) | upstream uses `.superpowers/brainstorm/` | one canonical `.internal/` scratch root (spec 2026-06-30); `server.cjs` unchanged — do not revert the path on re-sync |
-| **subagent-driven-development** (workspace paths) | SDD workspace, task briefs, and review packages live under `.internal/sdd/` (self-ignored) | upstream uses `.superpowers/sdd/` | one canonical `.internal/` scratch root (spec 2026-06-30); do not revert the path on re-sync |
+| **brainstorming** | brainstorm session dir + auth-token files live under `docs/brainstorm/` | upstream uses `.superpowers/brainstorm/` | canonical docs artifact root; `server.cjs` unchanged — do not revert the path on re-sync |
+| **subagent-driven-development** (workspace paths) | SDD workspace, task briefs, and review packages live under `.internal/sdd/` | upstream uses `.superpowers/sdd/` | subagent artifacts stay in the SDD workspace; do not revert the path on re-sync |
 | **Codex SessionStart hook** | keep it — still fires `using-superpowers` bootstrap + composed beads context | v6.1.0 removed theirs ("Codex reliably triggers skills on its own, and the bootstrap hook made the UX worse rather than better") | ours also carries composed beads context injection (curated memories + a `bd prime` pointer), not just the skill bootstrap upstream deemed redundant (ADR-0039, 2026-07-02) |
 | **SessionStart matcher** | `startup|resume|clear|compact` | `startup|clear|compact` | added in bd-3ogl.2 to cover session resumption |
 
@@ -200,7 +200,7 @@ results=$(grep -rn "docs/superpowers" skills/ tests/ | grep -v "auditing-upstrea
 [ -z "$results" ] && echo "PASS" || echo "FAIL: stale paths found: $results"
 ```
 
-All paths should use `.internal/`.
+Documentation artifact paths should use `docs/`.
 
 **Check 3.3 — Zero stale skill namespace references:**
 ```bash
@@ -411,14 +411,14 @@ done
 
 **Check 7.5 — SETUP-GUIDE install commands use correct names:**
 ```bash
-grep -q "DollarDill/beads-superpowers" .internal/SETUP-GUIDE.md && echo "PASS: correct marketplace repo" || echo "FAIL"
-grep -q "beads-superpowers@beads-superpowers-marketplace" .internal/SETUP-GUIDE.md && echo "PASS: correct install command" || echo "FAIL"
+grep -q "DollarDill/beads-superpowers" docs/SETUP-GUIDE.md && echo "PASS: correct marketplace repo" || echo "FAIL"
+grep -q "beads-superpowers@beads-superpowers-marketplace" docs/SETUP-GUIDE.md && echo "PASS: correct install command" || echo "FAIL"
 ```
 
 **Check 7.6 — Copied upstream docs don't have stale references:**
 ```bash
 # These docs were adapted from superpowers — verify no stale refs
-for f in .internal/testing.md .internal/windows/polyglot-hooks.md; do
+for f in docs/testing.md docs/windows/polyglot-hooks.md; do
     stale=$(grep -c "superpowers" "$f" | head -1)
     allowed=$(grep -c "beads-superpowers\|obra/superpowers\|upstream" "$f" | head -1)
     raw=$((stale - allowed))
@@ -453,7 +453,7 @@ bd create "Drift: [description]" -t chore -p 3 --parent <audit-id>
 bd create "CRITICAL: [description]" -t bug -p 0 --parent <audit-id>
 ```
 
-Write the report to `.internal/audits/YYYY-MM-DD-upstream-drift.md`:
+Write the report to `docs/audits/YYYY-MM-DD-upstream-drift.md`:
 
 ```markdown
 # Plugin Audit — YYYY-MM-DD

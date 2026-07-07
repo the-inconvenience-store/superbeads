@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Verify zh docs preserve structure & do-not-translate (DNT) terms vs their English source.
 # Heuristic structural gate — pairs with manual prose-quality review. See
-# .internal/plans/2026-06-28-zh-docs-i18n.md (Task 2) and the spec's DNT list.
+# docs/plans/2026-06-28-zh-docs-i18n.md (Task 2) and the spec's DNT list.
 #
 # Usage:
 #   scripts/check-zh-docs.sh            # check the real docs pairs

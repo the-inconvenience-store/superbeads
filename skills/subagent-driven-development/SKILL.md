@@ -317,7 +317,7 @@ Dispatch via the `Agent` tool:
 ```
 You: I'm using Subagent-Driven Development to execute this plan.
 
-[Read plan file once: .internal/plans/feature-plan.md]
+[Read plan file once: docs/plans/feature-plan.md]
 [Extract all 5 tasks with full text and context]
 [Create epic + tasks + deps atomically via bd create --graph:]
 [  Build plan.json: {nodes:[{key,title,type,priority,parent_key,description}],]

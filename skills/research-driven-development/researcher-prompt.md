@@ -37,7 +37,7 @@ Agent tool (subagent_type: "general-purpose"):
        context. Then search for existing research documents:
        ```bash
        # Search the project research directory
-       find .internal/research -name "*.md" -exec grep -li "<keyword>" {} \; 2>/dev/null
+       find docs/research -name "*.md" -exec grep -li "<keyword>" {} \; 2>/dev/null
        ```
        Check it before researching from scratch. If comprehensive coverage already
        exists, reference it — do not duplicate.

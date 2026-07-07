@@ -30,7 +30,7 @@ Dispatch parallel research agents, synthesize their findings, and write a persis
 
 ## Output Path
 
-Research documents are written to **`.internal/research/`** — the project-local, gitignored knowledge base. Not configurable.
+Research documents are written to **`docs/research/`**. Not configurable.
 
 ## Pipeline
 
@@ -77,7 +77,7 @@ Before launching new research, search for existing coverage:
 bd memories <keyword>
 
 # Search project research directory
-find .internal/research -name "*.md" -exec grep -l "<keyword>" {} \; 2>/dev/null
+find docs/research -name "*.md" -exec grep -l "<keyword>" {} \; 2>/dev/null
 ```
 
 **If comprehensive coverage already exists:** Reference it, add any new findings as updates, and close the bead. Do not duplicate existing research.
@@ -137,14 +137,14 @@ If Step 4 surfaced load-bearing claims resting on a single source or unresolved,
 List existing category subdirectories and pick the one that best matches the research topic:
 
 ```bash
-find .internal/research -maxdepth 1 -mindepth 1 -type d 2>/dev/null
+find docs/research -maxdepth 1 -mindepth 1 -type d 2>/dev/null
 ```
 
-If a category fits, write inside it; if none fits (or none exist), write to `.internal/research/` directly.
+If a category fits, write inside it; if none fits (or none exist), write to `docs/research/` directly.
 
 ```bash
 # Example: research about CI/CD → engineering-and-technology subdirectory
-mkdir -p .internal/research/<category>
+mkdir -p docs/research/<category>
 ```
 
 Filename: `YYYY-MM-DD-<topic-slug>.md`
@@ -282,7 +282,7 @@ User asks: "How does Dolt handle merge conflicts?"
 3. Dispatch researcher (via ./researcher-prompt.md): "Research Dolt merge conflict resolution..."
    Dispatch @explore: "Search codebase for Dolt merge, conflict..."
 4. Synthesize: researcher found cell-level merge docs, explore found bd dolt pull usage
-5. Write to .internal/research/2026-05-01-dolt-merge-conflict-handling.md
+5. Write to docs/research/2026-05-01-dolt-merge-conflict-handling.md
 6. bd close <id> --reason "Research complete: Dolt uses cell-level merge on SQL tables"
 ```
 

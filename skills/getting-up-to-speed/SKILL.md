@@ -68,7 +68,7 @@ It emits labeled RAW sections only — no verdicts, no freshness classification 
 - `== in-progress ==` — `bd query "status=in_progress" -n 10`, run as its own call — the script never merges this with an open-status query into one `OR` (bd v1.0.5 silently drops rows when `OR` spans status clauses; never combine these into one `OR` query yourself either).
 - `== blocked ==` — `bd blocked`.
 - `== memories ==` — `bd memories` count line only (bodies come via the session hook).
-- `== handoff ==` — runs `ls -t .internal/handoff/*.md | head -1` to find the newest inbox doc, then emits `path=`, `head_sha=`, `doc_sha=`, `doc_mtime=`, `last_commit_time=`, `inbox_count=` as raw facts (or `none` if the inbox is empty/absent — it is gitignored, absent on fresh clones). `ls -t` (mtime) is deliberate: handoff naming is `YYYY-MM-DD[-HHMMSS]-<topic>-handoff.md` and `-HHMMSS` is added only when a same-day doc already exists, so a lexical sort mis-orders same-day docs; mtime does not. Phase 4's existing freshness/recency logic consumes `doc_sha` / `head_sha` / `doc_mtime` / `last_commit_time` — the script itself never classifies them.
+- `== handoff ==` — runs `ls -t .internal/handoff/*.md | head -1` to find the newest inbox doc, then emits `path=`, `head_sha=`, `doc_sha=`, `doc_mtime=`, `last_commit_time=`, `inbox_count=` as raw facts (or `none` if the inbox is empty/absent). `ls -t` (mtime) is deliberate: handoff naming is `YYYY-MM-DD[-HHMMSS]-<topic>-handoff.md` and `-HHMMSS` is added only when a same-day doc already exists, so a lexical sort mis-orders same-day docs; mtime does not. Phase 4's existing freshness/recency logic consumes `doc_sha` / `head_sha` / `doc_mtime` / `last_commit_time` — the script itself never classifies them.
 
 If `== handoff ==` returned a `path=` line, `Read` that file — the **second** Phase 1 tool call:
 
@@ -258,7 +258,7 @@ If orientation surfaced a Phase-1 memory that is now stale or wrong, remove it: 
 
    - **Best-effort, non-fatal, reported.** On success: "Archived consumed handoff `<name>` → `archive/`." On failure (permissions/disk/race): "⚠️ could not archive `<name>` (<reason>); left in inbox" and continue — the doc stays in the inbox and self-heals next session (re-read + recency-flagged).
    - **Re-run idempotency.** The doc is *moved, not deleted* — it remains readable under `archive/`, and a later run finds an empty inbox and skips.
-   - This `mv` is the **single local mutation** getting-up-to-speed makes — on the gitignored `.internal/` path, non-destructive to tracked state and to beads. (`.internal/handoff/archive/` is covered by the wholesale `.internal/` gitignore — verified.)
+   - This `mv` is the **single local mutation** getting-up-to-speed makes: it moves the consumed handoff into the archive and does not touch beads.
 
 ## Edge Cases
 

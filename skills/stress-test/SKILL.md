@@ -100,7 +100,7 @@ After all branches are resolved, write the findings. The output mode depends on 
 
 **Mode detection:**
 
-- **Mode A** applies when: the stress-test was invoked by brainstorming or writing-plans (caller passes the artifact path), OR the user explicitly points at a `.internal/specs/` or `.internal/plans/` file.
+- **Mode A** applies when: the stress-test was invoked by brainstorming or writing-plans (caller passes the artifact path), OR the user explicitly points at a `docs/specs/` or `docs/plans/` file.
 - **Mode B** applies for everything else: user-initiated "grill me" with no artifact, stress-testing a conversation or decision, or targeting documents that shouldn't be edited inline (README, CLAUDE.md, etc.).
 - **When ambiguous:** Use your structured question tool to ask:
 
@@ -111,14 +111,14 @@ After all branches are resolved, write the findings. The output mode depends on 
     "header": "Output mode",
     "options": [
       {"label": "Edit inline (Mode A)", "description": "Apply changes directly to the source document and append a results summary"},
-      {"label": "Separate report (Mode B)", "description": "Write findings to .internal/stress-tests/ without modifying the source"}
+      {"label": "Separate report (Mode B)", "description": "Write findings to docs/stress-tests/ without modifying the source"}
     ],
     "multiSelect": false
   }]
 }
 ```
 
-**Mode A — Existing artifact** (spec, plan, design doc in `.internal/`):
+**Mode A — Existing artifact** (spec, plan, design doc in `docs/`):
 
 - Edit the source artifact directly when a branch changes the design.
 - At the end, append a `## Stress Test Results` section at the bottom of the source document:
@@ -145,7 +145,7 @@ Alternatively, record as a `bd note` on the parent bead if the source doc should
 
 **Mode B — Standalone stress test** (no existing artifact):
 
-- Create `.internal/stress-tests/YYYY-MM-DD-<topic>.md` with the full findings template above.
+- Create `docs/stress-tests/YYYY-MM-DD-<topic>.md` with the full findings template above.
 - Open in user's editor for review:
 
 **User's preferred editor:** !`echo ${VISUAL:-${EDITOR:-not-configured}}`

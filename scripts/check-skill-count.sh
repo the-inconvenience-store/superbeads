@@ -24,14 +24,13 @@ COUNT_RE='[0-9]+\+?[[:space:]]+(composable[[:space:]]+|beads-native[[:space:]]+|
 # Files excluded from the drift scan (each with a reason):
 #   docs/**              macro-driven ({{ skill_count }})
 #   CHANGELOG.md         frozen historical entries
-#   .internal/**         local working docs
 #   site/**              build output
 #   .github/workflows/** GHA CI being retired in favor of pre-commit
 #   scripts/check-skill-count.sh  guard's own source defines the pattern
 #   tests/**             test assertions reference runtime counts (e.g. "0 skills" edge case); self-policing
 is_excluded() {
   case "$1" in
-    docs/*|CHANGELOG.md|.internal/*|site/*|.github/workflows/*|scripts/check-skill-count.sh|tests/*) return 0 ;;
+    docs/*|CHANGELOG.md|site/*|.github/workflows/*|scripts/check-skill-count.sh|tests/*) return 0 ;;
     *) return 1 ;;
   esac
 }
