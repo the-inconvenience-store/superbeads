@@ -17,8 +17,8 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
-**Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
-- (User preferences for plan location override this default)
+**Save graph plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.graph.json`
+- (User preferences for graph location override this default)
 
 ## Scope Check
 
@@ -55,89 +55,60 @@ In beads terms, a right-sized task is one bead (`bd create -t task --parent <epi
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
 
-## Plan Document Header
+## Graph Plan Structure
 
-**Every plan MUST start with this header:**
+Write a bd graph JSON file with one epic node, one task node per task, and dependency edges between tasks.
 
-```markdown
-# [Feature Name] Implementation Plan
-
-> **For agentic workers:** REQUIRED SUB-SKILL: Use beads-superpowers:subagent-driven-development (recommended) or beads-superpowers:executing-plans to implement this plan task-by-task. Each Task becomes a bead (`bd create -t task --parent <epic-id>`). Steps within tasks use checkbox (`- [ ]`) syntax for human readability.
-
-**Goal:** [One sentence describing what this builds]
-
-**Architecture:** [2-3 sentences about approach]
-
-**Tech Stack:** [Key technologies/libraries]
-
-## Global Constraints
-
-[The spec's project-wide requirements — version floors, dependency limits,
-naming and copy rules, platform requirements — one line each, with exact
-values copied verbatim from the spec. Every task's requirements implicitly
-include this section.]
-
----
+```json
+{
+  "nodes": [
+    {
+      "key": "epic1",
+      "title": "Epic: <feature name>",
+      "type": "epic",
+      "priority": 2,
+      "description": "<goal, architecture, tech stack, global constraints>\n\n## Success Criteria\n- <measurable outcome copied from the goal>"
+    },
+    {
+      "key": "t1",
+      "title": "Task 1: <component name>",
+      "type": "task",
+      "priority": 2,
+      "parent_key": "epic1",
+      "description": "<summary>\n\n## Files\n- Create: `exact/path/to/file.py`\n- Modify: `exact/path/to/existing.py:123`\n- Test: `tests/exact/path/to/test.py`\n\n## Interfaces\n- Consumes: <exact signatures and types>\n- Produces: <exact signatures and types>\n\n## Acceptance Criteria\n- <observable, testable outcome>\n\n## Steps\n1. Write the failing test: <exact test code or command>\n2. Run it to verify it fails: `<command>`; expected: <failure>\n3. Implement the minimal code: <exact code or file edits>\n4. Run it to verify it passes: `<command>`; expected: PASS\n5. Commit: `git add ... && git commit -m \"...\"`"
+    },
+    {
+      "key": "t2",
+      "title": "Task 2: <next component>",
+      "type": "task",
+      "priority": 2,
+      "parent_key": "epic1",
+      "description": "<summary>\n\n## Files\n- Modify: `exact/path/to/file.py`\n- Test: `tests/exact/path/to/test.py`\n\n## Interfaces\n- Consumes: <outputs from Task 1>\n- Produces: <exact signatures and types>\n\n## Acceptance Criteria\n- <observable, testable outcome>\n\n## Steps\n1. Write the failing test: <exact test code or command>\n2. Run it to verify it fails: `<command>`; expected: <failure>\n3. Implement the minimal code: <exact code or file edits>\n4. Run it to verify it passes: `<command>`; expected: PASS\n5. Commit: `git add ... && git commit -m \"...\"`"
+    }
+  ],
+  "edges": [
+    {"from_key": "t2", "to_key": "t1", "type": "blocks"}
+  ]
+}
 ```
 
-## Task Structure
+**Graph contract:**
+- `key` values are stable within the file (`epic1`, `t1`, `t2`, ...).
+- Every task node has `parent_key: "epic1"`.
+- Edge direction: `from_key` is the dependent task; `to_key` is the prerequisite task. `{"from_key":"t2","to_key":"t1","type":"blocks"}` means Task 2 waits for Task 1.
+- The graph schema has no separate criteria field. `bd lint` requires `## Success Criteria` in the epic's `description` and `## Acceptance Criteria` in each task's `description`.
+- Put all implementation detail in task descriptions. A task's implementer sees only that bead; include files, interfaces, exact test commands, exact expected outputs, and concrete steps.
 
-````markdown
-### Task N: [Component Name]
+## Create Beads
 
-**Files:**
-- Create: `exact/path/to/file.py`
-- Modify: `exact/path/to/existing.py:123-145`
-- Test: `tests/exact/path/to/test.py`
-
-**Interfaces:**
-- Consumes: [what this task uses from earlier tasks — exact signatures]
-- Produces: [what later tasks rely on — exact function names, parameter
-  and return types. A task's implementer sees only their own task; this
-  block is how they learn the names and types neighboring tasks use.]
-
-**Acceptance Criteria:**
-- [Observable, testable outcomes — copied verbatim into the task bead's
-  `## Acceptance Criteria` section at creation]
-
-- [ ] **Step 1: Write the failing test**
-
-```python
-def test_specific_behavior():
-    result = function(input)
-    assert result == expected
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: FAIL with "function not defined"
-
-- [ ] **Step 3: Write minimal implementation**
-
-```python
-def function(input):
-    return expected
-```
-
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: PASS
-
-- [ ] **Step 5: Commit**
+After writing the graph JSON file, create the beads before asking for review:
 
 ```bash
-git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature"
+bd create --graph docs/plans/YYYY-MM-DD-<feature-name>.graph.json --dry-run
+bd create --graph docs/plans/YYYY-MM-DD-<feature-name>.graph.json
 ```
-````
 
-**Beads integration:** When executing this plan, the executing skill creates an epic bead for the plan and a child task bead for each Task N. The `- [ ]` checkboxes remain in the markdown for human readability, but task-level tracking uses beads (`bd create`, `bd update --claim`, `bd close --reason`). Dependencies between tasks should be declared with `bd dep add`.
-
-**Atomic creation:** the executing skill SHOULD create the epic + tasks + dependencies atomically via `bd create --graph` (one JSON plan, `--dry-run` first), not a sequential loop — this avoids orphaned beads on mid-sequence failure. Falls back to sequential `bd create`/`bd dep add` if unavailable.
-
-**Required bead-body sections:** `bd lint` (Self-Review step 0) requires `## Success Criteria` in the epic bead's description and `## Acceptance Criteria` in each task bead's description. Include them at creation time. In `--graph` JSON, embed them in each node's `description` string — the graph schema has no separate criteria field. In the sequential fallback, `--acceptance "<criteria>"` also satisfies the check. The epic's Success Criteria derive from the plan's **Goal**; each task's copy from its **Acceptance Criteria** block.
+Record the created epic ID and child task IDs from the command output. If `--graph` is unavailable, fall back to sequential `bd create` for the epic and each task, then wire dependencies with `bd dep add`; keep the same descriptions and criteria sections.
 
 > **bd frugality: bounded output, one round trip.** Cap reads: `bd ready -n 10`,
 > `bd show --short <id>` to skim (full `bd show` only when the body is needed),
@@ -167,54 +138,32 @@ Every step must contain the actual content an engineer needs. These are **plan f
 
 ## Self-Review
 
-After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch.
+After creating the beads, look at the spec with fresh eyes and check the bead graph against it. This is a checklist you run yourself — not a subagent dispatch.
 
 **0. Deterministic checks:** Run these commands and fix anything they flag before proceeding to the judgment checks below:
 
 ```bash
-bd lint <epic-id>                                                    # required-section check on the epic
-bd list --parent <epic-id> --json | jq -r '.[].id' | xargs -n1 bd lint   # same check on each child task
-bd ready --parent <epic-id> --explain                                # confirm dependency ordering
+bd lint <epic-id>                                                      # required-section check on the epic
+bd list --parent <epic-id> --json | jq -r '.[].id' | xargs -n1 bd lint # same check on each child task
+bd ready --parent <epic-id> --explain                                  # confirm dependency ordering
 ```
 
-**1. Spec coverage:** Skim each requirement in the spec. Every one MUST map to a task — point to it. A requirement with no task is either added as a task or surfaced to the user as an explicit, acknowledged cut. Silent omission is a plan failure.
+**1. Spec coverage:** Skim each requirement in the spec. Every one MUST map to a task bead — point to it. A requirement with no task bead is either added as a task bead or surfaced to the user as an explicit, acknowledged cut. Silent omission is a plan failure.
 
-**2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
+**2. Placeholder scan:** Search the graph JSON and created bead descriptions for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
-If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+If you find issues, fix the graph JSON and the created beads. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task bead.
 
 ## User Review Gate
 
-After self-review passes, **open the plan file in the user's editor** so they can review it, then gate progression with your structured question tool (content below; shape shown in Claude Code schema — adapt to your tool):
-
-**User's preferred editor:** !`echo ${VISUAL:-${EDITOR:-not-configured}}`
-
-**⚠️ Run the open command as a standalone Bash call** — never chain it after `bd` commands in the same invocation (e.g., `bd close <id> && open file.md`). The combination hangs.
-
-```bash
-# Open in user's preferred editor, with platform fallbacks
-if [ -n "$VISUAL" ]; then
-  "$VISUAL" "<plan-file-path>"
-elif [ -n "$EDITOR" ]; then
-  "$EDITOR" "<plan-file-path>"
-elif command -v open >/dev/null 2>&1; then
-  open "<plan-file-path>"
-else
-  xdg-open "<plan-file-path>" 2>/dev/null
-fi
-# If none available: just report the path
-```
-
-Then immediately ask via your structured question tool (content below; shape shown in Claude Code schema — adapt to your tool):
-
-<!-- Canonical 3-option stress-test gate — keep identical to brainstorming/SKILL.md -->
+After self-review passes, summarize the created epic and task beads, then gate progression with your structured question tool (content below; shape shown in Claude Code schema — adapt to your tool):
 
 ```json
 {
   "questions": [{
-    "question": "Plan opened in your editor at `<path>`. Review it and let me know how to proceed.",
+    "question": "Plan beads created under `<epic-id>`. Review the task breakdown and let me know how to proceed.",
     "header": "Plan review",
     "options": [
       {"label": "Approved + stress-test (Recommended)", "description": "Plan looks good — run an adversarial stress-test before execution"},
@@ -227,9 +176,9 @@ Then immediately ask via your structured question tool (content below; shape sho
 ```
 
 Route on the answer:
-- **Approved + stress-test** → invoke the `stress-test` skill with the plan path (`docs/plans/YYYY-MM-DD-<feature-name>.md`) as the Mode-A artifact; when it completes, proceed to **Execution Handoff**.
+- **Approved + stress-test** → invoke the `stress-test` skill with the epic bead ID and graph JSON path as the target; when it completes, proceed to **Execution Handoff**.
 - **Approved** → proceed to **Execution Handoff** directly.
-- **Needs changes** → make the requested changes and re-run the self-review. Only proceed once approved.
+- **Needs changes** → update the graph JSON and beads, then re-run the self-review. Only proceed once approved.
 
 > When filing a bead for discovered/follow-up work, stamp it per **Agent-Filed Bead Discipline** (`verification-before-completion`).
 
@@ -260,7 +209,7 @@ After the plan is approved, **use your structured question tool** to offer the e
 ```json
 {
   "questions": [{
-    "question": "Plan complete and saved. How would you like to execute it?",
+    "question": "Plan beads are ready. How would you like to execute them?",
     "header": "Execution",
     "options": [
       {
@@ -279,10 +228,12 @@ After the plan is approved, **use your structured question tool** to offer the e
 
 **If Subagent-Driven chosen:**
 - **REQUIRED SUB-SKILL:** Use beads-superpowers:subagent-driven-development
+- Pass the epic bead ID and graph JSON path forward
 - Fresh subagent per task + single task review (spec + quality verdicts)
 
 **If Inline Execution chosen:**
 - **REQUIRED SUB-SKILL:** Use beads-superpowers:executing-plans
+- Pass the epic bead ID and graph JSON path forward
 - Batch execution with checkpoints for review
 
 ## Integration
