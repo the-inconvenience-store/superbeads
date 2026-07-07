@@ -82,6 +82,16 @@ For each task:
 6. Check for next task: `bd ready --parent <epic-id>` (use `bd ready --explain` to see dependency reasoning if task ordering is unclear)
 7. Check epic progress: `bd epic status <epic-id>` to see overall completion
 
+> **bd frugality: bounded output, one round trip.** Cap reads: `bd ready -n 10`,
+> `bd show --short <id>` to skim (full `bd show` only when the body is needed),
+> `bd memories <keyword>` (NEVER bare `bd memories` — it dumps the whole store).
+> Batch writes: several creates/updates/closes = one `bd batch` or `bd create --graph`
+> call, not a loop. Filter big outputs before they hit context
+> (`... | grep -E "PATTERN" | head -20`). Keep write confirmations — they are evidence.
+> **`--claim` boundary:** `bd ready --claim` ONLY in autonomous take-next-task flows
+> (this skill's batch/wave dispatch). FORBIDDEN wherever the user picks the work —
+> orientation, brainstorming, session close. Efficiency never erodes a consent gate.
+
 ### Step 3: Complete Development
 
 After all tasks complete and verified:

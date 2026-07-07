@@ -103,6 +103,16 @@ Before creating the worktree, claim the issue you're about to work on. This prev
 bd update <issue-id> --claim
 ```
 
+> **bd frugality: bounded output, one round trip.** Cap reads: `bd ready -n 10`,
+> `bd show --short <id>` to skim (full `bd show` only when the body is needed),
+> `bd memories <keyword>` (NEVER bare `bd memories` — it dumps the whole store).
+> Batch writes: several creates/updates/closes = one `bd batch` or `bd create --graph`
+> call, not a loop. Filter big outputs before they hit context
+> (`... | grep -E "PATTERN" | head -20`). Keep write confirmations — they are evidence.
+> **`--claim` boundary:** `bd ready --claim` ONLY in autonomous take-next-task flows
+> (this skill's batch/wave dispatch). FORBIDDEN wherever the user picks the work —
+> orientation, brainstorming, session close. Efficiency never erodes a consent gate.
+
 ### 1. Create Worktree with `bd worktree create`
 
 ```bash

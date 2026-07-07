@@ -78,6 +78,16 @@ If `bd` is not installed or `.beads/` is missing, skip Phase 1 entirely and emit
 
 **Do NOT run `bd dolt status`, `bd dolt show`, or `bd dolt push` here** — they aren't needed for orientation, and `bd dolt push` mutates the remote. Keep orientation read-only.
 
+> **bd frugality: bounded output, one round trip.** Cap reads: `bd ready -n 10`,
+> `bd show --short <id>` to skim (full `bd show` only when the body is needed),
+> `bd memories <keyword>` (NEVER bare `bd memories` — it dumps the whole store).
+> Batch writes: several creates/updates/closes = one `bd batch` or `bd create --graph`
+> call, not a loop. Filter big outputs before they hit context
+> (`... | grep -E "PATTERN" | head -20`). Keep write confirmations — they are evidence.
+> **`--claim` boundary:** `bd ready --claim` ONLY in autonomous take-next-task flows
+> (this skill's batch/wave dispatch). FORBIDDEN wherever the user picks the work —
+> orientation, brainstorming, session close. Efficiency never erodes a consent gate.
+
 ## Phase 2 — Codebase exploration (single parallel batch, content varies by path)
 
 Issue **all reads in one message, multiple tool calls in parallel**. Do NOT serialize.
@@ -294,6 +304,7 @@ These thoughts mean STOP — you're rationalizing skipping orientation:
 | "Beads and git probably agree" | Run the continuity check. A shipped-but-still-open bead is exactly what it catches. |
 | "I'll suggest they start the top bead" | Suggest the *skill*; don't claim or begin. The terminal contract is absolute. |
 | "I'll skip the handoff — `bd prime` covers it" | The handoff doc holds the narrative thread (WIP, decisions, loose threads) that `bd prime` does not. Read it. |
+| "`bd ready --claim` is efficient" | It's a consent violation here. Terminal contract wins — orient and stop. |
 
 ## Output Contract
 

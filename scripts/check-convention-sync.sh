@@ -17,6 +17,7 @@ cd "$ROOT" || exit 1
 # ASCII-only signature slices (no em-dash) so the patterns are shell/grep-safe.
 CB3_SIG="what should I capture?"
 CB4_SIG="Don't skip because it feels minor"
+CB5_SIG='bd frugality: bounded output, one round trip'
 
 CB3_SITES=(
   skills/brainstorming/SKILL.md
@@ -41,6 +42,14 @@ CB4_SITES=(
   skills/document-release/SKILL.md
   skills/write-documentation/SKILL.md
   skills/verification-before-completion/SKILL.md
+)
+CB5_SITES=(
+  skills/subagent-driven-development/SKILL.md
+  skills/executing-plans/SKILL.md
+  skills/using-git-worktrees/SKILL.md
+  skills/project-init/SKILL.md
+  skills/getting-up-to-speed/SKILL.md
+  skills/writing-plans/SKILL.md
 )
 
 FAIL=0
@@ -77,6 +86,7 @@ fi
 
 check_block "CB-3 Capture gate"    "$CB3_SIG" "${CB3_SITES[@]}"
 check_block "CB-4 memory convention" "$CB4_SIG" "${CB4_SITES[@]}"
+check_block "CB-5 bd-frugality" "$CB5_SIG" "${CB5_SITES[@]}"
 
 if [ "$FAIL" -eq 0 ]; then
   echo "convention-sync: OK (all canonical blocks byte-identical at their sites)"
