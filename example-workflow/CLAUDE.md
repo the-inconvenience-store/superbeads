@@ -120,7 +120,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
 ## Beads Issue Tracker
 
-This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
+This project uses **bd (beads)** for issue tracking. If beads context wasn't already injected this session, run `bd prime` to see full workflow context and commands.
 
 ### Quick Reference
 
