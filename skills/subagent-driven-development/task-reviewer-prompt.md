@@ -20,7 +20,8 @@ Subagent (general-purpose):
 
     ## What Was Requested
 
-    Read the task brief: [BRIEF_FILE]
+    Read the task bead: `bd show [TASK_ID]`. Its description is the task's
+    requirements.
 
     Global constraints from the spec/design that bind this task:
     [GLOBAL_CONSTRAINTS]
@@ -128,7 +129,7 @@ Subagent (general-purpose):
     would block a merge over — verbatim duplication of a logic block,
     swallowed errors, tests that assert nothing. "Coverage could be broader"
     and polish suggestions are Minor.
-    If the plan or brief explicitly mandates something this rubric calls a
+    If the plan or task bead explicitly mandates something this rubric calls a
     defect (a test that asserts nothing, verbatim duplication of a logic
     block), that IS a finding — report it as Important, labeled
     plan-mandated. The plan's authorship does not grade its own work; the
@@ -176,8 +177,8 @@ Subagent (general-purpose):
 
 **Placeholders:**
 - `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection
-- `[BRIEF_FILE]` — REQUIRED: the task brief file (`scripts/task-brief PLAN N`
-  prints the path; same file the implementer worked from)
+- `[TASK_ID]` — REQUIRED: the task bead ID. The reviewer reads `bd show
+  [TASK_ID]`, the same requirements the implementer worked from.
 - `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from
   the plan's Global Constraints section or the spec: exact values, formats,
   and stated relationships between components (not process rules — those

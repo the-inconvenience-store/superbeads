@@ -130,12 +130,18 @@ fi
 
 echo ""
 
-# Test 7: Verify the task is handed off as a brief file (File Handoffs model)
-echo "Test 7: Task handoff via brief file..."
+# Test 7: Verify the task is handed off via the task bead description
+echo "Test 7: Task handoff via task bead..."
 
-output=$(run_claude "In subagent-driven-development, how does the controller hand the task to the implementer subagent — by pasting the full task text into the prompt, or by writing a task brief file the implementer reads?" 30)
+output=$(run_claude "In subagent-driven-development, how does the controller hand the task to the implementer subagent — by pasting the full task text into the prompt, writing a task brief file, or using the task bead description?" 30)
 
-if assert_contains "$output" "brief\|task-brief\|file\|\.internal/sdd\|read this first" "Hands off task as a brief file"; then
+if assert_contains "$output" "bd show\|task bead\|bead description\|task description" "Hands off task via task bead description"; then
+    : # pass
+else
+    exit 1
+fi
+
+if assert_contains "$output" "comment\|bd comment\|report\|reviewer verdict" "Persists reports/reviews as bead comments"; then
     : # pass
 else
     exit 1

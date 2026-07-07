@@ -12,8 +12,9 @@ Agent tool (subagent_type: "general-purpose"):
 
     ## Task Description
 
-    Read your task brief first: [BRIEF_FILE] — it is your requirements. (The controller
-    writes it with `scripts/task-brief <plan-file> <N>`; see the skill's File Handoffs section.)
+    Read the task bead first: `bd show [TASK_ID]` — its description is your
+    requirements. Do not work from the raw multi-task plan unless the controller
+    explicitly provides extra context from it.
 
     ## Context
 
@@ -35,9 +36,11 @@ Agent tool (subagent_type: "general-purpose"):
 
     1. **Claim at start:** `bd update <bead-id> --claim`
     2. **Work the task** (see workflow below)
-    3. **Close with evidence:** `bd close <bead-id> --reason "what passed and how"`
+    3. **Report with evidence:** write your report file. The controller closes
+       the bead only after independent review passes.
 
-    A bead closed without verification evidence is worse than a bead left open.
+    A bead closed without review evidence is worse than a bead left open. Do
+    not close the bead yourself.
 
     ## Mandatory Skills
 
@@ -45,7 +48,7 @@ Agent tool (subagent_type: "general-purpose"):
 
     - `Skill(beads-superpowers:test-driven-development)` — RED-GREEN-REFACTOR for ALL code changes. Write the failing test FIRST.
     - `Skill(beads-superpowers:systematic-debugging)` — 4-phase root cause analysis when tests fail unexpectedly. Do NOT guess at fixes.
-    - `Skill(beads-superpowers:verification-before-completion)` — Evidence before closing any bead. Run the verification command, read the output, THEN claim success.
+    - `Skill(beads-superpowers:verification-before-completion)` — Evidence before reporting completion. Run the verification command, read the output, THEN claim success.
 
     ## Code Intelligence
 
@@ -67,14 +70,14 @@ Agent tool (subagent_type: "general-purpose"):
 
     ```text
     1. Claim the bead: bd update <bead-id> --claim
-    2. Read the task requirements from the plan
+    2. Read the task requirements: bd show <bead-id>
     3. Invoke Skill(beads-superpowers:test-driven-development) — write failing test FIRST
     4. Implement the minimum code to pass the test
     5. If tests fail unexpectedly → Invoke Skill(beads-superpowers:systematic-debugging)
     6. Run acceptance criteria checks
     7. If ALL pass → Invoke Skill(beads-superpowers:verification-before-completion)
     8. Commit your work
-    9. Close bead: bd close <bead-id> --reason "evidence of what passed"
+    9. Write your report file with evidence and suggested close reason
     ```
 
     Work from: [directory]
@@ -153,10 +156,12 @@ Agent tool (subagent_type: "general-purpose"):
     ## Report Format
 
     Write your full report to `[REPORT_FILE]` (a path the controller provides,
-    typically `.internal/sdd/task-<N>-report.md`). Include:
+    typically `.internal/sdd/task-<N>-report.md`). The controller will persist
+    this file to the task bead as a comment. Include:
     - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
     - What you implemented (or what you attempted, if blocked)
     - What you tested and test results
+    - Commits created (short SHA + subject) and the task commit range, if known
     - Files changed
     - Bead ID and suggested close reason
     - Self-review findings (if any)

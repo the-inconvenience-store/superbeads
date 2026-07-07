@@ -58,14 +58,16 @@ digraph process {
 
     subgraph cluster_per_task {
         label="Per Task";
-        "Dispatch implementer subagent (./implementer-prompt.md)" [shape=box];
+        "Claim task and dispatch implementer subagent (./implementer-prompt.md)" [shape=box];
         "Implementer subagent asks questions?" [shape=diamond];
         "Answer questions, provide context" [shape=box];
         "Implementer subagent implements, tests, commits, self-reviews" [shape=box];
+        "Persist implementer report as bd comment" [shape=box];
         "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" [shape=box];
         "Task reviewer: spec compliant AND quality approved?" [shape=diamond];
+        "Persist reviewer verdict as bd comment; leave task open" [shape=box];
         "Implementer subagent fixes findings" [shape=box];
-        "bd close <task-id> --reason 'Completed'" [shape=box];
+        "bd close <task-id> --reason 'Completed: commits <base>..<head>, review approved'" [shape=box];
     }
 
     "Read plan, extract all tasks, create epic bead + child beads (bd create)" [shape=box];
@@ -73,18 +75,20 @@ digraph process {
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
     "Use beads-superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
-    "Read plan, extract all tasks, create epic bead + child beads (bd create)" -> "Dispatch implementer subagent (./implementer-prompt.md)";
-    "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
+    "Read plan, extract all tasks, create epic bead + child beads (bd create)" -> "Claim task and dispatch implementer subagent (./implementer-prompt.md)";
+    "Claim task and dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
     "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
-    "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
+    "Answer questions, provide context" -> "Claim task and dispatch implementer subagent (./implementer-prompt.md)";
     "Implementer subagent asks questions?" -> "Implementer subagent implements, tests, commits, self-reviews" [label="no"];
-    "Implementer subagent implements, tests, commits, self-reviews" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)";
+    "Implementer subagent implements, tests, commits, self-reviews" -> "Persist implementer report as bd comment";
+    "Persist implementer report as bd comment" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)";
     "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" -> "Task reviewer: spec compliant AND quality approved?";
-    "Task reviewer: spec compliant AND quality approved?" -> "Implementer subagent fixes findings" [label="no"];
-    "Implementer subagent fixes findings" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" [label="re-review"];
-    "Task reviewer: spec compliant AND quality approved?" -> "bd close <task-id> --reason 'Completed'" [label="yes"];
-    "bd close <task-id> --reason 'Completed'" -> "More tasks remain?";
-    "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
+    "Task reviewer: spec compliant AND quality approved?" -> "Persist reviewer verdict as bd comment; leave task open" [label="no"];
+    "Persist reviewer verdict as bd comment; leave task open" -> "Implementer subagent fixes findings";
+    "Implementer subagent fixes findings" -> "Persist implementer report as bd comment" [label="fix report"];
+    "Task reviewer: spec compliant AND quality approved?" -> "bd close <task-id> --reason 'Completed: commits <base>..<head>, review approved'" [label="yes"];
+    "bd close <task-id> --reason 'Completed: commits <base>..<head>, review approved'" -> "More tasks remain?";
+    "More tasks remain?" -> "Claim task and dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
     "Dispatch final code reviewer subagent for entire implementation" -> "Use beads-superpowers:finishing-a-development-branch";
 }
@@ -194,15 +198,18 @@ digraph parallel_batch {
      })
 
 6. Task review per task (can also run in parallel):
+   First persist the implementer's report:
+     bd comment <task-id> --file <report-file>
    Dispatch the single task reviewer (./task-reviewer-prompt.md) with the task
-   brief, the implementer's report file, and the review-package diff. It returns
+   bead ID, the implementer's report file, and the review-package diff. It returns
    a spec-compliance verdict (✅/❌/⚠️) and a code-quality verdict in one pass.
+   Persist each reviewer verdict as a task comment.
 
 7. For each task that passes review:
      cd <epic-worktree-path>
      git merge feature/<epic>/<task>
      bd worktree remove <task-name>
-     bd close <task-id> --reason "Completed: reviews passed"
+     bd close <task-id> --reason "Completed: commits <base7>..<head7>, review approved"
 
 8. Run full test suite on epic worktree (integration check):
    If fail → invoke systematic-debugging → fix before next batch
@@ -291,15 +298,17 @@ bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / patt
 
 The task reviewer returns a Spec Compliance verdict of ✅, ❌, or ⚠️. A ⚠️ "cannot verify from diff" item does **not** block the task on its own — but you (the controller) must resolve it, because it usually needs cross-task context the reviewer lacks. Check the named requirement against the broader implementation. If the ⚠️ turns out to be a real gap, treat it as a failed spec review and re-dispatch the implementer to close it; if it's actually satisfied elsewhere, record that and proceed.
 
-## File Handoffs
+## File Handoffs and Durable Evidence
 
-Hand task text and review diffs to subagents as **files**, not pasted context — this keeps large text out of your own context and gives subagents a single thing to read.
+Use bead descriptions for task requirements, files for bulky scratch data, and bead comments for durable evidence.
 
-- Before dispatching an implementer, run `scripts/task-brief <plan-file> <N>` → writes `.internal/sdd/task-<N>-brief.md`. Pass that path to the implementer as "read this first — it is your requirements."
-- The implementer writes its full report to `.internal/sdd/task-<N>-report.md` (you name the path in the dispatch via `[REPORT_FILE]`); the reviewer reads it as a file.
+- The task bead description is the task brief. Before dispatching an implementer, claim the task and pass the task ID; the implementer reads `bd show <task-id>`.
+- The implementer writes its full report to `.internal/sdd/task-<N>-report.md` (you name the path in the dispatch via `[REPORT_FILE]`). After the implementer returns, persist it immediately: `bd comment <task-id> --file <report-file>`.
 - Before dispatching the reviewer, run `scripts/review-package <BASE> <HEAD>` → writes `.internal/sdd/review-<base7>..<head7>.diff` (commit log + file stat + unified diff). Pass that path to the reviewer. `BASE` is the commit recorded before the implementer ran — never `HEAD~1`.
+- The review package diff remains a scratch artifact, not a bead comment. It is usually large and can be regenerated from the commit range. Preserve the range in the reviewer comment and close reason.
+- Persist every reviewer verdict as a task comment. Use `bd comment <task-id> --stdin` and paste the reviewer output, prefixed with `## Review <base7>..<head7>`. A failed review comment does **not** close the task; the task remains open until review passes.
 - The reviewer is **read-only**: it must not mutate the working tree, the index, HEAD, or branch state.
-- `.internal/sdd/` is resolved **per working tree** (`scripts/sdd-workspace`). In Parallel Batch Mode each `bd worktree` therefore gets its own isolated directory — concurrent tasks never collide on brief/report/diff filenames.
+- `.internal/sdd/` is resolved **per working tree** (`scripts/sdd-workspace`). In Parallel Batch Mode each `bd worktree` therefore gets its own isolated directory — concurrent tasks never collide on report/diff filenames.
 
 ## Prompt Templates
 
@@ -324,7 +333,6 @@ You: I'm using Subagent-Driven Development to execute this plan.
 [                   edges:[{from_key:<dependent>,to_key:<dependency>,type:"blocks"}]}]
 [  Each description embeds the bd lint-required section: epic -> "## Success Criteria",]
 [  task -> "## Acceptance Criteria" (copied from the plan; no separate graph field exists)]
-[  bd create --graph plan.json --dry-run   <- dry-run first]
 [  bd create --graph plan.json]
 [  Fallback: sequential bd create loop + bd dep add if --graph unavailable]
 [  Tip: wire multiple deps atomically to avoid orphaned deps if one fails:]
@@ -332,8 +340,7 @@ You: I'm using Subagent-Driven Development to execute this plan.
 
 Task 1: Hook installation script
 
-[Get Task 1 text and context (already extracted)]
-[Dispatch implementation subagent with full task text + context]
+[Claim Task 1 and dispatch implementer with task ID; implementer reads `bd show <task-1-id>`]
 
 Implementer: "Before I begin - should the hook be installed at user or system level?"
 
@@ -346,20 +353,21 @@ Implementer: "Got it. Implementing now..."
   - Self-review: Found I missed --force flag, added it
   - Committed
 
+[bd comment <task-1-id> --file .internal/sdd/task-1-report.md]
 [Generate review package: scripts/review-package BASE HEAD]
-[Dispatch single task reviewer with the brief, report file, and diff]
+[Dispatch single task reviewer with task ID, report file, and diff]
 Task reviewer:
   Spec Compliance: ✅ Spec compliant - all requirements met, nothing extra
   Strengths: Good test coverage, clean
   Issues: None
   Task quality: Approved
 
-[bd close <task-1-id> --reason "Completed: review clean, commits a1b2c3d..e4f5a6b"]
+[bd comment <task-1-id> --stdin  # reviewer verdict]
+[bd close <task-1-id> --reason "Completed: commits a1b2c3d..e4f5a6b, review approved"]
 
 Task 2: Recovery modes
 
-[Get Task 2 text and context (already extracted)]
-[Dispatch implementation subagent with full task text + context]
+[Claim Task 2 and dispatch implementer with task ID; implementer reads `bd show <task-2-id>`]
 
 Implementer: [No questions, proceeds]
 Implementer:
@@ -368,6 +376,7 @@ Implementer:
   - Self-review: All good
   - Committed
 
+[bd comment <task-2-id> --file .internal/sdd/task-2-report.md]
 [Generate review package + dispatch single task reviewer]
 Task reviewer:
   Spec Compliance: ❌ Issues:
@@ -376,15 +385,18 @@ Task reviewer:
   Issues (Important): Magic number (100)
   Task quality: Needs fixes
 
+[bd comment <task-2-id> --stdin  # failed reviewer verdict; task remains open]
 [Implementer fixes all findings in one pass]
 Implementer: Removed --json flag, added progress reporting, extracted PROGRESS_INTERVAL constant
 
+[bd comment <task-2-id> --file .internal/sdd/task-2-report.md]
 [Re-generate review package + re-dispatch task reviewer]
 Task reviewer:
   Spec Compliance: ✅ Spec compliant now
   Task quality: Approved
 
-[bd close <task-2-id> --reason "Completed: review clean, commits e4f5a6b..c7d8e9f"]
+[bd comment <task-2-id> --stdin  # approved reviewer verdict]
+[bd close <task-2-id> --reason "Completed: commits e4f5a6b..c7d8e9f, review approved"]
 
 ...
 
@@ -413,7 +425,7 @@ Conversation memory does not survive compaction, and a controller that loses its
 - Review checkpoints automatic
 
 **Efficiency gains:**
-- Task brief and review diffs handed as files (see File Handoffs) — large text stays out of the controller's context
+- Implementer reports and review diffs handed as files (see File Handoffs and Durable Evidence) — large text stays out of the controller's context
 - Controller curates exactly what context is needed
 - Subagent gets complete information upfront
 - Questions surfaced before work begins (not after)
@@ -440,13 +452,14 @@ Conversation memory does not survive compaction, and a controller that loses its
 - Dispatch parallel subagents WITHOUT per-task worktree isolation (each subagent MUST have its own `bd worktree`)
 - Dispatch more than 5 parallel subagents in a single batch (resource exhaustion)
 - Use Claude's `isolation: "worktree"` parameter instead of `bd worktree` (bypasses beads DB sharing)
-- Make subagent navigate the raw multi-task plan file (give it a focused, self-contained task brief instead — `scripts/task-brief` writes one, see File Handoffs)
+- Make subagent navigate the raw multi-task plan file (the task bead description is the source of truth; pass the task ID and have it run `bd show <task-id>`)
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance (task reviewer found issues = not done)
 - Skip review loops (reviewer found issues = implementer fixes = review again)
 - Let implementer self-review replace the task review (both are needed)
 - Move to next task while the review has open issues
+- Close a task after a failed review; failed verdicts are comments, not completion evidence
 - **Coach a reviewer to suppress findings** — never instruct a reviewer to ignore or not flag an issue, or pre-rate a finding's severity. If your reviewer prompt contains "do not flag", "don't treat X as a defect", "at most Minor", or "the plan chose", stop: you are pre-judging. Let the reviewer raise it and adjudicate in the review loop.
 - Discard or defer a failed task to quietly descope a required deliverable, or let Model-Selection cost-minimization accept weaker correctness/security review — surface the trade-off, never take it silently (Production-Grade Doctrine)
 
