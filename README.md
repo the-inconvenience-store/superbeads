@@ -119,7 +119,7 @@ Or as slash commands inside a Claude Code session: `/plugin marketplace add the-
 
 ```bash
 codex plugin marketplace add the-inconvenience-store/superbeads
-codex plugin install superbeads@superbeads-marketplace
+codex plugin add superbeads@superbeads
 ```
 
 After installing, enable hooks in `~/.codex/config.toml`:
