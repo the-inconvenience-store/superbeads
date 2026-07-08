@@ -68,9 +68,9 @@ Underneath all of it is a production-grade standard: the agent treats every task
 | `writing-skills`          | Meta-skill for creating or modifying skills in this plugin       |
 | `auditing-upstream-drift` | Detects staleness vs upstream superpowers and beads releases     |
 
-## Docs
+## Documentation
 
-**[the-inconvenience-store.github.io/superbeads](https://the-inconvenience-store.github.io/superbeads/)** — getting started, methodology, skills reference, example workflow, and tips.
+This README is the canonical user guide: start with [Quickstart](#quickstart), scan the [skill index](#whats-inside), then use [Installation](#installation) for your agent. The optional [example workflow](example-workflow/) shows how to bring the same conventions into another project.
 
 ## Quickstart
 

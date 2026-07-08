@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # check-skill-count.sh — guard against hardcoded skill-count drift + structural self-consistency.
 #
-# The exact skill count lives ONLY in the docs {{ skill_count }} macro (main.py). Everywhere else the
-# integer is removed from prose; this guard forbids it from creeping back, and asserts that every
+# The exact skill count is intentionally not advertised in prose; this guard forbids
+# hardcoded totals from creeping back, and asserts that every
 # skill directory has exactly one SKILL.md (frontmatter validity is covered by check-skill-frontmatter.py).
 #
 # Usage:
@@ -15,14 +15,11 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Precise total-count regex: a number + optional count-qualifier adjective + "skills", or "Skills (N Total)".
 # Intentionally does NOT match "7 fork-unique skills", "(9 subtests)", or "7 more agents. ... skills".
-# Also catches CJK count literals: any number adjacent to 技能 (with optional 个/项 separator and 可组合),
-# e.g. "24 项技能", "24个技能", "24 个可组合技能" — the list is illustrative, not exhaustive. The English-only
-# pattern let the README.zh-CN.md "24 项技能" regression slip past. Alternation, not a bracket class, for
-# multibyte safety under GNU grep + UTF-8.
-COUNT_RE='[0-9]+\+?[[:space:]]+(composable[[:space:]]+|beads-native[[:space:]]+|process-discipline[[:space:]]+)*skills\b|Skills[[:space:]]*\([0-9]+[[:space:]]*Total\)|[0-9]+[[:space:]]*(个|项)?[[:space:]]*(可组合)?技能'
+# With the docs site removed, there is no macro-rendered exception.
+COUNT_RE='[0-9]+\+?[[:space:]]+(composable[[:space:]]+|beads-native[[:space:]]+|process-discipline[[:space:]]+)*skills\b|Skills[[:space:]]*\([0-9]+[[:space:]]*Total\)'
 
 # Files excluded from the drift scan (each with a reason):
-#   docs/**              macro-driven ({{ skill_count }})
+#   docs/**              research/plans/decisions can quote historical context
 #   CHANGELOG.md         frozen historical entries
 #   site/**              build output
 #   .github/workflows/** GHA CI being retired in favor of pre-commit
@@ -58,7 +55,7 @@ drift_check() {
       rc=1
     fi
   done < <(git -C "$root" ls-files)
-  [ "$rc" -ne 0 ] && echo "FAIL drift: hardcoded skill-count literal(s) above — remove the number (docs {{ skill_count }} macro is the single source)."
+  [ "$rc" -ne 0 ] && echo "FAIL drift: hardcoded skill-count literal(s) above — remove the number; prose should not advertise an exact skill total."
   return $rc
 }
 
@@ -92,7 +89,7 @@ self_test() {
     echo "SELF-TEST FAIL: clean fixture should pass"; rc=1; fi
   # (b) injected total-count literals are caught — covers the bare, multi-adjective, and N+ forms
   local form
-  for form in 'This repo has 25 skills now.' '25 composable process-discipline skills' 'Run /skills — 25+ skills available' '本仓库有 25 项技能。' '现在有25个可组合技能'; do
+  for form in 'This repo has 25 skills now.' '25 composable process-discipline skills' 'Run /skills — 25+ skills available'; do
     printf '%s\n' "$form" > "$tmp/README.md"; git -C "$tmp" add -A
     if drift_check "$tmp" >/dev/null 2>&1; then echo "SELF-TEST FAIL: injected literal not caught: $form"; rc=1; fi
   done

@@ -1,6 +1,6 @@
 # Example Workflow
 
-This directory contains a ready-to-use development workflow for projects using [beads-superpowers](https://github.com/DollarDill/beads-superpowers).
+This directory contains a ready-to-use development workflow for projects using [superbeads](https://github.com/the-inconvenience-store/superbeads).
 
 ## Architecture
 
@@ -52,6 +52,6 @@ The `CLAUDE.md` provides behavioral guardrails (Think Before Coding, Simplicity 
 
 ## Learn More
 
-- [Example Workflow docs](https://dollardill.github.io/beads-superpowers/workflow.html) — Full walkthrough with diagrams
-- [Skills Reference](https://dollardill.github.io/beads-superpowers/skills.html) — All skills explained
-- [Methodology](https://dollardill.github.io/beads-superpowers/methodology.html) — Why this workflow exists
+- [Main workflow overview](../README.md#how-it-works) — how the skills fit together
+- [Skills index](../README.md#whats-inside) — what each skill does
+- [Installation](../README.md#installation) — agent-specific setup paths

@@ -88,13 +88,11 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harn
 - `hooks/` — `session-start` (SessionStart: injects `using-superpowers` + composed beads context — curated memories + a `bd prime` pointer), the single recurring hook. Multi-format output supports Claude Code, Codex, Cursor, and generic CLIs. Registered in `hooks/hooks.json` (Claude Code) and `hooks/codex-hooks.json` (Codex). Auto-discovered.
 - `opencode/` — Native OpenCode TypeScript plugin (`superbeads-plugin.ts`). Two in-process hooks: a once-per-session bootstrap and a compaction re-injection. Distributed via `install.sh`.
 - `example-workflow/` — Ready-to-use project template: `CLAUDE.md` (Karpathy behavioral principles + beads integration) and `agents/yegge.md` (lean router — triages requests and routes to skills). `install.sh --with-yegge` installs `yegge.md` globally (opt-in; not installed by default).
-- `docs/` — MkDocs Material source pages (6 EN + 6 ZH pages + assets). Template variables (`{{ skill_count }}`) computed at build time via `main.py` macros plugin. Contains ONLY website content.
-- `decisions/` — Architecture Decision Records (ADRs). Local working docs (gitignored).
-- `.internal/` — Working docs (gitignored): specs from brainstorming, plans from writing-plans, research output, audits, reference docs, `.internal/sdd/` (SDD scratch), and `.internal/brainstorm/` (brainstorm server sessions).
+- `docs/` — Working knowledge base, not a website source tree. Current tracked content is `docs/research/`; skills also route graph plans to `docs/plans/` and ADRs to `docs/decisions/` when those directories are created.
+- `.internal/` — Local session scratch (gitignored), including handoff inbox/archive docs and transient agent/server artifacts. Do not put durable user-facing docs here.
 - `tests/` — deterministic suites (hooks, manifests, skills contracts, install-shape, installer Docker E2E, brainstorm-server Node tests) run via the `just` surface; the LLM-driven suites (claude-code, explicit-skill-requests, skill-triggering, subagent-driven-dev) are deprecated in place — see `tests/*/DEPRECATED.md`.
-- `scripts/` — `bump-version.sh` (sync version across 8 files), `check-skill-count.sh` (guard: forbid hardcoded skill counts + structural self-consistency), `build-docs.sh`, `check-agent-bead-stamp.sh`, `check-zh-docs.sh`, `check-convention-sync.sh` (verify shared convention blocks are byte-identical across skills), `lint-shell.sh` (shellcheck gate over tracked `.sh` with committed baseline; visible SKIP when shellcheck absent), `check-askuser-genericization.sh` (guard: skills use generic question-tool phrasing — ADR-0041).
+- `scripts/` — `bump-version.sh` (sync version across 8 files), `check-skill-count.sh` (guard: forbid hardcoded skill counts + structural self-consistency), `check-agent-bead-stamp.sh`, `check-convention-sync.sh` (verify shared convention blocks are byte-identical across skills), `lint-shell.sh` (shellcheck gate over tracked `.sh` with committed baseline; visible SKIP when shellcheck absent), `check-askuser-genericization.sh` (guard: skills use generic question-tool phrasing — ADR-0041).
 - `install.sh` — curl installer with 3-tier fallback chain (plugin system → npx → tarball/git clone). SHA-256 checksum validation, atomic rollback via staging directory, lazy prerequisites. Auto-detects Claude Code, Codex, OpenCode, and 6 more CLIs (Cursor, Copilot, Droid, Antigravity, Kimi, Pi).
-- `mkdocs.yml` + `main.py` + `mkdocs_hooks.py` — MkDocs Material site config, macros plugin, and i18n language-switcher hook.
 
 ## Key Design Decisions
 
@@ -102,7 +100,7 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harn
 - **Prompt templates over standalone agent files** — Subagent prompts (`implementer-prompt.md`, `researcher-prompt.md`) live inside their skills. Only the orchestrator (`yegge.md`) is a standalone agent file. Prevents drift between skill and dispatch instructions. (See: ADR-0003)
 - **`bd` replaces TodoWrite everywhere** — Every `TodoWrite` reference in upstream superpowers replaced with `bd` commands. Beads provides persistent cross-session memory that TodoWrite lacks.
 - **Three-layer architecture for example workflow** — `CLAUDE.md` (behavioral principles + project context) + `agents/yegge.md` (orchestration — triage + skill routing) + prompt templates (subagent dispatch). Each layer has a distinct responsibility. (See: ADR-0003, ADR-0032)
-- **MkDocs Material for docs site** — HashiCorp/Terraform-style sidebar, dark theme, Mermaid diagrams. Template variables via macros plugin avoid hardcoded counts. (See: ADR-0001)
+- **README-first public docs** — The docs site was removed; README is now the canonical user-facing guide. `docs/` is reserved for working knowledge artifacts produced by skills.
 - **Per-task worktree isolation for parallel SDD** — Independent plan tasks execute in parallel (max 5), each in its own `bd worktree`. Prevents merge conflicts between concurrent subagents. (See: ADR-0002)
 
 ## Common Gotchas
@@ -114,7 +112,7 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harn
 - **Never chain `open` after `bd` commands** — `open <file>` hangs when chained in the same Bash invocation with `bd` commands. Always run `open` as a standalone call.
 - **Worktree path default** — `bd worktree create <name>` creates at `./<name>` (sibling to repo files), NOT `.worktrees/<name>`. Pass the full path: `bd worktree create .worktrees/<name>`.
 - **Worktree detection** — Use `git rev-parse --is-inside-work-tree`, NOT `[ -d .git ]`. In a worktree, `.git` is a file, not a directory.
-- **Plugin cache goes stale** — After modifying skills, the installed plugin cache is outdated. Symlink the cache to this repo (see "Syncing Source" section below). `claude plugin update` has a [cache bug](https://github.com/anthropics/claude-code/issues/14061).
+- **Plugin cache goes stale** — After modifying skills, the installed plugin cache is outdated. Symlink the cache to this repo while developing; `claude plugin update` has a [cache bug](https://github.com/anthropics/claude-code/issues/14061).
 - **Skill `description` field trap** — Putting workflow descriptions in skill `description` frontmatter causes Claude to follow the description instead of reading the full skill body (SDO problem). Descriptions should state trigger conditions only.
 - **Codex plugin channel doesn't register hooks** — codex-cli (verified 0.142.5) rejects a populated `hooks` object in the plugin manifest ("ignoring hooks: … found object") and auto-discovers nothing usable, so plugin/marketplace installs get skills but NO SessionStart hook. `install.sh` wires the hook explicitly — it is the supported Codex hook path.
 
@@ -143,22 +141,14 @@ cp -rf source dest          # NOT: cp -r source dest
   marketplace.json         # Codex CLI marketplace config
 agents/                    # Removed in v0.6.0 (code-reviewer consolidated to skill template)
 assets/                    # Banner SVG
-docs/                      # MkDocs source pages — website content ONLY
-  index.md, getting-started.md, methodology.md, skills.md, workflow.md, tips.md
-  index.zh.md, getting-started.zh.md, methodology.zh.md, skills.zh.md, workflow.zh.md, tips.zh.md
-  assets/                  # Banner SVG
-decisions/                 # Architecture Decision Records (gitignored, local-only)
-.internal/                 # Working docs (gitignored)
-  specs/                   # Design specs from brainstorming
-  plans/                   # Implementation plans from writing-plans
+docs/                      # Working knowledge base, not website source
   research/                # Research output from research-driven-development
-  audits/                  # Upstream drift audit reports
-  reference/               # Upstream design docs
+  plans/                   # Graph plans from writing-plans (created on demand)
+  decisions/               # ADRs from decision-capture skills (created on demand)
+.internal/                 # Local scratch (gitignored)
+  handoff/                 # Session-handoff inbox/archive docs
   sdd/                     # SDD scratch — briefs, reports, diffs
   brainstorm/              # Brainstorm server sessions
-  windows/                 # Windows polyglot hook docs
-  SETUP-GUIDE.md           # Installation and setup guide
-  testing.md               # Test infrastructure docs
 example-workflow/
   CLAUDE.md                # Karpathy behavioral principles + beads integration (generic project template)
   agents/yegge.md          # Orchestrator agent — lean router (triage + skill routing)
@@ -173,9 +163,7 @@ opencode/
 scripts/
   bump-version.sh          # Sync version across package.json + plugin manifests
   check-skill-count.sh     # Guard: forbid hardcoded skill counts + structural self-consistency
-  build-docs.sh            # Build MkDocs site
   check-agent-bead-stamp.sh  # Verify agent-filed bead discipline convention
-  check-zh-docs.sh           # Verify zh docs structure/term parity
   check-convention-sync.sh   # Verify shared convention blocks are byte-identical across skills
   lint-shell.sh              # Shellcheck gate over tracked .sh (baseline + visible-SKIP)
   lint-shell-baseline.txt    # Committed lint baseline (empty at adoption — repo is clean)
@@ -183,8 +171,6 @@ scripts/
 skills/                    # beads-native skills (auto-discovered, each has SKILL.md)
 tests/                     # Test infrastructure (deterministic suites via `just`; 4 LLM suites deprecated in place)
 install.sh                 # curl installer — 3-tier fallback (plugin → npx → tarball/git), checksums, atomic rollback
-mkdocs.yml                 # MkDocs Material site config
-mkdocs_hooks.py            # i18n language-switcher hook
 ```
 
 **Important:** Claude Code auto-discovers `skills/`, `agents/`, and `hooks/` directories by convention. Do NOT declare these paths in `plugin.json` — it causes validation failures.
@@ -274,7 +260,7 @@ This plugin uses `bd` (beads) for ALL task tracking.
 
 ## Build & Test
 
-Skills are plain Markdown. The docs site uses MkDocs Material.
+Skills are plain Markdown. Public docs live in README; `docs/` is a working knowledge base for research, graph plans, and ADRs.
 
 ### Validation — the `just` surface (tool, not gate)
 
@@ -283,7 +269,7 @@ Pre-commit covers commit-time hygiene; nothing here is CI-enforced by design.
 
 ```bash
 just            # = just check: guards + hooks + manifests + contracts + shape
-just guards     # all guard scripts (todowrite, bead-stamp, zh-docs, convention-sync,
+just guards     # all guard scripts (todowrite, bead-stamp, convention-sync,
                 #   skill-count + KNOWN_SKILLS drift, version sync, frontmatter, shell lint,
                 #   askuser-genericization)
 just lint       # shellcheck gate alone (tracked .sh, baseline'd; SKIPs if shellcheck absent)
@@ -293,8 +279,6 @@ just shape codex  # one harness
 just selftest   # guard-the-guards: 4 mutations that must fail
 just server     # brainstorm-server Node tests (opt-in)
 just docker     # installer Docker E2E (opt-in, slow)
-just docs       # mkdocs build --strict (opt-in; needs the deploy-docs.yml pip set incl.
-                #   mkdocs-panzoom-plugin + mkdocs-git-revision-date-localized-plugin)
 ```
 
 ```bash
@@ -314,7 +298,7 @@ tag `v<ver>` → `git push --tags` → **publish the GitHub Release**:
 The last step is NOT optional — `install.sh` resolves its default version from `releases/latest`,
 so a pushed tag without a published Release leaves installers on the previous version. Attach
 `checksums.txt` (`sha256sum` of the tag tarball `archive/refs/tags/v<ver>.tar.gz`) or
-`verify_checksum` silently skips. Docs deploy stays manual via `.github/workflows/deploy-docs.yml` (workflow_dispatch).
+`verify_checksum` silently skips. There is no docs deploy step.
 
 ### Running Skill Tests
 

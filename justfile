@@ -1,4 +1,4 @@
-# beads-superpowers check-suite — tool, not gate. Run when touching harness plumbing
+# superbeads check-suite — tool, not gate. Run when touching harness plumbing
 # (hooks/, install.sh, manifests, opencode/). Skill QUALITY testing lives in the
 # external eval-harness project, not here.
 
