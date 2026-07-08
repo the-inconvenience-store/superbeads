@@ -1,16 +1,16 @@
 {
-  "name": "beads-superpowers-marketplace",
+  "name": "superbeads-marketplace",
   "owner": {
-    "name": "Dillon Frawley"
+    "name": "the-inconvenience-store"
   },
   "plugins": [
     {
-      "name": "beads-superpowers",
+      "name": "superbeads",
       "description": "Superpowers skills + Beads issue tracking for Claude Code, Codex, OpenCode, and 6 more AI coding agents: TDD, debugging, code review, and persistent task memory.",
       "version": "0.10.0",
       "source": "./",
       "author": {
-        "name": "Dillon Frawley"
+        "name": "the-inconvenience-store"
       }
     }
   ]

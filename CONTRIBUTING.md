@@ -3,8 +3,8 @@
 ## Setup
 
 ```bash
-git clone git@github.com:<your-user>/beads-superpowers.git
-cd beads-superpowers
+git clone git@github.com:<your-user>/superbeads.git
+cd superbeads
 git switch -c feat/my-improvement
 ```
 

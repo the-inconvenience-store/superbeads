@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# beads-superpowers installer (scripted / advanced install)
-# https://github.com/DollarDill/beads-superpowers
+# superbeads installer (scripted / advanced install)
+# https://github.com/the-inconvenience-store/superbeads
 #
 # Preferred install for Claude Code / Codex: use the native plugin system.
 # For OpenCode: use this script (it deploys the TypeScript plugin natively).
@@ -8,7 +8,7 @@
 # optional yegge.md agent install (--with-yegge), version pinning (--version), or CI automation.
 #
 # Scripted usage:
-#   curl -fsSL https://raw.githubusercontent.com/DollarDill/beads-superpowers/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/the-inconvenience-store/superbeads/main/install.sh | bash
 #   curl -fsSL <url> | bash -s -- --yes            # CI / non-interactive
 #   curl -fsSL <url> | bash -s -- --version 0.4.0  # Pin version
 #   curl -fsSL <url> | bash -s -- --dry-run         # Preview
@@ -18,15 +18,15 @@
 set -euo pipefail
 
 # --- Configuration ---
-REPO="DollarDill/beads-superpowers"
+REPO="the-inconvenience-store/superbeads"
 FALLBACK_VERSION="0.5.3"
-SKILLS_DIR="${BEADS_SUPERPOWERS_SKILLS_DIR:-$HOME/.claude/skills}"
+SKILLS_DIR="${SUPERBEADS_SKILLS_DIR:-${BEADS_SUPERPOWERS_SKILLS_DIR:-$HOME/.claude/skills}}"
 HOOKS_DIR="$HOME/.claude/hooks"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 PLUGINS_FILE="$HOME/.claude/plugins/installed_plugins.json"
-HOOK_SCRIPT="$HOOKS_DIR/beads-superpowers-session-start.sh"
+HOOK_SCRIPT="$HOOKS_DIR/superbeads-session-start.sh"
 AGENTS_DIR="$HOME/.claude/agents"
-VERSION_FILE="$SKILLS_DIR/.beads-superpowers-version"
+VERSION_FILE="$SKILLS_DIR/.superbeads-version"
 
 KNOWN_SKILLS=(
   brainstorming dispatching-parallel-agents
@@ -191,12 +191,12 @@ promote_staging() {
 
 usage() {
   cat <<'USAGE'
-beads-superpowers — scripted / advanced installer
+superbeads — scripted / advanced installer
 
 Preferred install for Tier-1 CLIs:
-  Claude Code:  claude plugin marketplace add DollarDill/beads-superpowers
-  Codex:        codex plugin marketplace add DollarDill/beads-superpowers
-  OpenCode:     see https://github.com/DollarDill/beads-superpowers#opencode
+  Claude Code:  claude plugin marketplace add the-inconvenience-store/superbeads
+  Codex:        codex plugin marketplace add the-inconvenience-store/superbeads
+  OpenCode:     see https://github.com/the-inconvenience-store/superbeads#opencode
 
 Use this script when you need:
   - beads/Dolt bootstrap and hook registration outside the plugin system
@@ -211,17 +211,17 @@ Usage:
 Flags:
   --yes, -y       Skip consent prompt (CI mode)
   --dry-run       Print what would happen without doing it
-  --test          Install to /tmp/beads-superpowers-test/ (verifies then cleans up)
+  --test          Install to /tmp/superbeads-test/ (verifies then cleans up)
   --with-yegge    Also install the yegge.md orchestrator agent (default: not installed;
                   forces the tarball/git install tier — plugin/npx tiers are skipped)
-  --uninstall     Remove beads-superpowers skills, hook, and settings entry
+  --uninstall     Remove superbeads skills, hook, and settings entry
   --version X.Y.Z Pin to a specific version (default: latest GitHub release)
   --source DIR    Install from a local checkout (dev/test; bypasses download tiers, no network)
   --skip-checksum   Skip SHA-256 checksum verification (tarball downloads)
   --help, -h      Show this help
 
 Environment:
-  BEADS_SUPERPOWERS_SKILLS_DIR  Override skills install location (default: ~/.claude/skills)
+  SUPERBEADS_SKILLS_DIR  Override skills install location (default: ~/.claude/skills)
 USAGE
 }
 
@@ -282,7 +282,7 @@ except:
 " 2>/dev/null; then
       error "Upstream superpowers plugin detected."
       echo
-      echo "  beads-superpowers supersedes the upstream superpowers plugin."
+      echo "  superbeads supersedes the upstream superpowers plugin."
       echo "  Having both installed causes duplicate skill loading."
       echo
       echo "  Uninstall it first:"
@@ -326,13 +326,13 @@ detect_existing_install() {
       installed_tier="tarball"
     fi
     if [ "$installed_version" = "$VERSION" ] && [ -z "$INSTALL_TIER" ]; then
-      success "beads-superpowers v$VERSION is already installed (via $installed_tier)."
+      success "superbeads v$VERSION is already installed (via $installed_tier)."
       exit 0
     fi
     if [ "$installed_version" != "$VERSION" ]; then
-      info "Upgrading beads-superpowers: v$installed_version → v$VERSION"
+      info "Upgrading superbeads: v$installed_version → v$VERSION"
     else
-      info "Reinstalling beads-superpowers v$VERSION (tier change: $installed_tier → new)"
+      info "Reinstalling superbeads v$VERSION (tier change: $installed_tier → new)"
     fi
     UPGRADING=true
     # shellcheck disable=SC2034  # PREVIOUS_TIER used in later install tiers
@@ -344,9 +344,9 @@ detect_existing_install() {
 # --- Phase 2: Consent ---
 print_consent() {
   echo
-  printf "${BOLD}beads-superpowers v%s — scripted / advanced installer${NC}\n" "$VERSION"
+  printf "${BOLD}superbeads v%s — scripted / advanced installer${NC}\n" "$VERSION"
   echo
-  echo "This script installs the beads-superpowers skill suite via the best available fallback method."
+  echo "This script installs the superbeads skill suite via the best available fallback method."
   echo "(For Claude Code / Codex / OpenCode, native plugin install is preferred.)"
   if [ "$HAS_CLAUDE" = 1 ] || [ "$HAS_CODEX" = 1 ]; then
     echo "  1. Plugin system (Claude Code / Codex) — used when CLI detected"
@@ -399,7 +399,7 @@ uninstall_opencode_support() {
     success "OpenCode: removed $removed skills from $oc_skills/"
   fi
 
-  local oc_plugin="$HOME/.config/opencode/plugins/beads-superpowers-plugin.ts"
+  local oc_plugin="$HOME/.config/opencode/plugins/superbeads-plugin.ts"
   if [ -f "$oc_plugin" ]; then
     rm -f "$oc_plugin"
     success "OpenCode: removed plugin"
@@ -444,8 +444,8 @@ install_opencode_from() {
   if [ -n "$extract_dir" ]; then
     local oc_plugins="$HOME/.config/opencode/plugins"
     mkdir -p "$oc_plugins"
-    if [ -f "$extract_dir/opencode/beads-superpowers-plugin.ts" ]; then
-      cp -f "$extract_dir/opencode/beads-superpowers-plugin.ts" "$oc_plugins/"
+    if [ -f "$extract_dir/opencode/superbeads-plugin.ts" ]; then
+      cp -f "$extract_dir/opencode/superbeads-plugin.ts" "$oc_plugins/"
       success "OpenCode: installed plugin to $oc_plugins/"
     fi
 
@@ -537,8 +537,8 @@ try_plugin_install() {
 
   if [ "$HAS_CLAUDE" = 1 ]; then
     info "Tier 1: Trying Claude Code plugin install..."
-    if claude plugin marketplace add DollarDill/beads-superpowers 2>/dev/null && \
-       claude plugin install beads-superpowers@beads-superpowers-marketplace 2>/dev/null; then
+    if claude plugin marketplace add the-inconvenience-store/superbeads 2>/dev/null && \
+       claude plugin install superbeads@superbeads-marketplace 2>/dev/null; then
       installed=true
       success "Claude Code: plugin installed via marketplace"
     else
@@ -548,8 +548,8 @@ try_plugin_install() {
 
   if [ "$HAS_CODEX" = 1 ]; then
     info "Tier 1: Trying Codex plugin install..."
-    if codex plugin marketplace add DollarDill/beads-superpowers 2>/dev/null && \
-       codex plugin install beads-superpowers@beads-superpowers-marketplace 2>/dev/null; then
+    if codex plugin marketplace add the-inconvenience-store/superbeads 2>/dev/null && \
+       codex plugin install superbeads@superbeads-marketplace 2>/dev/null; then
       installed=true
       success "Codex: plugin installed via marketplace"
     else
@@ -577,7 +577,7 @@ try_npx_install() {
   [ "$HAS_CODEX" = 1 ] && agents="$agents -a codex"
 
   # shellcheck disable=SC2086  # word splitting intentional: $agents expands to multiple -a flags
-  if npx skills add DollarDill/beads-superpowers $agents -g --copy -y 2>/dev/null; then
+  if npx skills add the-inconvenience-store/superbeads $agents -g --copy -y 2>/dev/null; then
     success "Skills installed via npx"
 
     # npx doesn't install hooks — do it ourselves
@@ -598,8 +598,8 @@ try_tarball_install() {
 
   create_staging
 
-  local tarball_url="${BEADS_SUPERPOWERS_TARBALL_URL:-https://github.com/$REPO/archive/refs/tags/v${VERSION}.tar.gz}"
-  local checksums_url="${BEADS_SUPERPOWERS_CHECKSUMS_URL:-https://github.com/$REPO/releases/download/v${VERSION}/checksums.txt}"
+  local tarball_url="${SUPERBEADS_TARBALL_URL:-${BEADS_SUPERPOWERS_TARBALL_URL:-https://github.com/$REPO/archive/refs/tags/v${VERSION}.tar.gz}}"
+  local checksums_url="${SUPERBEADS_CHECKSUMS_URL:-${BEADS_SUPERPOWERS_CHECKSUMS_URL:-https://github.com/$REPO/releases/download/v${VERSION}/checksums.txt}}"
 
   if ! curl -fsSL "$tarball_url" -o "$STAGING_DIR/release.tar.gz"; then
     warn "Tarball download failed — trying next method"
@@ -660,17 +660,17 @@ all_methods_failed() {
   echo "Manual installation options:"
   echo
   echo "  Plugin (Claude Code):"
-  echo "    claude plugin marketplace add DollarDill/beads-superpowers"
-  echo "    claude plugin install beads-superpowers@beads-superpowers-marketplace"
+  echo "    claude plugin marketplace add the-inconvenience-store/superbeads"
+  echo "    claude plugin install superbeads@superbeads-marketplace"
   echo
   if command -v npx >/dev/null 2>&1; then
     echo "  npx:"
-    echo "    npx skills add DollarDill/beads-superpowers -a claude-code -g --copy"
+    echo "    npx skills add the-inconvenience-store/superbeads -a claude-code -g --copy"
     echo
   fi
   echo "  Git:"
   echo "    git clone https://github.com/$REPO.git"
-  echo "    cp -r beads-superpowers/skills/* ~/.claude/skills/"
+  echo "    cp -r superbeads/skills/* ~/.claude/skills/"
   echo
   exit 1
 }
@@ -682,15 +682,15 @@ do_auto_uninstall_previous() {
   info "Auto-uninstalling previous install (tier: $PREVIOUS_TIER)..."
   case "$PREVIOUS_TIER" in
     plugin)
-      claude plugin uninstall beads-superpowers@beads-superpowers-marketplace 2>/dev/null || true
-      codex plugin uninstall beads-superpowers@beads-superpowers-marketplace 2>/dev/null || true
+      claude plugin uninstall superbeads@superbeads-marketplace 2>/dev/null || true
+      codex plugin uninstall superbeads@superbeads-marketplace 2>/dev/null || true
       ;;
     npx|tarball|git|local)
       for skill in "${KNOWN_SKILLS[@]}"; do
         rm -rf "${SKILLS_DIR:?}/$skill" 2>/dev/null
       done
-      rm -f "$HOOK_SCRIPT" "$HOOKS_DIR/beads-superpowers-reminder.sh" 2>/dev/null
-      rm -rf "$HOOKS_DIR/beads-superpowers" 2>/dev/null
+      rm -f "$HOOK_SCRIPT" "$HOOKS_DIR/superbeads-reminder.sh" 2>/dev/null
+      rm -rf "$HOOKS_DIR/superbeads" 2>/dev/null
       if [ -f "$SETTINGS_FILE" ] && [ "$HAS_PYTHON3" = 1 ]; then
         python3 -c "
 import json
@@ -700,7 +700,7 @@ with open(sf) as f:
 h = s.get('hooks', {})
 for k in ['SessionStart', 'UserPromptSubmit']:
     if k in h:
-        h[k] = [e for e in h[k] if 'beads-superpowers' not in json.dumps(e)]
+        h[k] = [e for e in h[k] if 'superbeads' not in json.dumps(e)]
 with open(sf, 'w') as f:
     json.dump(s, f, indent=2)
     f.write('\n')
@@ -745,7 +745,7 @@ write_hook_script() {
   local source_root="${1:-}"
 
   if [ -n "$source_root" ] && [ -f "$source_root/hooks/session-start" ]; then
-    local canon_root="$HOOKS_DIR/beads-superpowers"
+    local canon_root="$HOOKS_DIR/superbeads"
     mkdir -p "$canon_root/hooks"
     cp -f "$source_root/hooks/session-start" "$canon_root/hooks/session-start"
     chmod +x "$canon_root/hooks/session-start"  # direct exec relies on the bash shebang
@@ -758,7 +758,7 @@ write_hook_script() {
     # mechanism as register_hook's PYEOF); runtime expansions are escaped.
     cat > "$HOOK_SCRIPT" << HOOKEOF
 #!/usr/bin/env bash
-# beads-superpowers hook shim — canonical logic lives in hooks/session-start.
+# superbeads hook shim — canonical logic lives in hooks/session-start.
 # The CLAUDE_PLUGIN_ROOT default preserves the hookSpecificOutput envelope this
 # registration has always emitted (settings.json / codex_hooks consumers).
 BSP_ROOT="$canon_root"
@@ -768,7 +768,7 @@ HOOKEOF
   else
     cat > "$HOOK_SCRIPT" << 'HOOKEOF'
 #!/usr/bin/env bash
-# beads-superpowers SessionStart hook — minimal fallback (npx tier).
+# superbeads SessionStart hook — minimal fallback (npx tier).
 # npx installs skills only (no repo checkout), so the canonical
 # hooks/session-start composer is not available to exec. This fallback is
 # policy-free by design: skill injection plus static bd pointers — no bd prime
@@ -784,7 +784,7 @@ for dir in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
 done
 
 if [ -z "$SKILL_CONTENT" ]; then
-  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"beads-superpowers: using-superpowers skill not found."}}\n'
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"superbeads: using-superpowers skill not found."}}\n'
   exit 0
 fi
 
@@ -819,7 +819,7 @@ escape_json() {
 }
 
 SKILL_ESC=$(escape_json "$SKILL_CONTENT")
-CONTEXT="<EXTREMELY_IMPORTANT>\\nYou have beads-superpowers.\\n\\n**Below is the full content of your 'beads-superpowers:using-superpowers' skill:**\\n\\n${SKILL_ESC}\\n</EXTREMELY_IMPORTANT>"
+CONTEXT="<EXTREMELY_IMPORTANT>\\nYou have superbeads.\\n\\n**Below is the full content of your 'superbeads:using-superpowers' skill:**\\n\\n${SKILL_ESC}\\n</EXTREMELY_IMPORTANT>"
 
 if [ -n "$BEADS_CONTEXT" ]; then
   BEADS_ESC=$(escape_json "$BEADS_CONTEXT")
@@ -851,7 +851,7 @@ hooks = settings.setdefault("hooks", {})
 
 # SessionStart hook
 ss = hooks.setdefault("SessionStart", [])
-if not any("beads-superpowers" in json.dumps(e) for e in ss):
+if not any("superbeads" in json.dumps(e) for e in ss):
     ss.append({
         "matcher": "startup|clear|compact",
         "hooks": [{"type": "command", "command": f"bash {hs}"}]
@@ -923,7 +923,7 @@ do_verify() {
 
     if [ -f "$SETTINGS_FILE" ] && python3 -c "
 import json; d=json.load(open('$SETTINGS_FILE'))
-assert any('beads-superpowers' in json.dumps(e) for e in d.get('hooks',{}).get('SessionStart',[]))
+assert any('superbeads' in json.dumps(e) for e in d.get('hooks',{}).get('SessionStart',[]))
 " 2>/dev/null; then
       success "Hook registered in settings.json"
     else
@@ -941,11 +941,11 @@ print_next_steps() {
   local count
   count=$(find "$SKILLS_DIR" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
   echo
-  success "beads-superpowers v$VERSION installed ($count skills via $INSTALL_TIER)"
+  success "superbeads v$VERSION installed ($count skills via $INSTALL_TIER)"
   echo
   echo "Next steps:"
   echo "  1. Restart Claude Code (or start a new session) to activate skills"
-  echo "  2. Run /skills to verify — the beads-superpowers skills should be available"
+  echo "  2. Run /skills to verify — the superbeads skills should be available"
   if [ "$HAS_BEADS" != true ]; then
     echo
     echo "  3. Install beads for persistent task tracking:"
@@ -966,17 +966,17 @@ print_next_steps() {
     echo "    Plugin installed — skills and hooks are active automatically."
   fi
   echo
-  if [ "$HAS_COPILOT" = 1 ]; then info "Copilot CLI detected — native install: copilot plugin marketplace add DollarDill/beads-superpowers && copilot plugin install beads-superpowers@beads-superpowers-marketplace"; fi
-  if [ "$HAS_CURSOR" = 1 ]; then info "Cursor detected — native install: /add-plugin beads-superpowers (in Cursor Agent)"; fi
-  if [ "$HAS_DROID" = 1 ]; then info "Factory Droid detected — native: droid plugin marketplace add https://github.com/DollarDill/beads-superpowers && droid plugin install beads-superpowers@beads-superpowers-marketplace"; fi
-  if [ "$HAS_AGY" = 1 ]; then info "Antigravity detected — native install: agy plugin install https://github.com/DollarDill/beads-superpowers"; fi
-  if [ "$HAS_KIMI" = 1 ]; then info "Kimi Code detected — native install: /plugins install https://github.com/DollarDill/beads-superpowers"; fi
-  if [ "$HAS_PI" = 1 ]; then info "Pi detected — native install: pi install git:github.com/DollarDill/beads-superpowers"; fi
+  if [ "$HAS_COPILOT" = 1 ]; then info "Copilot CLI detected — native install: copilot plugin marketplace add the-inconvenience-store/superbeads && copilot plugin install superbeads@superbeads-marketplace"; fi
+  if [ "$HAS_CURSOR" = 1 ]; then info "Cursor detected — native install: /add-plugin superbeads (in Cursor Agent)"; fi
+  if [ "$HAS_DROID" = 1 ]; then info "Factory Droid detected — native: droid plugin marketplace add https://github.com/the-inconvenience-store/superbeads && droid plugin install superbeads@superbeads-marketplace"; fi
+  if [ "$HAS_AGY" = 1 ]; then info "Antigravity detected — native install: agy plugin install https://github.com/the-inconvenience-store/superbeads"; fi
+  if [ "$HAS_KIMI" = 1 ]; then info "Kimi Code detected — native install: /plugins install https://github.com/the-inconvenience-store/superbeads"; fi
+  if [ "$HAS_PI" = 1 ]; then info "Pi detected — native install: pi install git:github.com/the-inconvenience-store/superbeads"; fi
 }
 
 # --- Uninstall ---
 do_uninstall() {
-  info "Uninstalling beads-superpowers..."
+  info "Uninstalling superbeads..."
 
   local installed_tier="tarball"
   if [ -f "$VERSION_FILE" ]; then
@@ -988,8 +988,8 @@ do_uninstall() {
 
   case "$installed_tier" in
     plugin)
-      claude plugin uninstall beads-superpowers@beads-superpowers-marketplace 2>/dev/null || true
-      codex plugin uninstall beads-superpowers@beads-superpowers-marketplace 2>/dev/null || true
+      claude plugin uninstall superbeads@superbeads-marketplace 2>/dev/null || true
+      codex plugin uninstall superbeads@superbeads-marketplace 2>/dev/null || true
       ;;
     npx|tarball|git|local)
       local removed=0
@@ -1006,8 +1006,8 @@ do_uninstall() {
       done
       info "Removed agent definitions"
 
-      rm -f "$HOOK_SCRIPT" "$HOOKS_DIR/beads-superpowers-reminder.sh"
-      rm -rf "$HOOKS_DIR/beads-superpowers"
+      rm -f "$HOOK_SCRIPT" "$HOOKS_DIR/superbeads-reminder.sh"
+      rm -rf "$HOOKS_DIR/superbeads"
       info "Removed hook scripts"
 
       if [ -f "$SETTINGS_FILE" ] && command -v python3 >/dev/null 2>&1; then
@@ -1020,7 +1020,7 @@ with open(sf) as f:
 hooks = settings.get("hooks", {})
 for key in ["SessionStart", "UserPromptSubmit"]:
     if key in hooks:
-        hooks[key] = [e for e in hooks[key] if "beads-superpowers" not in json.dumps(e)]
+        hooks[key] = [e for e in hooks[key] if "superbeads" not in json.dumps(e)]
 with open(sf, "w") as f:
     json.dump(settings, f, indent=2)
     f.write("\n")
@@ -1032,19 +1032,19 @@ PYEOF
 
   # ADR-0039 migration: clean up any stale reminder registration/file, regardless of tier
   cleanup_stale_reminder "$SETTINGS_FILE"
-  rm -f "$HOOKS_DIR/beads-superpowers-reminder.sh"
+  rm -f "$HOOKS_DIR/superbeads-reminder.sh"
 
   uninstall_codex_support
   uninstall_opencode_support
 
   rm -f "$VERSION_FILE"
-  success "beads-superpowers uninstalled"
+  success "superbeads uninstalled"
 }
 
 # --- Dry Run ---
 print_dry_run() {
   echo
-  printf "${BOLD}beads-superpowers v%s installer (dry run)${NC}\n" "$VERSION"
+  printf "${BOLD}superbeads v%s installer (dry run)${NC}\n" "$VERSION"
   echo
   echo "Would install the skill suite using the best available method:"
   if [ "$HAS_CLAUDE" = 1 ] || [ "$HAS_CODEX" = 1 ]; then
@@ -1064,7 +1064,7 @@ print_dry_run() {
 
 # --- Test Mode ---
 do_test() {
-  local test_home="/tmp/beads-superpowers-test"
+  local test_home="/tmp/superbeads-test"
   rm -rf "$test_home"
 
   info "Test mode: installing to $test_home/"
@@ -1076,7 +1076,7 @@ do_test() {
   local extra_flags=""
   if [ "$FLAG_WITH_YEGGE" = true ]; then extra_flags="--with-yegge"; fi
   # shellcheck disable=SC2086  # word splitting intentional: optional flag
-  BEADS_SUPERPOWERS_SKILLS_DIR="$test_home/skills" HOME="$test_home" bash "$0" --yes --version "$FALLBACK_VERSION" $extra_flags
+  SUPERBEADS_SKILLS_DIR="$test_home/skills" HOME="$test_home" bash "$0" --yes --version "$FALLBACK_VERSION" $extra_flags
 
   echo
   info "Running verification checks..."
@@ -1092,14 +1092,14 @@ do_test() {
   fi
 
   # Check SessionStart hook
-  if bash "$test_home/.claude/hooks/beads-superpowers-session-start.sh" 2>/dev/null | python3 -m json.tool > /dev/null 2>&1; then
+  if bash "$test_home/.claude/hooks/superbeads-session-start.sh" 2>/dev/null | python3 -m json.tool > /dev/null 2>&1; then
     success "SessionStart hook: valid JSON"; pass=$((pass + 1))
   else
     error "SessionStart hook: invalid JSON"; fail=$((fail + 1))
   fi
 
   # ADR-0039: fresh install must not write a reminder script or register UserPromptSubmit
-  if [ -f "$test_home/.claude/hooks/beads-superpowers-reminder.sh" ]; then
+  if [ -f "$test_home/.claude/hooks/superbeads-reminder.sh" ]; then
     error "Fresh install wrote the reminder script (should not exist)"; fail=$((fail + 1))
   else
     success "Fresh install: no reminder script"; pass=$((pass + 1))
@@ -1149,7 +1149,7 @@ assert 'UserPromptSubmit' not in d.get('hooks', {})
   "hooks": {
     "UserPromptSubmit": [
       {"matcher": "", "hooks": [
-        {"type": "command", "command": "bash /home/user/.claude/hooks/beads-superpowers-reminder.sh"},
+        {"type": "command", "command": "bash /home/user/.claude/hooks/superbeads-reminder.sh"},
         {"type": "command", "command": "bash /home/user/.claude/hooks/somebody-elses-hook.sh"}
       ]}
     ]
@@ -1174,7 +1174,7 @@ CLEANUPEOF
   "hooks": {
     "UserPromptSubmit": [
       {"matcher": "", "hooks": [
-        {"type": "command", "command": "bash /home/user/.claude/hooks/beads-superpowers-reminder.sh"}
+        {"type": "command", "command": "bash /home/user/.claude/hooks/superbeads-reminder.sh"}
       ]}
     ]
   }
@@ -1195,10 +1195,10 @@ NOPYEOF
   fi
 
   # Test uninstall
-  BEADS_SUPERPOWERS_SKILLS_DIR="$test_home/skills" HOME="$test_home" bash "$0" --uninstall 2>&1
+  SUPERBEADS_SKILLS_DIR="$test_home/skills" HOME="$test_home" bash "$0" --uninstall 2>&1
 
-  if [ ! -f "$test_home/.claude/hooks/beads-superpowers-session-start.sh" ] && \
-     [ ! -f "$test_home/.claude/hooks/beads-superpowers-reminder.sh" ] && \
+  if [ ! -f "$test_home/.claude/hooks/superbeads-session-start.sh" ] && \
+     [ ! -f "$test_home/.claude/hooks/superbeads-reminder.sh" ] && \
      [ ! -f "$test_home/.claude/agents/yegge.md" ]; then
     success "Uninstall: hooks and agents removed"; pass=$((pass + 1))
   else

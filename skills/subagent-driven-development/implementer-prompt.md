@@ -46,9 +46,9 @@ Agent tool (subagent_type: "general-purpose"):
 
     Invoke these skills explicitly via the `Skill` tool at each step of your workflow:
 
-    - `Skill(beads-superpowers:test-driven-development)` — RED-GREEN-REFACTOR for ALL code changes. Write the failing test FIRST.
-    - `Skill(beads-superpowers:systematic-debugging)` — 4-phase root cause analysis when tests fail unexpectedly. Do NOT guess at fixes.
-    - `Skill(beads-superpowers:verification-before-completion)` — Evidence before reporting completion. Run the verification command, read the output, THEN claim success.
+    - `Skill(superbeads:test-driven-development)` — RED-GREEN-REFACTOR for ALL code changes. Write the failing test FIRST.
+    - `Skill(superbeads:systematic-debugging)` — 4-phase root cause analysis when tests fail unexpectedly. Do NOT guess at fixes.
+    - `Skill(superbeads:verification-before-completion)` — Evidence before reporting completion. Run the verification command, read the output, THEN claim success.
 
     ## Code Intelligence
 
@@ -71,11 +71,11 @@ Agent tool (subagent_type: "general-purpose"):
     ```text
     1. Claim the bead: bd update <bead-id> --claim
     2. Read the task requirements: bd show <bead-id>
-    3. Invoke Skill(beads-superpowers:test-driven-development) — write failing test FIRST
+    3. Invoke Skill(superbeads:test-driven-development) — write failing test FIRST
     4. Implement the minimum code to pass the test
-    5. If tests fail unexpectedly → Invoke Skill(beads-superpowers:systematic-debugging)
+    5. If tests fail unexpectedly → Invoke Skill(superbeads:systematic-debugging)
     6. Run acceptance criteria checks
-    7. If ALL pass → Invoke Skill(beads-superpowers:verification-before-completion)
+    7. If ALL pass → Invoke Skill(superbeads:verification-before-completion)
     8. Commit your work
     9. Write your report file with evidence and suggested close reason
     ```

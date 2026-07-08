@@ -19,20 +19,20 @@ issues, discussions, or pull requests.**
 
 Instead, use GitHub's private vulnerability reporting:
 
-1. Navigate to the [Security tab](https://github.com/DollarDill/beads-superpowers/security)
+1. Navigate to the [Security tab](https://github.com/the-inconvenience-store/superbeads/security)
 2. Click **Report a vulnerability**
 3. Fill in the advisory form with as much detail as you can provide
 
 GitHub will notify the maintainer privately and create a draft advisory.
 
-If you cannot use GitHub's private reporting, email the maintainer directly
-via the contact details on [DollarDill's GitHub profile](https://github.com/DollarDill).
+If you cannot use GitHub's private reporting, contact the maintainer through
+[the-inconvenience-store on GitHub](https://github.com/the-inconvenience-store).
 
 ## What to include
 
 - A description of the vulnerability and its impact
 - Steps to reproduce — ideally a minimal repro
-- The version of `beads-superpowers` you tested against
+- The version of `superbeads` you tested against
 - Whether the vulnerability has been disclosed elsewhere
 
 ## Response timeline
@@ -45,7 +45,7 @@ via the contact details on [DollarDill's GitHub profile](https://github.com/Doll
 
 This policy covers:
 
-- The `beads-superpowers` plugin code (skills, hooks, scripts)
+- The `superbeads` plugin code (skills, hooks, scripts)
 - The `.github/` automation (CI workflow, Dependabot, templates)
 - The plugin manifests (`.claude-plugin/plugin.json`, `marketplace.json`)
 

@@ -34,7 +34,7 @@ rm -rf "$MUT1"
 # Mutation 2: SessionStart entry stripped from settings.json post-install -> claude JSON assertion fails.
 # Setup failures are rig breakage, NOT a caught mutation — never let them masquerade as red.
 SB2=$(mktemp -d)
-if ! HOME="$SB2" BEADS_SUPERPOWERS_SKILLS_DIR="$SB2/skills" bash "$REPO_ROOT/install.sh" --yes --source "$REPO_ROOT" >/dev/null 2>&1; then
+if ! HOME="$SB2" SUPERBEADS_SKILLS_DIR="$SB2/skills" bash "$REPO_ROOT/install.sh" --yes --source "$REPO_ROOT" >/dev/null 2>&1; then
   echo "SELFTEST FAIL: mutation-2 setup install failed (rig broken, not a caught mutation)"; rc=1
 elif [ ! -f "$SB2/.claude/settings.json" ]; then
   echo "SELFTEST FAIL: mutation-2 setup produced no settings.json (rig broken, not a caught mutation)"; rc=1
@@ -60,9 +60,9 @@ rm -rf "$MUT3"
 # Mutation 4: file planted after uninstall -> round-trip residue assertion fails.
 # Setup failures are rig breakage, NOT a caught mutation — never let them masquerade as red.
 SB4=$(mktemp -d)
-if ! HOME="$SB4" BEADS_SUPERPOWERS_SKILLS_DIR="$SB4/skills" bash "$REPO_ROOT/install.sh" --yes --source "$REPO_ROOT" >/dev/null 2>&1; then
+if ! HOME="$SB4" SUPERBEADS_SKILLS_DIR="$SB4/skills" bash "$REPO_ROOT/install.sh" --yes --source "$REPO_ROOT" >/dev/null 2>&1; then
   echo "SELFTEST FAIL: mutation-4 setup install failed (rig broken, not a caught mutation)"; rc=1
-elif ! HOME="$SB4" BEADS_SUPERPOWERS_SKILLS_DIR="$SB4/skills" bash "$REPO_ROOT/install.sh" --yes --uninstall >/dev/null 2>&1; then
+elif ! HOME="$SB4" SUPERBEADS_SKILLS_DIR="$SB4/skills" bash "$REPO_ROOT/install.sh" --yes --uninstall >/dev/null 2>&1; then
   echo "SELFTEST FAIL: mutation-4 setup uninstall failed (rig broken, not a caught mutation)"; rc=1
 else
   mkdir -p "$SB4/skills/using-superpowers" && touch "$SB4/skills/using-superpowers/SKILL.md"

@@ -56,7 +56,7 @@ grep -q 'additionalContext' "$TMP/out4b" || { echo "FAIL: session-A nosid run di
 grep -q 'additionalContext' "$TMP/out4c" || { echo "FAIL: session-B nosid run suppressed by session-A (nosid bucket collision)"; exit 1; }
 
 # marker dir permissions (dual-form stat: GNU then BSD)
-dir="$TMP/run/beads-superpowers-$(id -u)"
+dir="$TMP/run/superbeads-$(id -u)"
 perms=$(stat -c %a "$dir" 2>/dev/null || stat -f %Lp "$dir")
 [ "$perms" = "700" ] || { echo "FAIL: marker dir not 0700 (got $perms)"; exit 1; }
 

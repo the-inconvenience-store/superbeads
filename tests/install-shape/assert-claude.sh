@@ -9,12 +9,12 @@ trap 'shape_sandbox_teardown' EXIT
 shape_install
 
 assert_all_skills "$SANDBOX/skills"
-assert_file "$SANDBOX/.claude/hooks/beads-superpowers-session-start.sh"
+assert_file "$SANDBOX/.claude/hooks/superbeads-session-start.sh"
 # Written hook must be a thin exec shim of the canonical composer (bead bb6x),
 # and the canonical copy must land where the shim points.
-assert_file "$SANDBOX/.claude/hooks/beads-superpowers/hooks/session-start"
+assert_file "$SANDBOX/.claude/hooks/superbeads/hooks/session-start"
 # shellcheck disable=SC2016  # the '$BSP_ROOT' exec line is matched literally, not expanded
-if grep -qF 'exec "$BSP_ROOT/hooks/session-start"' "$SANDBOX/.claude/hooks/beads-superpowers-session-start.sh" 2>/dev/null; then
+if grep -qF 'exec "$BSP_ROOT/hooks/session-start"' "$SANDBOX/.claude/hooks/superbeads-session-start.sh" 2>/dev/null; then
   _pass "written hook execs the canonical composer"
 else
   _fail "written hook is not an exec shim of hooks/session-start"
@@ -22,22 +22,22 @@ fi
 assert_file "$SANDBOX/.claude/settings.json"
 assert_json "$SANDBOX/.claude/settings.json" "'SessionStart' in d.get('hooks', {})"
 assert_json "$SANDBOX/.claude/settings.json" "'UserPromptSubmit' not in d.get('hooks', {})"
-assert_no_file "$SANDBOX/.claude/hooks/beads-superpowers-reminder.sh"
+assert_no_file "$SANDBOX/.claude/hooks/superbeads-reminder.sh"
 # Default install must NOT place the yegge agent (opt-in via --with-yegge, bead 3krn)
 assert_no_file "$SANDBOX/.claude/agents/yegge.md"
-assert_file "$SANDBOX/skills/.beads-superpowers-version"
-grep -q ":local$" "$SANDBOX/skills/.beads-superpowers-version" || _fail "version file tier != local"
+assert_file "$SANDBOX/skills/.superbeads-version"
+grep -q ":local$" "$SANDBOX/skills/.superbeads-version" || _fail "version file tier != local"
 assert_shims_never_invoked
 
 # Round-trip: uninstall removes artifacts; designed settings backup MUST remain.
 shape_uninstall
 assert_no_file "$SANDBOX/skills/using-superpowers/SKILL.md"
 assert_no_file "$SANDBOX/.claude/agents/yegge.md"
-assert_no_file "$SANDBOX/.claude/hooks/beads-superpowers-session-start.sh"
-assert_no_file "$SANDBOX/.claude/hooks/beads-superpowers"
-assert_no_file "$SANDBOX/skills/.beads-superpowers-version"
+assert_no_file "$SANDBOX/.claude/hooks/superbeads-session-start.sh"
+assert_no_file "$SANDBOX/.claude/hooks/superbeads"
+assert_no_file "$SANDBOX/skills/.superbeads-version"
 if [ -f "$SANDBOX/.claude/settings.json" ]; then
-  assert_json "$SANDBOX/.claude/settings.json" "'beads-superpowers' not in json.dumps(d)"
+  assert_json "$SANDBOX/.claude/settings.json" "'superbeads' not in json.dumps(d)"
 fi
 if compgen -G "$SANDBOX/.claude/settings.json.backup-*" > /dev/null; then
   _pass "designed settings backup present"

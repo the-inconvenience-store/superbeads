@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SessionStart hook for beads-superpowers plugin
+# SessionStart hook for superbeads plugin
 # This hook subsumes both superpowers skill injection AND beads context (bd prime).
 # If bd prime is already registered as a hook elsewhere (e.g. bd setup claude),
 # we skip our bd prime call to avoid duplicate context injection.
@@ -135,7 +135,7 @@ bsp_src=$(printf '%s' "$bsp_stdin" | sed -n 's/.*"source"[[:space:]]*:[[:space:]
 [ -z "$bsp_sid" ] && bsp_sid="nosid-$PPID"
 [ -z "$bsp_src" ] && bsp_src="unknown"
 
-bsp_marker_dir="${XDG_RUNTIME_DIR:-/tmp}/beads-superpowers-$(id -u)"
+bsp_marker_dir="${XDG_RUNTIME_DIR:-/tmp}/superbeads-$(id -u)"
 bsp_marker="$bsp_marker_dir/m-${bsp_sid}-${bsp_src}"
 bsp_suppress=0
 if mkdir -p "$bsp_marker_dir" 2>/dev/null && chmod 700 "$bsp_marker_dir" 2>/dev/null; then
@@ -162,13 +162,13 @@ if command -v bd >/dev/null 2>&1 && [ -d .beads ] && [ ! -e .beads/PRIME.md ] &&
     bsp_net_off='custom\.prime-safety-net[[:space:]]*=[[:space:]]*false'
     if ! [[ "$bsp_cfg" =~ $bsp_net_off ]]; then
         cat > .beads/PRIME.md <<'NET' || true
-<!-- Written by the beads-superpowers plugin (safety net).
+<!-- Written by the superbeads plugin (safety net).
      Your session hook injects a curated beads context, so `bd prime` here
      returns this lean pointer instead of the full memory dump.
      To restore full `bd prime` output: delete this file.
      To stop it being recreated: bd config set custom.prime-safety-net false -->
 # Beads Workflow (lean pointer)
-Session context is injected by the beads-superpowers hook.
+Session context is injected by the superbeads hook.
 - Work queue: `bd ready -n 10` · full reference: `bd human`
 - Memories: `bd memories <keyword>` · one memory: `bd recall <key>`
 - Full default prime content: `bd prime --export`
@@ -226,7 +226,7 @@ for settings_file in \
 done
 
 # Read using-superpowers content
-using_superpowers_content=$(cat "${PLUGIN_ROOT}/skills/using-superpowers/SKILL.md" 2>/dev/null) || using_superpowers_content="beads-superpowers: using-superpowers skill unreadable"
+using_superpowers_content=$(cat "${PLUGIN_ROOT}/skills/using-superpowers/SKILL.md" 2>/dev/null) || using_superpowers_content="superbeads: using-superpowers skill unreadable"
 
 # Compose beads section (skipped if an external bd prime hook owns injection)
 beads_context=""
@@ -267,9 +267,9 @@ escape_for_json() {
 # RAW strings only (real newlines) — escape_for_json is applied exactly once,
 # at the output boundary below, per dialect.
 session_context_raw="<EXTREMELY_IMPORTANT>
-You have beads-superpowers.
+You have superbeads.
 
-**Below is the full content of your 'beads-superpowers:using-superpowers' skill - your introduction to using skills. For all other skills, use the 'Skill' tool:**
+**Below is the full content of your 'superbeads:using-superpowers' skill - your introduction to using skills. For all other skills, use the 'Skill' tool:**
 
 ${using_superpowers_content}
 ${warning_message_raw}
@@ -301,13 +301,13 @@ fi
 
 # bd-absent hint (non-fatal, one line to stderr)
 if ! command -v bd >/dev/null 2>&1; then
-  printf '%s\n' "beads not found — install bd to enable persistent task memory: https://github.com/DollarDill/beads-superpowers#prerequisites" >&2
+  printf '%s\n' "beads not found — install bd to enable persistent task memory: https://github.com/the-inconvenience-store/superbeads#prerequisites" >&2
 fi
 
 # upstream-superpowers coexistence collision warning (best-effort, non-fatal)
 _bsp_plugins="$HOME/.claude/plugins/installed_plugins.json"
 if grep -Eq '"superpowers@(claude-plugins-official|superpowers-marketplace)"' "$_bsp_plugins" 2>/dev/null; then
-  printf '%s\n' "warning: obra/superpowers appears installed alongside beads-superpowers — skill names collide; use one or the other" >&2
+  printf '%s\n' "warning: obra/superpowers appears installed alongside superbeads — skill names collide; use one or the other" >&2
 fi
 
 exit 0

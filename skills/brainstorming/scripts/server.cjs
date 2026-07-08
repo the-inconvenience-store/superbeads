@@ -241,8 +241,8 @@ function escapeHtmlText(value) {
 
 function brandMarkup() {
   const version = escapeHtmlText(SUPERPOWERS_VERSION); // preserve upstream escaping (defense-in-depth)
-  const text = 'beads-superpowers v' + version;
-  return '<div class="brand"><a href="https://github.com/DollarDill/beads-superpowers"><span class="brand-copy">' + text + '</span></a></div>';
+  const text = 'superbeads v' + version;
+  return '<div class="brand"><a href="https://github.com/the-inconvenience-store/superbeads"><span class="brand-copy">' + text + '</span></a></div>';
 }
 
 function renderBranding(html) {

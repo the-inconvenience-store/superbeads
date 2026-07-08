@@ -27,8 +27,8 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 
 When multiple skills apply, process skills come first — they set the approach, then implementation skills carry it out.
 
-- "Let's build X" → beads-superpowers:brainstorming first, then implementation skills.
-- "Fix this bug" → beads-superpowers:systematic-debugging first, then domain skills.
+- "Let's build X" → superbeads:brainstorming first, then implementation skills.
+- "Fix this bug" → superbeads:systematic-debugging first, then domain skills.
 
 ## Red Flags
 

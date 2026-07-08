@@ -27,7 +27,7 @@ convert -density 200 assets/banner.svg -resize 1280x640 assets/social-preview.pn
 
 GitHub's REST API does not expose the social preview image upload endpoint, so this step must be done through the web UI:
 
-1. Open [https://github.com/DollarDill/beads-superpowers/settings](https://github.com/DollarDill/beads-superpowers/settings)
+1. Open [https://github.com/the-inconvenience-store/superbeads/settings](https://github.com/the-inconvenience-store/superbeads/settings)
 2. Scroll to **Social preview**
 3. Click **Edit** → **Upload an image**
 4. Select `assets/social-preview.png`

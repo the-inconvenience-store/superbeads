@@ -165,7 +165,7 @@ echo "=== Group 1: Fresh Install ==="
 # ============================================================
 
 start_http_server
-BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" bash /src/install.sh --yes --version "$VERSION"
+SUPERBEADS_TARBALL_URL="$TARBALL_URL" bash /src/install.sh --yes --version "$VERSION"
 stop_http_server
 
 # Skills: count + spot-check
@@ -180,21 +180,21 @@ assert_file_exists "$HOME/.claude/skills/brainstorming/SKILL.md" "skill has SKIL
 assert_file_not_exists "$HOME/.claude/agents/yegge.md" "agent: yegge NOT installed by default (opt-in)"
 
 # Hooks
-assert_file_executable "$HOME/.claude/hooks/beads-superpowers-session-start.sh" "hook: session-start executable"
-assert_file_not_exists "$HOME/.claude/hooks/beads-superpowers-reminder.sh" "hook: reminder NOT installed (ADR-0039)"
+assert_file_executable "$HOME/.claude/hooks/superbeads-session-start.sh" "hook: session-start executable"
+assert_file_not_exists "$HOME/.claude/hooks/superbeads-reminder.sh" "hook: reminder NOT installed (ADR-0039)"
 
 # Version file
-assert_file_exists "$HOME/.claude/skills/.beads-superpowers-version" "version file exists"
-assert_file_contains "$HOME/.claude/skills/.beads-superpowers-version" "$VERSION" "version matches"
+assert_file_exists "$HOME/.claude/skills/.superbeads-version" "version file exists"
+assert_file_contains "$HOME/.claude/skills/.superbeads-version" "$VERSION" "version matches"
 
 # settings.json
 assert_json_valid "$HOME/.claude/settings.json" "settings.json valid JSON"
-assert_file_contains "$HOME/.claude/settings.json" "beads-superpowers" "settings has beads-superpowers"
+assert_file_contains "$HOME/.claude/settings.json" "superbeads" "settings has superbeads"
 assert_file_contains "$HOME/.claude/settings.json" "SessionStart" "settings has SessionStart"
 assert_file_not_contains "$HOME/.claude/settings.json" "UserPromptSubmit" "settings has no UserPromptSubmit (ADR-0039)"
 
 # Hook output
-assert_command_output_valid_json "bash $HOME/.claude/hooks/beads-superpowers-session-start.sh" "session-start hook output valid JSON"
+assert_command_output_valid_json "bash $HOME/.claude/hooks/superbeads-session-start.sh" "session-start hook output valid JSON"
 
 # ============================================================
 echo "=== Group 1b: Multi-CLI Install Verification ==="
@@ -223,7 +223,7 @@ if command -v opencode >/dev/null 2>&1; then
   assert_dir_exists "$HOME/.config/opencode/skills/using-superpowers" "OpenCode skill: using-superpowers"
 
   # OpenCode plugin installed
-  assert_file_exists "$HOME/.config/opencode/plugins/beads-superpowers-plugin.ts" "OpenCode plugin installed"
+  assert_file_exists "$HOME/.config/opencode/plugins/superbeads-plugin.ts" "OpenCode plugin installed"
 else
   echo "  [SKIP] OpenCode not in container — skipping OpenCode assertions"
 fi
@@ -233,13 +233,13 @@ echo "=== Group 1c: Hook Format Validation ==="
 # ============================================================
 
 # Test session-start with CLAUDE_PLUGIN_ROOT (existing behavior)
-assert_command_output_valid_json "CLAUDE_PLUGIN_ROOT=/src bash $HOME/.claude/hooks/beads-superpowers-session-start.sh" "session-start CC format valid JSON"
+assert_command_output_valid_json "CLAUDE_PLUGIN_ROOT=/src bash $HOME/.claude/hooks/superbeads-session-start.sh" "session-start CC format valid JSON"
 
 # Test session-start with CODEX_PLUGIN_ROOT
-assert_command_output_valid_json "CODEX_PLUGIN_ROOT=/src bash $HOME/.claude/hooks/beads-superpowers-session-start.sh" "session-start Codex format valid JSON"
+assert_command_output_valid_json "CODEX_PLUGIN_ROOT=/src bash $HOME/.claude/hooks/superbeads-session-start.sh" "session-start Codex format valid JSON"
 
 # Test session-start generic (no env var)
-assert_command_output_valid_json "bash $HOME/.claude/hooks/beads-superpowers-session-start.sh" "session-start generic format valid JSON"
+assert_command_output_valid_json "bash $HOME/.claude/hooks/superbeads-session-start.sh" "session-start generic format valid JSON"
 
 # ============================================================
 echo "=== Group 2: Idempotent Re-Install ==="
@@ -247,7 +247,7 @@ echo "=== Group 2: Idempotent Re-Install ==="
 
 start_http_server
 # Re-running with same version should exit 0 and say "already installed"
-output=$(BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" bash /src/install.sh --yes --version "$VERSION" 2>&1) || true
+output=$(SUPERBEADS_TARBALL_URL="$TARBALL_URL" bash /src/install.sh --yes --version "$VERSION" 2>&1) || true
 stop_http_server
 
 if echo "$output" | grep -q "already installed"; then
@@ -262,14 +262,14 @@ echo "=== Group 3: Uninstall ==="
 
 bash /src/install.sh --uninstall
 
-assert_file_not_exists "$HOME/.claude/hooks/beads-superpowers-session-start.sh" "hook removed"
-assert_file_not_exists "$HOME/.claude/hooks/beads-superpowers-reminder.sh" "reminder removed"
+assert_file_not_exists "$HOME/.claude/hooks/superbeads-session-start.sh" "hook removed"
+assert_file_not_exists "$HOME/.claude/hooks/superbeads-reminder.sh" "reminder removed"
 assert_file_not_exists "$HOME/.claude/agents/yegge.md" "agent removed"
-assert_file_not_exists "$HOME/.claude/skills/.beads-superpowers-version" "version file removed"
+assert_file_not_exists "$HOME/.claude/skills/.superbeads-version" "version file removed"
 
 # settings.json should still be valid but cleaned
 assert_json_valid "$HOME/.claude/settings.json" "settings.json still valid after uninstall"
-assert_file_not_contains "$HOME/.claude/settings.json" "beads-superpowers" "settings cleaned of beads-superpowers"
+assert_file_not_contains "$HOME/.claude/settings.json" "superbeads" "settings cleaned of superbeads"
 
 # All skill directories should be gone
 remaining=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
@@ -284,7 +284,7 @@ fi
 if command -v opencode >/dev/null 2>&1; then
   oc_remaining=$(find "$HOME/.config/opencode/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
   assert_count_eq "$oc_remaining" 0 "OpenCode skills removed"
-  assert_file_not_exists "$HOME/.config/opencode/plugins/beads-superpowers-plugin.ts" "OpenCode plugin removed"
+  assert_file_not_exists "$HOME/.config/opencode/plugins/superbeads-plugin.ts" "OpenCode plugin removed"
 fi
 
 # ============================================================
@@ -295,13 +295,13 @@ echo "=== Group 3b: Stale Reminder Cleanup (ADR-0039) ==="
 # entry alongside a foreign hook. do_uninstall's plugin-tier branch does not
 # otherwise touch settings.json, isolating cleanup_stale_reminder()'s own work.
 mkdir -p "$HOME/.claude/skills"
-echo "$VERSION:plugin" > "$HOME/.claude/skills/.beads-superpowers-version"
+echo "$VERSION:plugin" > "$HOME/.claude/skills/.superbeads-version"
 cat > "$HOME/.claude/settings.json" << 'EOF'
 {
   "hooks": {
     "UserPromptSubmit": [
       {"matcher": "", "hooks": [
-        {"type": "command", "command": "bash /home/user/.claude/hooks/beads-superpowers-reminder.sh"},
+        {"type": "command", "command": "bash /home/user/.claude/hooks/superbeads-reminder.sh"},
         {"type": "command", "command": "bash /home/user/.claude/hooks/somebody-elses-hook.sh"}
       ]}
     ]
@@ -326,8 +326,8 @@ rm -rf "$HOME/.claude" "$HOME/.codex" "$HOME/.config/opencode"
 
 # 4a: Valid checksum passes
 start_http_server
-BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" \
-BEADS_SUPERPOWERS_CHECKSUMS_URL="http://localhost:8888/checksums.txt" \
+SUPERBEADS_TARBALL_URL="$TARBALL_URL" \
+SUPERBEADS_CHECKSUMS_URL="http://localhost:8888/checksums.txt" \
   bash /src/install.sh --yes --version "$VERSION" 2>&1
 stop_http_server
 
@@ -342,8 +342,8 @@ rm -rf "$HOME/.claude/skills"
 # Start server first (copies clean tarball), then corrupt it in-place
 start_http_server
 printf '\xff' | dd of=/tmp/release.tar.gz bs=1 seek=100 count=1 conv=notrunc 2>/dev/null
-output=$(BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" \
-BEADS_SUPERPOWERS_CHECKSUMS_URL="http://localhost:8888/checksums.txt" \
+output=$(SUPERBEADS_TARBALL_URL="$TARBALL_URL" \
+SUPERBEADS_CHECKSUMS_URL="http://localhost:8888/checksums.txt" \
   bash /src/install.sh --yes --version "$VERSION" 2>&1) || true
 stop_http_server
 
@@ -355,8 +355,8 @@ cp -f /src/release.tar.gz /tmp/release.tar.gz
 if [ -f /src/checksums.txt ]; then cp -f /src/checksums.txt /tmp/checksums.txt; fi
 
 start_http_server
-output=$(BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" \
-BEADS_SUPERPOWERS_CHECKSUMS_URL="http://localhost:8888/checksums.txt" \
+output=$(SUPERBEADS_TARBALL_URL="$TARBALL_URL" \
+SUPERBEADS_CHECKSUMS_URL="http://localhost:8888/checksums.txt" \
   bash /src/install.sh --yes --version "$VERSION" --skip-checksum 2>&1) || true
 stop_http_server
 
@@ -372,8 +372,8 @@ cp -f /src/release.tar.gz /tmp/release.tar.gz
 rm -f /tmp/checksums.txt
 
 start_http_server
-BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" \
-BEADS_SUPERPOWERS_CHECKSUMS_URL="http://localhost:8888/missing-checksums.txt" \
+SUPERBEADS_TARBALL_URL="$TARBALL_URL" \
+SUPERBEADS_CHECKSUMS_URL="http://localhost:8888/missing-checksums.txt" \
   bash /src/install.sh --yes --version "$VERSION" 2>&1
 stop_http_server
 
@@ -390,7 +390,7 @@ rm -rf "$HOME/.claude" "$HOME/.codex" "$HOME/.config/opencode"
 
 # 5a: Tarball tier (curl available, no plugin CLIs treated as non-functional)
 start_http_server
-BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" \
+SUPERBEADS_TARBALL_URL="$TARBALL_URL" \
   bash /src/install.sh --yes --version "$VERSION" 2>&1
 stop_http_server
 
@@ -398,8 +398,8 @@ skill_count=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev
 assert_count_gte "$skill_count" 22 "fallback: tarball tier installs skills"
 
 # Check version:tier format
-assert_file_exists "$HOME/.claude/skills/.beads-superpowers-version" "fallback: version file exists"
-assert_file_contains "$HOME/.claude/skills/.beads-superpowers-version" ":" "fallback: version file has tier separator"
+assert_file_exists "$HOME/.claude/skills/.superbeads-version" "fallback: version file exists"
+assert_file_contains "$HOME/.claude/skills/.superbeads-version" ":" "fallback: version file has tier separator"
 
 bash /src/install.sh --uninstall 2>/dev/null || true
 rm -rf "$HOME/.claude"
@@ -411,7 +411,7 @@ restore_tools
 
 skill_count=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
 assert_count_gte "$skill_count" 22 "fallback: git clone tier installs skills"
-assert_file_contains "$HOME/.claude/skills/.beads-superpowers-version" "git" "fallback: version file shows git tier"
+assert_file_contains "$HOME/.claude/skills/.superbeads-version" "git" "fallback: version file shows git tier"
 
 bash /src/install.sh --uninstall 2>/dev/null || true
 rm -rf "$HOME/.claude"
@@ -435,7 +435,7 @@ mkdir -p "$HOME/.claude/skills"
 chmod 444 "$HOME/.claude/skills"
 
 start_http_server
-output=$(BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" \
+output=$(SUPERBEADS_TARBALL_URL="$TARBALL_URL" \
   bash /src/install.sh --yes --version "$VERSION" 2>&1) || true
 stop_http_server
 
@@ -454,13 +454,13 @@ rm -rf "$HOME/.claude"
 
 # Install first
 start_http_server
-BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" \
+SUPERBEADS_TARBALL_URL="$TARBALL_URL" \
   bash /src/install.sh --yes --version "$VERSION" 2>&1
 stop_http_server
 
 # Test that session-start hook handles bd in PATH
 if command -v bd >/dev/null 2>&1; then
-  assert_command_output_valid_json "bash $HOME/.claude/hooks/beads-superpowers-session-start.sh" "bd: session-start with bd produces valid JSON"
+  assert_command_output_valid_json "bash $HOME/.claude/hooks/superbeads-session-start.sh" "bd: session-start with bd produces valid JSON"
 else
   echo "  [SKIP] bd not in container — skipping bd integration"
 fi
@@ -475,7 +475,7 @@ echo "=== Group 8: Opt-in Agent Install (--with-yegge) ==="
 rm -rf "$HOME/.claude"
 
 start_http_server
-BEADS_SUPERPOWERS_TARBALL_URL="$TARBALL_URL" \
+SUPERBEADS_TARBALL_URL="$TARBALL_URL" \
   bash /src/install.sh --yes --version "$VERSION" --with-yegge
 stop_http_server
 

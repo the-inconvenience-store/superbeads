@@ -146,7 +146,7 @@ Thresholds: **<2 → rewrite** the entry; **3 → gold** (preserve as-is or mino
 | CHANGELOG.md | ✅ Polished | Voice improvements |
 ```
 
-6. **Documentation Debt (from the Step 1.5 coverage map).** For each judgment-confirmed gap, **offer** a bead (do not auto-create — consistent with "ask before new TODO items"), stamped per **Agent-Filed Bead Discipline** (`beads-superpowers:verification-before-completion`): `bd create "docs-debt: <entity> missing <quadrant>" -t chore -p 3 --notes "Severity:/Confidence:/Evidence:"`. Before creating, **check for an existing open `docs-debt` bead for the same entity** (`bd find-duplicates`, or `bd list --status=open | grep docs-debt`) and skip duplicates so the ledger doesn't fill with re-filed gaps. If a PR exists, also append the lightweight always-available form to the PR body:
+6. **Documentation Debt (from the Step 1.5 coverage map).** For each judgment-confirmed gap, **offer** a bead (do not auto-create — consistent with "ask before new TODO items"), stamped per **Agent-Filed Bead Discipline** (`superbeads:verification-before-completion`): `bd create "docs-debt: <entity> missing <quadrant>" -t chore -p 3 --notes "Severity:/Confidence:/Evidence:"`. Before creating, **check for an existing open `docs-debt` bead for the same entity** (`bd find-duplicates`, or `bd list --status=open | grep docs-debt`) and skip duplicates so the ledger doesn't fill with re-filed gaps. If a PR exists, also append the lightweight always-available form to the PR body:
 
    ```text
    ### Documentation Debt

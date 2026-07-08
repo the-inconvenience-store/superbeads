@@ -1,11 +1,11 @@
 {
-  "name": "beads-superpowers",
+  "name": "superbeads",
   "interface": {
-    "displayName": "beads-superpowers"
+    "displayName": "superbeads"
   },
   "plugins": [
     {
-      "name": "beads-superpowers",
+      "name": "superbeads",
       "source": {
         "source": "url",
         "url": "./"

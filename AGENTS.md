@@ -75,13 +75,13 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Overview
 
-This project is a plugin for **Claude Code, Codex, and OpenCode (verified), plus Cursor, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi (best-effort)** (beads-superpowers) that merges [Superpowers](https://github.com/obra/superpowers) skills with [Beads](https://github.com/gastownhall/beads) issue tracking. It provides composable skills for AI coding agents with persistent task memory via a Dolt-backed database.
+This project is a plugin for **Claude Code, Codex, and OpenCode (verified), plus Cursor, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi (best-effort)** (superbeads) that merges [Superpowers](https://github.com/obra/superpowers) skills with [Beads](https://github.com/gastownhall/beads) issue tracking. It provides composable skills for AI coding agents with persistent task memory via a Dolt-backed database.
 
 ## Beads Issue Tracking
 
 This project uses **bd (beads)** for ALL issue tracking. Issues sync to GitHub Issues via `bd github push`.
 
-- **GitHub Issues:** <https://github.com/DollarDill/beads-superpowers/issues>
+- **GitHub Issues:** <https://github.com/the-inconvenience-store/superbeads/issues>
 - **Issue tracker:** `bd` CLI (beads) with GitHub sync
 - Do NOT use TodoWrite, TaskCreate, or markdown TODO lists
 

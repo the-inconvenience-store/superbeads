@@ -40,22 +40,22 @@ fi
 
 # --- Read version from package.json ---
 version=$(python3 -c "import json; print(json.load(open('$REPO_ROOT/package.json'))['version'])")
-info "Testing install.sh for beads-superpowers v$version"
+info "Testing install.sh for superbeads v$version"
 
 # --- Build tarball ---
-tarball=$(mktemp /tmp/beads-superpowers-release-XXXXXX.tar.gz)
+tarball=$(mktemp /tmp/superbeads-release-XXXXXX.tar.gz)
 
 info "Building local tarball..."
 tar czf "$tarball" \
     -C "$REPO_ROOT" \
-    --transform "s,^,beads-superpowers-${version}/," \
+    --transform "s,^,superbeads-${version}/," \
     skills/ hooks/ example-workflow/ .claude-plugin/ .codex-plugin/ opencode/
 
 chmod 644 "$tarball"  # readable by container's non-root user
 info "Tarball: $(du -h "$tarball" | cut -f1)"
 
 # Generate checksums.txt alongside tarball
-checksums=$(mktemp /tmp/beads-superpowers-checksums-XXXXXX.txt)
+checksums=$(mktemp /tmp/superbeads-checksums-XXXXXX.txt)
 sha256sum "$tarball" | sed "s|$tarball|release.tar.gz|" > "$checksums"
 chmod 644 "$checksums"
 info "Checksums: $(cat "$checksums")"

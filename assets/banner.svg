@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" role="img" aria-label="beads-superpowers — Process discipline and persistent memory for AI coding agents">
-  <title>beads-superpowers</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" role="img" aria-label="superbeads — Process discipline and persistent memory for AI coding agents">
+  <title>superbeads</title>
   <desc>Process discipline and persistent memory for AI coding agents</desc>
 
   <defs>
@@ -17,7 +17,7 @@
 
   <rect width="1280" height="320" fill="url(#bg)"/>
 
-  <text x="80" y="140" class="title" font-size="64">beads-superpowers</text>
+  <text x="80" y="140" class="title" font-size="64">superbeads</text>
   <line x1="80" y1="170" x2="640" y2="170" class="rule"/>
   <text x="80" y="220" class="tagline" font-size="28">Process discipline + persistent memory</text>
   <text x="80" y="258" class="tagline" font-size="28">for AI coding agents</text>

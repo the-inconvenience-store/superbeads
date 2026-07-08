@@ -73,7 +73,7 @@ digraph process {
     "Read plan, extract all tasks, create epic bead + child beads (bd create)" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
-    "Use beads-superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
+    "Use superbeads:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
     "Read plan, extract all tasks, create epic bead + child beads (bd create)" -> "Claim task and dispatch implementer subagent (./implementer-prompt.md)";
     "Claim task and dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
@@ -90,7 +90,7 @@ digraph process {
     "bd close <task-id> --reason 'Completed: commits <base>..<head>, review approved'" -> "More tasks remain?";
     "More tasks remain?" -> "Claim task and dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
-    "Dispatch final code reviewer subagent for entire implementation" -> "Use beads-superpowers:finishing-a-development-branch";
+    "Dispatch final code reviewer subagent for entire implementation" -> "Use superbeads:finishing-a-development-branch";
 }
 ```
 
@@ -481,19 +481,19 @@ Conversation memory does not survive compaction, and a controller that loses its
 ## Integration
 
 **Required workflow skills:**
-- **beads-superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **beads-superpowers:writing-plans** - Creates the plan this skill executes
-- **beads-superpowers:requesting-code-review** - Code review template for reviewer subagents
-- **beads-superpowers:finishing-a-development-branch** - Complete development after all tasks
-- **beads-superpowers:dispatching-parallel-agents** - SDD's parallel batch mode uses this skill's dispatch pattern: when `bd ready --parent` returns multiple unblocked tasks, up to 5 are dispatched concurrently, each in its own worktree
-- **beads-superpowers:receiving-code-review** - When the task review produces feedback, this skill's anti-sycophancy protocol ensures technical evaluation rather than blind acceptance
+- **superbeads:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
+- **superbeads:writing-plans** - Creates the plan this skill executes
+- **superbeads:requesting-code-review** - Code review template for reviewer subagents
+- **superbeads:finishing-a-development-branch** - Complete development after all tasks
+- **superbeads:dispatching-parallel-agents** - SDD's parallel batch mode uses this skill's dispatch pattern: when `bd ready --parent` returns multiple unblocked tasks, up to 5 are dispatched concurrently, each in its own worktree
+- **superbeads:receiving-code-review** - When the task review produces feedback, this skill's anti-sycophancy protocol ensures technical evaluation rather than blind acceptance
 
 **Subagents should use:**
-- **beads-superpowers:test-driven-development** - Subagents follow TDD for each task
+- **superbeads:test-driven-development** - Subagents follow TDD for each task
 
 **Parallel mode uses:**
-- **beads-superpowers:using-git-worktrees** - Multiple worktrees for parallel task isolation
-- **beads-superpowers:systematic-debugging** - Integration test failures after batch merge
+- **superbeads:using-git-worktrees** - Multiple worktrees for parallel task isolation
+- **superbeads:systematic-debugging** - Integration test failures after batch merge
 
 **Alternative workflow:**
-- **beads-superpowers:executing-plans** - Use for parallel session instead of same-session execution
+- **superbeads:executing-plans** - Use for parallel session instead of same-session execution

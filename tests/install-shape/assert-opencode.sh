@@ -10,7 +10,7 @@ trap 'shape_sandbox_teardown' EXIT
 shape_install
 
 assert_all_skills "$SANDBOX/.config/opencode/skills"
-assert_file "$SANDBOX/.config/opencode/plugins/beads-superpowers-plugin.ts"
+assert_file "$SANDBOX/.config/opencode/plugins/superbeads-plugin.ts"
 # Canonical hook must be reachable by the TS plugin's exec target (bead 7bod):
 # present at the OpenCode root, executable, bash shebang intact.
 OC_HOOK="$SANDBOX/.config/opencode/hooks/session-start"
@@ -23,7 +23,7 @@ assert_in_log "OpenCode: installed"
 assert_shims_never_invoked
 
 shape_uninstall
-assert_no_file "$SANDBOX/.config/opencode/plugins/beads-superpowers-plugin.ts"
+assert_no_file "$SANDBOX/.config/opencode/plugins/superbeads-plugin.ts"
 assert_no_file "$SANDBOX/.config/opencode/hooks/session-start"
 assert_no_file "$SANDBOX/.config/opencode/skills/using-superpowers/SKILL.md"
 

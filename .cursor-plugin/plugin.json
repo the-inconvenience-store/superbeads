@@ -1,13 +1,13 @@
 {
-  "name": "beads-superpowers",
-  "displayName": "Beads Superpowers",
+  "name": "superbeads",
+  "displayName": "Superbeads",
   "description": "Plugin merging Superpowers skills with Beads issue tracking. Composable skills + persistent task memory for AI coding agents.",
   "version": "0.10.0",
   "author": {
-    "name": "Dillon Frawley"
+    "name": "the-inconvenience-store"
   },
-  "homepage": "https://github.com/DollarDill/beads-superpowers",
-  "repository": "https://github.com/DollarDill/beads-superpowers",
+  "homepage": "https://github.com/the-inconvenience-store/superbeads",
+  "repository": "https://github.com/the-inconvenience-store/superbeads",
   "license": "MIT",
   "keywords": [
     "beads",

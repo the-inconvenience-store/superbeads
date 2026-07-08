@@ -177,7 +177,7 @@ You MUST complete each phase before proceeding to the next.
    - Automated test if possible
    - One-off test script if no framework
    - MUST have before fixing
-   - Use the `beads-superpowers:test-driven-development` skill for writing proper failing tests
+   - Use the `superbeads:test-driven-development` skill for writing proper failing tests
 
 2. **Implement Single Fix**
    - Address the root cause identified
@@ -306,8 +306,8 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
-- **beads-superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
-- **beads-superpowers:verification-before-completion** - Verify fix worked before claiming success
+- **superbeads:test-driven-development** - For creating failing test case (Phase 4, Step 1)
+- **superbeads:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 

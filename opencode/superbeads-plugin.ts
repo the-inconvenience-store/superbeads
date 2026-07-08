@@ -23,7 +23,7 @@ export const BeadsSuperpowers: Plugin = async () => {
   }
 
   const notFoundHint =
-    "beads-superpowers: using-superpowers skill not found — run: npm exec --yes -- skills@latest add DollarDill/beads-superpowers -a opencode -g --copy -y"
+    "superbeads: using-superpowers skill not found — run: npm exec --yes -- skills@latest add the-inconvenience-store/superbeads -a opencode -g --copy -y"
 
   // Resolve the plugin root (dir containing hooks/session-start) using the same
   // home-relative candidate search as skillCandidates above.
@@ -61,7 +61,7 @@ export const BeadsSuperpowers: Plugin = async () => {
         // bd absent
       }
       const text = [
-        "beads-superpowers: session hook unavailable in this environment.",
+        "superbeads: session hook unavailable in this environment.",
         "Load skills via the Skill tool (start: using-superpowers).",
         memLine ? `${memLine} — search: bd memories <keyword>, fetch: bd recall <key>` : "",
       ]
@@ -83,7 +83,7 @@ export const BeadsSuperpowers: Plugin = async () => {
         // plugin-side bootstrap would double it and re-wrapping would nest the tags. Only
         // the fallback needs the bootstrap + <beads-context> envelope built here.
         const bootstrap = skillContent
-          ? `<EXTREMELY_IMPORTANT>\nYou have beads-superpowers.\n\n${skillContent}\n</EXTREMELY_IMPORTANT>`
+          ? `<EXTREMELY_IMPORTANT>\nYou have superbeads.\n\n${skillContent}\n</EXTREMELY_IMPORTANT>`
           : notFoundHint
         const text = ctx.primary
           ? ctx.text || bootstrap
@@ -98,7 +98,7 @@ export const BeadsSuperpowers: Plugin = async () => {
       output: { context: string[]; prompt?: string }
     ) => {
       const ctx = composerContext(pluginRoot)
-      const pointer = "beads-superpowers is installed. Run skills via the skill tool."
+      const pointer = "superbeads is installed. Run skills via the skill tool."
       // Same rule as bootstrap: primary composer output is complete — push as-is.
       output.context.push(ctx.primary && ctx.text ? ctx.text : ctx.text ? `${pointer}\n\n${ctx.text}` : pointer)
     },

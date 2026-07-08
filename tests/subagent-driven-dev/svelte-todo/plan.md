@@ -1,6 +1,6 @@
 # Svelte Todo List - Implementation Plan
 
-Execute this plan using the `beads-superpowers:subagent-driven-development` skill.
+Execute this plan using the `superbeads:subagent-driven-development` skill.
 
 ## Context
 

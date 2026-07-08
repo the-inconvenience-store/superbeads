@@ -162,8 +162,8 @@ Use skill names only; do not use `@` links or file paths that force-load skill b
 ```markdown
 ## Skills
 
-- beads-superpowers:test-driven-development: use before implementation; this task changes behavior and needs a failing test first.
-- beads-superpowers:systematic-debugging: use if the regression test fails for an unexpected reason; this task touches flaky initialization code.
+- superbeads:test-driven-development: use before implementation; this task changes behavior and needs a failing test first.
+- superbeads:systematic-debugging: use if the regression test fails for an unexpected reason; this task touches flaky initialization code.
 ```
 
 If no task-specific skill applies, do not include the Skills section.
@@ -323,13 +323,13 @@ After the plan is approved, **use your structured question tool** to offer the e
 
 **If Subagent-Driven chosen:**
 
-- **REQUIRED SUB-SKILL:** Use beads-superpowers:subagent-driven-development
+- **REQUIRED SUB-SKILL:** Use superbeads:subagent-driven-development
 - Pass the epic bead ID and graph JSON path forward
 - Fresh subagent per task + single task review (spec + quality verdicts)
 
 **If Inline Execution chosen:**
 
-- **REQUIRED SUB-SKILL:** Use beads-superpowers:executing-plans
+- **REQUIRED SUB-SKILL:** Use superbeads:executing-plans
 - Pass the epic bead ID and graph JSON path forward
 - Batch execution with checkpoints for review
 

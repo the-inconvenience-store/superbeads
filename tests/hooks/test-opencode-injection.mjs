@@ -17,7 +17,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync } from "nod
 import { tmpdir } from "node:os"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const pluginPath = join(__dirname, "../../opencode/beads-superpowers-plugin.ts")
+const pluginPath = join(__dirname, "../../opencode/superbeads-plugin.ts")
 const pluginSrc = readFileSync(pluginPath, "utf-8")
 
 // Test 0a: exec-target — composerContext execs the canonical composer, not a reimplementation.
@@ -97,7 +97,7 @@ assert.strictEqual(p2.parts.length, 0, "subsequent messages inject nothing")
 const c = { context: [] }
 await hooks["experimental.session.compacting"]({ sessionID: "s1" }, c)
 assert.strictEqual(c.context.length, 1, "compaction pushes one context entry")
-assert.ok(c.context[0].includes("beads-superpowers is installed"), "compaction pointer present")
+assert.ok(c.context[0].includes("superbeads is installed"), "compaction pointer present")
 
 // Test 4: skill-not-found HOME → hint injected on first message.
 // No re-import needed: BeadsSuperpowers reads process.env.HOME at CONSTRUCTION
@@ -112,7 +112,7 @@ assert.ok(p3.parts[0].text.includes("not found"), "notFoundHint injected when sk
 // Test 5: primary path — HOME with an executable canonical-hook stub → the plugin injects
 // the stub's --emit-plain output AS-IS. The composer output already contains the bootstrap
 // AND the <beads-context> envelope, so the plugin must not prepend its own bootstrap or
-// re-wrap (double-bootstrap / nested-tags bug, beads-superpowers-7bod).
+// re-wrap (double-bootstrap / nested-tags bug, superbeads-7bod).
 const hookHome = mkdtempSync(join(tmpdir(), "bsp-oc-hook-"))
 const ocRoot = join(hookHome, ".config/opencode")
 mkdirSync(join(ocRoot, "skills/using-superpowers"), { recursive: true })

@@ -1,4 +1,4 @@
-# beads-superpowers — Claude Code Plugin
+# superbeads — Claude Code Plugin
 
 Behavioral guidelines to reduce common LLM coding mistakes, plus project-specific instructions.
 
@@ -75,7 +75,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harnesses — Cursor, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi — that merges [Superpowers](https://github.com/obra/superpowers) skills (v6.1.1) with [Beads](https://github.com/gastownhall/beads) issue tracking (v1.1.0). It gives AI coding agents composable process-discipline skills (TDD, brainstorming, systematic debugging, code review, verification) plus persistent task memory via a Dolt-backed database.
 
-**Repository:** <https://github.com/DollarDill/beads-superpowers>
+**Repository:** <https://github.com/the-inconvenience-store/superbeads>
 **Version:** 0.10.0
 **License:** MIT (fork of obra/superpowers, also MIT)
 
@@ -86,7 +86,7 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harn
 - `skills/` — one skill per `skills/<name>/SKILL.md` directory. Some include prompt templates (`implementer-prompt.md`, `researcher-prompt.md`) or helper scripts. Auto-discovered by Claude Code — do NOT declare in `plugin.json`.
 - `agents/` — Removed in v0.6.0. Code-reviewer is now dispatched via `skills/requesting-code-review/code-reviewer.md` prompt template. Subagents (implementer, researcher) use prompt templates inside their skills, not standalone agent files.
 - `hooks/` — `session-start` (SessionStart: injects `using-superpowers` + composed beads context — curated memories + a `bd prime` pointer), the single recurring hook. Multi-format output supports Claude Code, Codex, Cursor, and generic CLIs. Registered in `hooks/hooks.json` (Claude Code) and `hooks/codex-hooks.json` (Codex). Auto-discovered.
-- `opencode/` — Native OpenCode TypeScript plugin (`beads-superpowers-plugin.ts`). Two in-process hooks: a once-per-session bootstrap and a compaction re-injection. Distributed via `install.sh`.
+- `opencode/` — Native OpenCode TypeScript plugin (`superbeads-plugin.ts`). Two in-process hooks: a once-per-session bootstrap and a compaction re-injection. Distributed via `install.sh`.
 - `example-workflow/` — Ready-to-use project template: `CLAUDE.md` (Karpathy behavioral principles + beads integration) and `agents/yegge.md` (lean router — triages requests and routes to skills). `install.sh --with-yegge` installs `yegge.md` globally (opt-in; not installed by default).
 - `docs/` — MkDocs Material source pages (6 EN + 6 ZH pages + assets). Template variables (`{{ skill_count }}`) computed at build time via `main.py` macros plugin. Contains ONLY website content.
 - `decisions/` — Architecture Decision Records (ADRs). Local working docs (gitignored).
@@ -168,7 +168,7 @@ hooks/
   session-start            # Bash: injects using-superpowers + composed beads context (multi-format output)
   run-hook.cmd             # Windows polyglot wrapper
 opencode/
-  beads-superpowers-plugin.ts  # Native OpenCode TypeScript plugin (2 hooks)
+  superbeads-plugin.ts  # Native OpenCode TypeScript plugin (2 hooks)
   package.json             # Plugin dependencies
 scripts/
   bump-version.sh          # Sync version across package.json + plugin manifests

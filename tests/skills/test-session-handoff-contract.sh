@@ -41,7 +41,7 @@ check_loose "unread inbox" "$SKILL"
 # --- Budget + ships-clean (H1) ---
 lines=$(grep -c '' "$SKILL")
 if [ "$lines" -lt 500 ]; then echo "PASS: <500 lines ($lines)"; else echo "FAIL: >=500 lines"; fail=1; fi
-grep -nE 'ADR-[0-9]|\bbd-[a-z0-9]{4}\b|beads-superpowers-[a-z0-9]+|decisions/' "$SKILL" && { echo "FAIL: unshipped refs"; fail=1; } || echo "PASS: ships clean"
+grep -nE 'ADR-[0-9]|\bbd-[a-z0-9]{4}\b|superbeads-[a-z0-9]+|decisions/' "$SKILL" && { echo "FAIL: unshipped refs"; fail=1; } || echo "PASS: ships clean"
 # Only .internal/handoff/ (the write-target default) is an allowed .internal/ ref
 grep -nE '\.internal/' "$SKILL" | grep -v '\.internal/handoff/' && { echo "FAIL: non-handoff .internal/ ref"; fail=1; } || echo "PASS: .internal/ clean"
 

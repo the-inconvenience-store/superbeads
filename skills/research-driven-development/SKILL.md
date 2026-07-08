@@ -248,7 +248,7 @@ bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / patt
 bd close <id> --reason "Research complete: <1-line summary of finding>"
 ```
 
-If research revealed follow-up work, create the recommended beads — stamp each per **Agent-Filed Bead Discipline** (`beads-superpowers:verification-before-completion`):
+If research revealed follow-up work, create the recommended beads — stamp each per **Agent-Filed Bead Discipline** (`superbeads:verification-before-completion`):
 
 ```bash
 bd create "Follow-up: <title>" -t task -p <priority> --notes "Severity: <Critical|Important|Minor>

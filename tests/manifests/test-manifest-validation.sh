@@ -4,6 +4,9 @@
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"; cd "$ROOT" || exit
 VER=$(jq -r .version package.json)
+EXPECTED_NAME="superbeads"
+EXPECTED_MARKETPLACE="superbeads-marketplace"
+EXPECTED_REPO="https://github.com/the-inconvenience-store/superbeads"
 fail=0
 valid_json() {
   if python3 -m json.tool < "$1" >/dev/null 2>&1; then
@@ -30,6 +33,18 @@ for f in .claude-plugin/plugin.json .codex-plugin/plugin.json .cursor-plugin/plu
 done
 ver_match .cursor-plugin/plugin.json '.version'
 ver_match .kimi-plugin/plugin.json '.version'
+jq -e --arg name "$EXPECTED_NAME" '.name==$name' package.json >/dev/null && echo "package name OK" || fail=1
+jq -e --arg name "$EXPECTED_NAME" '.name==$name' .claude-plugin/plugin.json >/dev/null && echo "claude name OK" || fail=1
+jq -e --arg name "$EXPECTED_NAME" '.name==$name' .codex-plugin/plugin.json >/dev/null && echo "codex name OK" || fail=1
+jq -e --arg name "$EXPECTED_NAME" '.name==$name' .cursor-plugin/plugin.json >/dev/null && echo "cursor name OK" || fail=1
+jq -e --arg name "$EXPECTED_NAME" '.name==$name' .kimi-plugin/plugin.json >/dev/null && echo "kimi name OK" || fail=1
+jq -e --arg repo "$EXPECTED_REPO" '.repository==$repo and .homepage==$repo' .claude-plugin/plugin.json >/dev/null && echo "claude repo OK" || fail=1
+jq -e --arg repo "$EXPECTED_REPO" '.repository==$repo and .homepage==$repo' .codex-plugin/plugin.json >/dev/null && echo "codex repo OK" || fail=1
+jq -e --arg repo "$EXPECTED_REPO" '.repository==$repo and .homepage==$repo' .cursor-plugin/plugin.json >/dev/null && echo "cursor repo OK" || fail=1
+jq -e --arg repo "$EXPECTED_REPO" '.homepage==$repo and .interface.websiteURL==$repo' .kimi-plugin/plugin.json >/dev/null && echo "kimi repo OK" || fail=1
+jq -e --arg market "$EXPECTED_MARKETPLACE" --arg name "$EXPECTED_NAME" '.name==$market and .plugins[0].name==$name' .claude-plugin/marketplace.json >/dev/null && echo "claude marketplace name OK" || fail=1
+jq -e --arg market "$EXPECTED_MARKETPLACE" --arg name "$EXPECTED_NAME" '.name==$market and .plugins[0].name==$name' .codex-plugin/marketplace.json >/dev/null && echo "codex marketplace name OK" || fail=1
+jq -e --arg name "$EXPECTED_NAME" '.name==$name and .plugins[0].name==$name and .interface.displayName==$name' .agents/plugins/marketplace.json >/dev/null && echo "agents marketplace name OK" || fail=1
 jq -e '.skills=="./skills/"' .cursor-plugin/plugin.json >/dev/null && echo "cursor skills OK" || fail=1
 jq -e '.sessionStart.skill=="using-superpowers"' .kimi-plugin/plugin.json >/dev/null && echo "kimi sessionStart OK" || fail=1
 

@@ -58,7 +58,7 @@ Agent tool (subagent_type: "general-purpose"):
        recommended beads to create in your output
     8. **Design tasks** — When research is for a new feature or system design (not just
        information gathering), note in your output that the dispatching agent should invoke
-       `Skill(beads-superpowers:brainstorming)` for Socratic design refinement after
+       `Skill(superbeads:brainstorming)` for Socratic design refinement after
        reviewing your findings
 
     ## Research Principles

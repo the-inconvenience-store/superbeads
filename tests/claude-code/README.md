@@ -1,8 +1,8 @@
-# Claude Code Skills Tests (beads-superpowers)
+# Claude Code Skills Tests (superbeads)
 
 > **Note:** Adapted from [obra/superpowers](https://github.com/obra/superpowers) test suite. Skills in this plugin use beads (`bd`) for task tracking.
 
-Automated tests for beads-superpowers skills using Claude Code CLI.
+Automated tests for superbeads skills using Claude Code CLI.
 
 ## Overview
 
@@ -11,7 +11,7 @@ This test suite verifies that skills are loaded correctly and Claude follows the
 ## Requirements
 
 - Claude Code CLI installed and in PATH (`claude --version` should work)
-- Local beads-superpowers plugin installed (see main README for installation)
+- Local superbeads plugin installed (see main README for installation)
 
 ## Running Tests
 

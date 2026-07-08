@@ -1,12 +1,12 @@
 {
-  "name": "beads-superpowers",
+  "name": "superbeads",
   "description": "Superpowers skills + Beads issue tracking for Claude Code, Codex, OpenCode, and 6 more AI coding agents. Composable skills + persistent task memory.",
   "version": "0.10.0",
   "author": {
-    "name": "Dillon Frawley"
+    "name": "the-inconvenience-store"
   },
-  "homepage": "https://github.com/DollarDill/beads-superpowers",
-  "repository": "https://github.com/DollarDill/beads-superpowers",
+  "homepage": "https://github.com/the-inconvenience-store/superbeads",
+  "repository": "https://github.com/the-inconvenience-store/superbeads",
   "license": "MIT",
   "keywords": [
     "beads",

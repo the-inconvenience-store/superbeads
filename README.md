@@ -1,13 +1,11 @@
-<p align="center"><strong>English</strong> · <a href="README.zh-CN.md">中文</a></p>
-
 <p align="center">
-  <img src="assets/banner.svg" alt="beads-superpowers — Process discipline and persistent memory for AI coding agents" width="100%" />
+  <img src="assets/banner.svg" alt="superbeads — Process discipline and persistent memory for AI coding agents" width="100%" />
 </p>
 
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <a href=".claude-plugin/plugin.json"><img alt="Plugin version" src="https://img.shields.io/badge/plugin-v0.10.0-4f46e5.svg"></a>
-  <a href="https://github.com/DollarDill/beads-superpowers/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/DollarDill/beads-superpowers?style=social"></a>
+  <a href="https://github.com/the-inconvenience-store/superbeads/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/the-inconvenience-store/superbeads?style=social"></a>
 </p>
 
 ---
@@ -24,55 +22,55 @@ Underneath all of it is a production-grade standard: the agent treats every task
 
 ### Testing
 
-| Skill | What it does |
-|-------|-------------|
-| `test-driven-development` | RED-GREEN-REFACTOR loop — Iron Law: no implementation without a failing test |
-| `verification-before-completion` | Evidence before claims — requires proof before marking anything done |
+| Skill                            | What it does                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------------- |
+| `test-driven-development`        | RED-GREEN-REFACTOR loop — Iron Law: no implementation without a failing test |
+| `verification-before-completion` | Evidence before claims — requires proof before marking anything done         |
 
 ### Debugging
 
-| Skill | What it does |
-|-------|-------------|
+| Skill                  | What it does                                         |
+| ---------------------- | ---------------------------------------------------- |
 | `systematic-debugging` | 4-phase root-cause analysis before proposing any fix |
 
 ### Collaboration
 
-| Skill | What it does |
-|-------|-------------|
-| `requesting-code-review` | Dispatches a code-reviewer subagent with structured criteria |
-| `receiving-code-review` | Anti-sycophancy reception — evaluates each finding on its merits |
+| Skill                         | What it does                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------ |
+| `requesting-code-review`      | Dispatches a code-reviewer subagent with structured criteria                               |
+| `receiving-code-review`       | Anti-sycophancy reception — evaluates each finding on its merits                           |
 | `subagent-driven-development` | Fresh agent per task with spec + quality review; parallel batch mode for independent tasks |
-| `dispatching-parallel-agents` | Fan-out to 2+ independent agents without shared state |
+| `dispatching-parallel-agents` | Fan-out to 2+ independent agents without shared state                                      |
 
 ### Project management
 
-| Skill | What it does |
-|-------|-------------|
-| `brainstorming` | Socratic design session before any code — produces a spec bead |
-| `stress-test` | Adversarial interrogation of plans with recommended answers |
-| `writing-plans` | Breaks work into bite-sized tasks, each tracked as a `bd` bead |
-| `executing-plans` | Batch plan execution in a single session |
-| `using-git-worktrees` | Isolated development branches per task |
-| `finishing-a-development-branch` | Merge/PR flow + Land the Plane (close beads, push) |
-| `document-release` | Post-ship doc audit — keeps README, CHANGELOG, and ARCHITECTURE in sync |
-| `project-init` | Beads/Dolt DB setup, bootstrap, and recovery |
-| `getting-up-to-speed` | Session orientation — reads the latest session-handoff doc, loads `bd` context, and produces a current-state summary |
-| `memory-curator` | Session-close/on-demand memory consolidation — deduplicates and prunes the `bd` memory store |
-| `session-handoff` | Human-invoked — writes a grounded handoff doc + continuation memory to resume in-progress work |
-| `research-driven-development` | Parallel research agents → synthesized knowledge-base document |
-| `write-documentation` | Human-quality prose — 14-rule writing system with context-first drafting |
+| Skill                            | What it does                                                                                                         |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `brainstorming`                  | Socratic design session before any code — produces a spec bead                                                       |
+| `stress-test`                    | Adversarial interrogation of plans with recommended answers                                                          |
+| `writing-plans`                  | Breaks work into bite-sized tasks, each tracked as a `bd` bead                                                       |
+| `executing-plans`                | Batch plan execution in a single session                                                                             |
+| `using-git-worktrees`            | Isolated development branches per task                                                                               |
+| `finishing-a-development-branch` | Merge/PR flow + Land the Plane (close beads, push)                                                                   |
+| `document-release`               | Post-ship doc audit — keeps README, CHANGELOG, and ARCHITECTURE in sync                                              |
+| `project-init`                   | Beads/Dolt DB setup, bootstrap, and recovery                                                                         |
+| `getting-up-to-speed`            | Session orientation — reads the latest session-handoff doc, loads `bd` context, and produces a current-state summary |
+| `memory-curator`                 | Session-close/on-demand memory consolidation — deduplicates and prunes the `bd` memory store                         |
+| `session-handoff`                | Human-invoked — writes a grounded handoff doc + continuation memory to resume in-progress work                       |
+| `research-driven-development`    | Parallel research agents → synthesized knowledge-base document                                                       |
+| `write-documentation`            | Human-quality prose — 14-rule writing system with context-first drafting                                             |
 
 ### Meta
 
-| Skill | What it does |
-|-------|-------------|
-| `using-superpowers` | Bootstrap — injected at session start, routes to the right skill |
-| `writing-skills` | Meta-skill for creating or modifying skills in this plugin |
-| `auditing-upstream-drift` | Detects staleness vs upstream superpowers and beads releases |
+| Skill                     | What it does                                                     |
+| ------------------------- | ---------------------------------------------------------------- |
+| `using-superpowers`       | Bootstrap — injected at session start, routes to the right skill |
+| `writing-skills`          | Meta-skill for creating or modifying skills in this plugin       |
+| `auditing-upstream-drift` | Detects staleness vs upstream superpowers and beads releases     |
 
 ## Docs
 
-**[dollardill.github.io/beads-superpowers](https://dollardill.github.io/beads-superpowers/)** — getting started, methodology, skills reference, example workflow, and tips.
+**[the-inconvenience-store.github.io/superbeads](https://the-inconvenience-store.github.io/superbeads/)** — getting started, methodology, skills reference, example workflow, and tips.
 
 ## Quickstart
 
@@ -81,11 +79,11 @@ The fastest path — Claude Code with native plugin install:
 ```bash
 brew install beads                    # 1. Install bd (requires beads v1.1.0+)
 # From your shell:
-claude plugin marketplace add DollarDill/beads-superpowers
-claude plugin install beads-superpowers@beads-superpowers-marketplace
+claude plugin marketplace add the-inconvenience-store/superbeads
+claude plugin install superbeads@superbeads-marketplace
 # Or, inside a Claude Code session:
-# /plugin marketplace add DollarDill/beads-superpowers
-# /plugin install beads-superpowers@beads-superpowers-marketplace
+# /plugin marketplace add the-inconvenience-store/superbeads
+# /plugin install superbeads@superbeads-marketplace
 # Then in your project directory:
 bd init                               # 2. Bootstrap the Dolt database for this project
 ```
@@ -111,17 +109,17 @@ These paths are tested end-to-end. Prefer them.
 #### Claude Code
 
 ```bash
-claude plugin marketplace add DollarDill/beads-superpowers
-claude plugin install beads-superpowers@beads-superpowers-marketplace
+claude plugin marketplace add the-inconvenience-store/superbeads
+claude plugin install superbeads@superbeads-marketplace
 ```
 
-Or as slash commands inside a Claude Code session: `/plugin marketplace add DollarDill/beads-superpowers` then `/plugin install beads-superpowers@beads-superpowers-marketplace`.
+Or as slash commands inside a Claude Code session: `/plugin marketplace add the-inconvenience-store/superbeads` then `/plugin install superbeads@superbeads-marketplace`.
 
 #### Codex CLI
 
 ```bash
-codex plugin marketplace add DollarDill/beads-superpowers
-codex plugin install beads-superpowers@beads-superpowers-marketplace
+codex plugin marketplace add the-inconvenience-store/superbeads
+codex plugin install superbeads@superbeads-marketplace
 ```
 
 After installing, enable hooks in `~/.codex/config.toml`:
@@ -136,7 +134,7 @@ To get the SessionStart hook under Codex, use the scripted installer (`install.s
 #### OpenCode
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/DollarDill/beads-superpowers/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/the-inconvenience-store/superbeads/main/install.sh | bash
 ```
 
 The installer detects OpenCode and copies skills to `~/.config/opencode/skills/` and the TypeScript plugin to `~/.config/opencode/plugins/` (active automatically).
@@ -148,7 +146,7 @@ Config validated; not E2E-tested by us. Use with that in mind.
 #### Cursor
 
 ```text
-/add-plugin beads-superpowers
+/add-plugin superbeads
 ```
 
 Run this command inside Cursor Agent. Update via the Marketplace UI.
@@ -156,14 +154,14 @@ Run this command inside Cursor Agent. Update via the Marketplace UI.
 #### GitHub Copilot CLI
 
 ```bash
-copilot plugin marketplace add DollarDill/beads-superpowers
-copilot plugin install beads-superpowers@beads-superpowers-marketplace
+copilot plugin marketplace add the-inconvenience-store/superbeads
+copilot plugin install superbeads@superbeads-marketplace
 ```
 
 Update:
 
 ```bash
-copilot plugin update beads-superpowers
+copilot plugin update superbeads
 ```
 
 Note: rides the Claude-plugin fallback (skills + session-start via the shared `hooks/hooks.json`), the same mechanism upstream ships; requires Copilot CLI v1.0.11+ for session-start context injection.
@@ -171,7 +169,7 @@ Note: rides the Claude-plugin fallback (skills + session-start via the shared `h
 #### Kimi Code
 
 ```text
-/plugins install https://github.com/DollarDill/beads-superpowers
+/plugins install https://github.com/the-inconvenience-store/superbeads
 ```
 
 Run `/new` after install to start a fresh session with the plugin active.
@@ -179,7 +177,7 @@ Run `/new` after install to start a fresh session with the plugin active.
 #### Antigravity
 
 ```bash
-agy plugin install https://github.com/DollarDill/beads-superpowers
+agy plugin install https://github.com/the-inconvenience-store/superbeads
 ```
 
 Note: reuses the Claude plugin manifest — the same mechanism upstream verified.
@@ -187,8 +185,8 @@ Note: reuses the Claude plugin manifest — the same mechanism upstream verified
 #### Factory Droid
 
 ```bash
-droid plugin marketplace add https://github.com/DollarDill/beads-superpowers
-droid plugin install beads-superpowers@beads-superpowers-marketplace
+droid plugin marketplace add https://github.com/the-inconvenience-store/superbeads
+droid plugin install superbeads@superbeads-marketplace
 ```
 
 Note: reuses the Claude plugin manifest — the same mechanism upstream verified.
@@ -196,7 +194,7 @@ Note: reuses the Claude plugin manifest — the same mechanism upstream verified
 #### Pi
 
 ```bash
-pi install git:github.com/DollarDill/beads-superpowers
+pi install git:github.com/the-inconvenience-store/superbeads
 ```
 
 #### Universal fallback (npx)
@@ -211,7 +209,7 @@ pi install git:github.com/DollarDill/beads-superpowers
 Installs the skills only — no hooks. Skill activation relies on your harness's native skill discovery.
 
 ```bash
-npx skills add DollarDill/beads-superpowers -g --copy -y
+npx skills add the-inconvenience-store/superbeads -g --copy -y
 ```
 
 For the full experience (session-start injection of skill context + a composed beads context), use the plugin install (Claude Code / Codex / OpenCode above) or the install script. To get beads context on an npx install, run `bd setup claude` (beads' own hook installer).
@@ -219,7 +217,7 @@ For the full experience (session-start injection of skill context + a composed b
 ### Alternative: scripted install (`curl | bash`)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/DollarDill/beads-superpowers/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/the-inconvenience-store/superbeads/main/install.sh | bash
 ```
 
 The script's role is broader than just copying files. Use it when you need any of:
@@ -239,7 +237,7 @@ Supports: `--yes` (skip prompts), `--version X.Y.Z`, `--with-yegge`, `--dry-run`
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md). Ideas welcome in **[Discussions](https://github.com/DollarDill/beads-superpowers/discussions/27)**.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md). Ideas welcome in **[Discussions](https://github.com/the-inconvenience-store/superbeads/discussions)**.
 
 ## License
 
