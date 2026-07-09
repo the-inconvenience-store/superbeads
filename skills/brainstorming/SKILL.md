@@ -141,6 +141,7 @@ digraph brainstorming {
 
 - Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
+- The spec MUST include an `## Assumptions` section: every load-bearing assumption, one line each — `<assumption> — [verified|recalled|assumed] — breaks: <what happens if this is wrong>`. If there are none, the section states `None — all inputs verified this session.`
 - Commit the design document to git
 
 > When filing a bead for discovered/follow-up work, stamp it per **Agent-Filed Bead Discipline** (`verification-before-completion`).
@@ -172,6 +173,7 @@ After writing the spec document, look at it with fresh eyes:
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+5. **Assumption audit:** Does `## Assumptions` exist, and is every load-bearing claim in the spec binned there as verified/recalled/assumed with what breaks if it's wrong? An unlabeled guess presented as fact is a spec failure.
 
 Fix any issues inline. No need to re-review — just fix and move on.
 

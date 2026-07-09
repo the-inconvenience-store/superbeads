@@ -62,6 +62,8 @@ Subagent (general-purpose):
     implementer grading their own work. Judge the code on its merits — a
     stated rationale never downgrades a finding's severity.
 
+    The report labels claims as `[verified: ...]`, `[recalled: ...]`, or `[assumed: ...]`. Spot-check `verified` claims against the diff; treat `recalled`, `assumed`, and unlabeled load-bearing claims as unverified — if one gates spec compliance, report it as a ⚠️ item naming the claim.
+
     ## Tests
 
     The implementer already ran the tests and reported results with TDD

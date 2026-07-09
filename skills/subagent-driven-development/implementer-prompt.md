@@ -167,6 +167,12 @@ Agent tool (subagent_type: "general-purpose"):
     - Self-review findings (if any)
     - Any issues or concerns
 
+    **Claim labels:** every factual claim in the report carries its bin at the point of the claim:
+    - `[verified: <command> → <observed output>]` — you ran it this session
+    - `[recalled: <source>]` — believed from docs or memory, not re-checked here
+    - `[assumed: <why you chose it>]` — picked to make progress
+    An unlabeled claim reads as `assumed`. Never write `verified` without the command and its output. Confidence words must track the label — "should work" next to a `[verified: ...]` claim and bare certainty next to an `[assumed: ...]` claim are both lies.
+
     Then report back to the controller with ONLY a short summary (the detail
     lives in the report file): the **Status**, commits created (short SHA +
     subject), a one-line test summary, your concerns if any, and the **report
