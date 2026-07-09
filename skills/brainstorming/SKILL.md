@@ -75,6 +75,18 @@ digraph brainstorming {
 **Understanding the idea:**
 
 - Check out the current project state first (files, docs, recent commits)
+- Search for prior decisions or design memories touching the feature area before asking detailed questions: `bd memories <keyword>`.
+
+> **bd frugality: bounded output, one round trip.** Cap reads: `bd ready -n 10`,
+> `bd show --short <id>` to skim (full `bd show` only when the body is needed),
+> `bd memories <keyword>` (NEVER bare `bd memories` — it dumps the whole store).
+> Batch writes: several creates/updates/closes = one `bd batch` or `bd create --graph`
+> call, not a loop. Filter big outputs before they hit context
+> (`... | grep -E "PATTERN" | head -20`). Keep write confirmations — they are evidence.
+> **`--claim` boundary:** `bd ready --claim` ONLY in autonomous take-next-task flows
+> (this skill's batch/wave dispatch). FORBIDDEN wherever the user picks the work —
+> orientation, brainstorming, session close. Efficiency never erodes a consent gate.
+
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
 - If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea

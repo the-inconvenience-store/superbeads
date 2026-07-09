@@ -50,6 +50,9 @@ CB5_SITES=(
   skills/project-init/SKILL.md
   skills/getting-up-to-speed/SKILL.md
   skills/writing-plans/SKILL.md
+  skills/brainstorming/SKILL.md
+  skills/systematic-debugging/SKILL.md
+  skills/stress-test/SKILL.md
 )
 LTP_SITES=(
   skills/executing-plans/SKILL.md

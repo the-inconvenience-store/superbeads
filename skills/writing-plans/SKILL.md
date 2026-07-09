@@ -29,6 +29,8 @@ If the spec covers multiple independent subsystems, it should have been broken i
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
 
+Search for prior decisions, designs, or plan memories touching the feature area before locking in decomposition: `bd memories <keyword>`.
+
 - Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
 - You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Prefer smaller, focused files over large ones that do too much.
 - Files that change together should live together. Split by responsibility, not by technical layer.

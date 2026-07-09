@@ -37,6 +37,18 @@ bd update <id> --claim
 
 Read the design, plan, or decision document thoroughly. If no document exists, ask the user to describe the approach. Explore the codebase for context — answer your own questions from code when possible rather than asking the user.
 
+Search for ADR or decision memories on the design under test before mapping branches: `bd memories <keyword>`.
+
+> **bd frugality: bounded output, one round trip.** Cap reads: `bd ready -n 10`,
+> `bd show --short <id>` to skim (full `bd show` only when the body is needed),
+> `bd memories <keyword>` (NEVER bare `bd memories` — it dumps the whole store).
+> Batch writes: several creates/updates/closes = one `bd batch` or `bd create --graph`
+> call, not a loop. Filter big outputs before they hit context
+> (`... | grep -E "PATTERN" | head -20`). Keep write confirmations — they are evidence.
+> **`--claim` boundary:** `bd ready --claim` ONLY in autonomous take-next-task flows
+> (this skill's batch/wave dispatch). FORBIDDEN wherever the user picks the work —
+> orientation, brainstorming, session close. Efficiency never erodes a consent gate.
+
 **Restore point (Mode A only):** If the target artifact has uncommitted changes, commit or stash them before starting — this preserves a clean restore point before inline edits begin. In the normal flow (brainstorming → stress-test), the artifact is already committed.
 
 ### Phase 2: Map the Decision Tree
