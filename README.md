@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <a href=".claude-plugin/plugin.json"><img alt="Plugin version" src="https://img.shields.io/badge/plugin-v0.10.0-4f46e5.svg"></a>
+  <a href=".claude-plugin/plugin.json"><img alt="Plugin version" src="https://img.shields.io/badge/plugin-v0.11.0-4f46e5.svg"></a>
   <a href="https://github.com/the-inconvenience-store/superbeads/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/the-inconvenience-store/superbeads?style=social"></a>
 </p>
 
