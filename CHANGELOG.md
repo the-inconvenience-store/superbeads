@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-07-10
+
 ### Changed
 
 - **Plugin identity renamed to `superbeads`.** Public manifests, installer artifact names, hook/version-file paths, native install snippets, OpenCode plugin packaging, docs links, and skill namespace references now point at `the-inconvenience-store/superbeads` with the `superbeads@superbeads-marketplace` install handle. The installer now writes `superbeads-session-start.sh`, `.superbeads-version`, and `superbeads-plugin.ts`, and accepts `SUPERBEADS_*` override variables while retaining the old `BEADS_SUPERPOWERS_*` names as compatibility fallbacks.
