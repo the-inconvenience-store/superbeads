@@ -25,6 +25,22 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
+## Verify Before You Write
+
+Every path, command, signature, and data shape in a task description must have
+been OBSERVED this session, not recalled from the spec or memory. Before writing
+task descriptions:
+
+- Run the actual test/build targets (`project.json`, `package.json`, justfile) —
+  never guess command syntax.
+- Open the files each task modifies; confirm line numbers, exported names, and
+  the shapes tasks consume/produce.
+- Read the most recent prior graph plan and match its conventions.
+- Re-verify any spec claim about landed prerequisites that execution depends on.
+
+A plan step citing a command that was never run, or a type never read, is a
+placeholder wearing a costume — same failure class as "TBD".
+
 ## File Structure
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.

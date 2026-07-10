@@ -25,7 +25,7 @@ You MUST create the session bead + step children atomically via `bd create --gra
 
 The session bead always stays permanent (it's the audit trail). Graph JSON nodes do not accept an `ephemeral` field (verified: `bd create --graph ... --dry-run` silently drops unknown node fields with a warning), so step children created via `--graph` are permanent chores. If the operator prefers hidden ceremony beads for the step children instead, create them individually: `bd create "Step N: <title>" -t chore --parent <session-bead-id> --ephemeral` — trade-off: `--graph` is one call and permanent; individual creation is N calls and ephemeral. Ephemeral beads are hidden from `bd ready`/`bd list`/`bd count` by default and do not self-clean — sweep them eventually with `bd purge`.
 
-1. **Explore project context** — check files, docs, recent commits
+1. **Establish ground truth** — parallel exploration of plan, code, prerequisites, refs; present findings digest (see Ground Truth Before Questions)
 2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
 3. **Restate the goal, then ask clarifying questions** — open with a one-sentence goal restatement, then one question at a time on purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
@@ -36,11 +36,51 @@ The session bead always stays permanent (it's the audit trail). Graph JSON nodes
 9. **Spec-review gate offers stress-test** — the spec-review gate (step 8) includes an "Approved + stress-test" option, offered every time; if selected, invoke `stress-test` before writing-plans
 10. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
+## Ground Truth Before Questions
+
+Exploration is not "read a few files." Before any clarifying question, establish
+ground truth on four evidence classes:
+
+1. **The governing plan** — read the relevant roadmap/spec section IN FULL, plus
+   the sections before and after it: what prior work landed, what future work
+   this design must not paint into a corner.
+2. **Existing code** — every area the work touches: what exists (reuse), what is
+   greenfield, what must change architecturally.
+3. **Claimed prerequisites** — anything the request or spec ASSUMES has landed.
+   Verify it actually landed (`git log`, grep the code). Spec stubs and trackers
+   are snapshots; treat every "already done" claim as unverified until observed.
+4. **Governing refs** — ADRs, tenets, design artifacts (wireframes, contracts)
+   that constrain the design.
+
+For non-trivial scope, dispatch parallel read-only exploration subagents — one
+per evidence class or code area — and continue useful inline reading while they
+run. Inline reads suffice only for genuinely small scope.
+
+**Findings digest (MANDATORY):** as reports land, present a digest to the user —
+never raw file contents. Every finding carries its design consequence
+("X exists → reuse it", "Y is greenfield", "Z requires an architectural change").
+End each digest with what's still outstanding and what happens next.
+
+**Discrepancy rule:** when recorded state (tracker, spec, docs) disagrees with
+observed code, verify independently first (git history, diffs), then make it
+your FIRST clarifying question — present the evidence, never silently pick a side.
+
+**Bright line:** NO clarifying question until ground truth is complete — the only
+exception is a question needed to scope the exploration itself.
+
+| Rationalization | Reality |
+|---|---|
+| "I read the main file, that's enough context" | You found what exists, not what the design must reuse, avoid, or change |
+| "The spec says X already landed" | Spec stubs go stale; verify against the code |
+| "I'll ask questions first, then explore based on answers" | Ungrounded questions waste the user's time; grounded questions answer themselves |
+| "I'll just present my findings as a file list" | Findings without design consequences are a dump, not a digest |
+
 ## Process Flow
 
 ```dot
 digraph brainstorming {
-    "Explore project context" [shape=box];
+    "Establish ground truth\n(parallel exploration)" [shape=box];
+    "Present findings digest" [shape=box];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
     "Present design sections" [shape=box];
@@ -52,7 +92,8 @@ digraph brainstorming {
     "Invoke stress-test skill" [shape=box];
     "Invoke writing-plans skill" [shape=doublecircle];
 
-    "Explore project context" -> "Ask clarifying questions";
+    "Establish ground truth\n(parallel exploration)" -> "Present findings digest";
+    "Present findings digest" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
     "Present design sections" -> "User approves design?";
@@ -74,7 +115,7 @@ digraph brainstorming {
 
 **Understanding the idea:**
 
-- Check out the current project state first (files, docs, recent commits)
+- Establish ground truth first, per Ground Truth Before Questions above — then present the findings digest before your first question
 - **Restate the real goal before the first question.** Open your first questioning message with one sentence: `Goal as I understand it: <what changes in the user's world if this succeeds, and what they'll do with it>`. The literal request is a lossy compression of that goal — look for the decision hiding behind the question and the audience who isn't the asker. If writing the sentence feels like a guess, your first clarifying question resolves that guess — one sharp question, not five. A wrong restatement caught here is cheap; a perfect design for the wrong goal is the most expensive failure available.
 - Search for prior decisions or design memories touching the feature area before asking detailed questions: `bd memories <keyword>`.
 
@@ -231,6 +272,7 @@ Route on the answer:
 
 ## Key Principles
 
+- **Evidence before questions** - Every clarifying question cites what you observed; ground truth comes first
 - **One question at a time** - Don't overwhelm with multiple questions
 - **Restate before you refine** - The goal restatement opens every brainstorm; questions refine it, never replace it
 - **Multiple choice preferred** - Easier to answer than open-ended when possible
