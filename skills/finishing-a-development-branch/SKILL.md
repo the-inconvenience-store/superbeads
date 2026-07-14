@@ -9,13 +9,13 @@ description: Use when implementation is complete, all tests pass, and you need t
 
 Guide completion of development work by presenting clear options and handling chosen workflow.
 
-**Core principle:** Verify tests → Detect environment → Present options → Execute choice → Clean up.
+**Core principle:** Verify code and required outcomes → state readiness precisely → present safe integration options → execute the user's choice.
 
 **Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
 
 ## The Process
 
-### Step 1: Verify Tests
+### Step 1: Verify Code and Acceptance
 
 **Before presenting options, verify tests pass:**
 
@@ -44,7 +44,26 @@ bd find-duplicates
 
 If `bd find-duplicates` reports issues, fix them before proceeding. Then continue to Step 2.
 
-A green suite is necessary but not sufficient: do not merge if a requirement was dropped or a security regression remains (Production-Grade Doctrine).
+A green suite is necessary but not sufficient. Discover the spec/epic's outcome
+trace and acceptance gate, then use `verification-before-completion` to verify
+every required acceptance ID on the final relevant commit/environment.
+
+Classify readiness precisely:
+
+| Status | Meaning | Allowed next action |
+|---|---|---|
+| `READY_FOR_CODE_REVIEW` | Build/tests/reviews green; required product acceptance is blocked or not run | Draft PR or keep branch; no merge/epic close |
+| `READY_FOR_ACCEPTANCE` | Code checks green and environment ready; outcome suite still needs to run | Run acceptance; draft PR only if requested |
+| `ACCEPTANCE_PASSED` | Every required acceptance ID has matching fresh PASS evidence | Merge/PR options may be presented |
+
+If no formal outcome trace exists, re-read the user request/spec line by line
+and build the requirement checklist now. Do not equate its absence with no
+acceptance obligations.
+
+Do not merge if a requirement was dropped, a required evidence class is
+`FAIL`, `BLOCKED`, or `NOT_RUN`, or a security regression remains. CI, static
+review, conformance, direct API checks, and browser/live evidence are not
+interchangeable.
 
 ### Step 2: Detect Environment
 
@@ -76,7 +95,27 @@ Or ask: "This branch split from main - is that correct?"
 
 **Use your structured question tool** to present options. Do NOT present choices as plain prose when your harness has a question tool; without one, numbered list + STOP. A skipped, dismissed, or auto-resolved answer is not consent — stop and ask in plain text.
 
-**For normal repo or named-branch worktree** (`IS_DETACHED=no`), present all 4 options:
+If status is `READY_FOR_CODE_REVIEW` or `READY_FOR_ACCEPTANCE`, do not offer
+local merge. Offer Draft PR, Keep as-is, or Discard, and state the unsatisfied
+acceptance IDs. A user may request a draft PR before acceptance; that does not
+close the acceptance gate or epic.
+
+```json
+{
+  "questions": [{
+    "question": "Code checks passed, but product acceptance is <STATUS>. Unmet IDs: <IDS>. What should I do with the branch?",
+    "header": "Branch action",
+    "options": [
+      {"label": "Open draft PR", "description": "Push and open a draft PR labelled with the blocked/not-run acceptance; do not merge or close the gate"},
+      {"label": "Keep as-is", "description": "Leave the branch/worktree in place for acceptance or follow-up work"},
+      {"label": "Discard", "description": "Delete this work after a separate typed confirmation"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+**When status is `ACCEPTANCE_PASSED`, for normal repo or named-branch worktree** (`IS_DETACHED=no`), present all 4 options:
 
 ```json
 {
@@ -175,6 +214,11 @@ case "$REMOTE_URL" in
 
 ## Test Plan
 - [ ] <verification steps>
+
+## Acceptance Status
+- Status: <READY_FOR_CODE_REVIEW | READY_FOR_ACCEPTANCE | ACCEPTANCE_PASSED>
+- Passed IDs: <ids + evidence links>
+- Unmet IDs: <FAIL/BLOCKED/NOT_RUN ids, or None>
 EOF
 )" ;;
   *gitlab*)
@@ -253,10 +297,12 @@ bd remember "<kind>: <durable, evidence-backed insight>"   # kind: lesson / patt
 
 **After executing the chosen option (Steps 1-6), complete the session close ritual. This is MANDATORY.**
 
-Work is NOT complete until `git push` succeeds.
+The session-close sync is not complete until `git push` succeeds. A successful
+push does not upgrade `READY_FOR_CODE_REVIEW` or `READY_FOR_ACCEPTANCE` to
+product acceptance.
 
 ```bash
-# 1. Close completed task beads with reasons
+# 1. Close completed task beads with reasons; do not close acceptance gates here unless every required ID is PASS
 bd close <task-id-1> <task-id-2> ... --reason "Completed: description of what was done"
 ```
 
@@ -267,10 +313,10 @@ bd close <task-id-1> <task-id-2> ... --reason "Completed: description of what wa
 > Note: `bd batch create` is simplified — no `--description`, `--parent`, or `--acceptance` flags. Use regular `bd create` when those are needed.
 
 ```bash
-# 2. Close the epic bead (if all child tasks are done)
+# 2. Close the epic bead only when all children are done AND every required acceptance ID is PASS
 bd epic status <epic-id>                    # Summary view of completion
-bd epic close-eligible                      # Auto-close epics where all children are done
-# Or manually: bd close <epic-id> --reason "Epic complete: all tasks finished and reviewed"
+# Do not use child-count-only auto-close for epics with an outcome contract.
+bd close <epic-id> --reason "Epic accepted: all tasks reviewed; acceptance IDs <ids> PASS on <commit/environment>"
 ```
 
 **3. File remaining work as new beads (if any)**
@@ -354,6 +400,9 @@ git status    # MUST show "up to date with origin"
 - Delete work without confirmation
 - Force-push without explicit request
 - Merge a dropped requirement or a security regression behind a green test suite
+- Merge, close an acceptance gate, or close an epic while a required acceptance ID is FAIL, BLOCKED, NOT_RUN, SKIPPED, or evidenced on stale code
+- Describe `READY_FOR_CODE_REVIEW` as implementation complete, accepted, or merge-ready
+- Infer that “open a PR” waives unfinished acceptance
 
 **Always:**
 - Verify tests before offering options

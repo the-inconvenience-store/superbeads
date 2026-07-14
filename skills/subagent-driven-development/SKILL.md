@@ -5,11 +5,11 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
-Execute plan by dispatching fresh subagent per task, with a single read-only task review after each — one reviewer returns a spec-compliance verdict and a code-quality verdict in one pass.
+Execute plan by dispatching a fresh subagent per task, with a single read-only task review after each. For plans with an outcome contract, run separate independent outcome reviews at declared checkpoints and before epic completion.
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
-**Core principle:** Fresh subagent per task + a single read-only task review (spec + quality verdicts in one pass) = high quality, fast iteration
+**Core principle:** Task review proves the change; outcome review proves the product. Neither substitutes for the other.
 
 **Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
 
@@ -73,6 +73,9 @@ digraph process {
     "Read plan, extract all tasks, create epic bead + child beads (bd create)" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
+    "Dispatch independent outcome reviewer (./outcome-reviewer-prompt.md)" [shape=box];
+    "All required outcome IDs PASS?" [shape=diamond];
+    "Persist evidence; leave acceptance gate and epic open" [shape=box];
     "Use superbeads:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
     "Read plan, extract all tasks, create epic bead + child beads (bd create)" -> "Claim task and dispatch implementer subagent (./implementer-prompt.md)";
@@ -90,9 +93,42 @@ digraph process {
     "bd close <task-id> --reason 'Completed: commits <base>..<head>, review approved'" -> "More tasks remain?";
     "More tasks remain?" -> "Claim task and dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
-    "Dispatch final code reviewer subagent for entire implementation" -> "Use superbeads:finishing-a-development-branch";
+    "Dispatch final code reviewer subagent for entire implementation" -> "Dispatch independent outcome reviewer (./outcome-reviewer-prompt.md)";
+    "Dispatch independent outcome reviewer (./outcome-reviewer-prompt.md)" -> "All required outcome IDs PASS?";
+    "All required outcome IDs PASS?" -> "Use superbeads:finishing-a-development-branch" [label="yes"];
+    "All required outcome IDs PASS?" -> "Persist evidence; leave acceptance gate and epic open" [label="failed/blocked/untested"];
+    "Persist evidence; leave acceptance gate and epic open" -> "Use superbeads:finishing-a-development-branch" [label="only if user requested draft PR/branch disposition"];
 }
 ```
+
+## Outcome Review
+
+Task review remains diff-scoped and does not become a miniature E2E pass. A
+separate fresh outcome reviewer uses `./outcome-reviewer-prompt.md`:
+
+- Run it after every outcome checkpoint declared by the plan and once on the
+  final commit before epic closure.
+- Give it the outcome trace, user stories/requirements, routes or interfaces,
+  design artifacts, required evidence classes, environment identity, and commit.
+- Do not give it the implementation plan's claims as assumed truth. Its job is
+  to falsify completion from the user's entry point.
+- It reports `PASS`, `FAIL`, `BLOCKED`, or `UNTESTED` for every acceptance ID.
+  Only `PASS` satisfies an ID.
+- Persist the report and evidence as a comment on the acceptance-gate bead.
+- `FAIL`, `BLOCKED`, or `UNTESTED` leaves the gate and epic open. File/fix the
+  blocker, rerun the affected evidence, then rerun the outcome review.
+
+Task beads may close after their own implementation and review criteria pass;
+that means task-complete, not product-complete. The acceptance gate and epic
+carry the higher-level outcome state.
+
+**No inferred waiver:** a user request to open a PR, babysit CI, continue to
+follow-ups, or meet a deadline does not remove unfinished acceptance IDs. Only
+explicit approval naming the IDs may cut scope, and the trace must record it.
+If the user explicitly requested a PR or branch disposition, a failed, blocked,
+or untested outcome review may still hand off to `finishing-a-development-branch`
+with status `READY_FOR_CODE_REVIEW`. That path may create a draft PR or keep the
+branch, but must not merge, close the acceptance gate, or close the epic.
 
 **Checking for remaining tasks:** Use `bd ready --parent <epic-id>` to see remaining unblocked child tasks. Use `bd epic status <epic-id>` for a summary view of completion percentage. When `bd ready` returns no results for the epic, all tasks are complete.
 
@@ -132,7 +168,7 @@ digraph parallel_batch {
     "bd swarm validate <epic-id>" [shape=box];
     "bd ready --parent <epic-id>" [shape=box];
     "How many unblocked?" [shape=diamond];
-    "0: All done → finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
+    "0: Tasks done → final code + outcome review" [shape=box style=filled fillcolor=lightgreen];
     "1: Sequential mode (run in epic worktree)" [shape=box];
     ">1: Parallel batch" [shape=box];
     "Create bd worktree per task (max 5)" [shape=box];
@@ -148,7 +184,7 @@ digraph parallel_batch {
 
     "bd swarm validate <epic-id>" -> "bd ready --parent <epic-id>";
     "bd ready --parent <epic-id>" -> "How many unblocked?";
-    "How many unblocked?" -> "0: All done → finishing-a-development-branch" [label="0"];
+    "How many unblocked?" -> "0: Tasks done → final code + outcome review" [label="0"];
     "How many unblocked?" -> "1: Sequential mode (run in epic worktree)" [label="1"];
     "1: Sequential mode (run in epic worktree)" -> "bd ready --parent <epic-id>" [label="after task completes"];
     "How many unblocked?" -> ">1: Parallel batch" [label="2-5+"];
@@ -240,7 +276,7 @@ When a parallel task fails review:
 tasks = bd ready --parent <epic-id>
 
 if len(tasks) == 0:
-    All done → invoke finishing-a-development-branch
+    Tasks done → final code review + required outcome review → finishing only on PASS
 elif len(tasks) == 1:
     Sequential mode (run in epic worktree, existing behavior)
 elif len(tasks) <= 5:
@@ -320,6 +356,7 @@ Dispatch via the `Agent` tool:
 
 - `./implementer-prompt.md` - Dispatch implementer subagent
 - `./task-reviewer-prompt.md` - Dispatch the single task reviewer subagent (returns spec-compliance + code-quality verdicts in one read-only pass)
+- `./outcome-reviewer-prompt.md` - Dispatch a fresh outcome reviewer for live/integrated acceptance IDs; never use it as the task reviewer
 
 ## Example Workflow
 
@@ -460,6 +497,9 @@ Conversation memory does not survive compaction, and a controller that loses its
 - Let implementer self-review replace the task review (both are needed)
 - Move to next task while the review has open issues
 - Close a task after a failed review; failed verdicts are comments, not completion evidence
+- Close an acceptance gate or epic while any required outcome ID is `FAIL`, `BLOCKED`, `UNTESTED`, `SKIPPED`, or `NOT_RUN`
+- Substitute CI, unit tests, conformance, static review, or direct API checks for a different evidence class required by the outcome contract
+- Treat a later operational instruction (open PR, monitor CI, continue) as permission to waive unfinished acceptance
 - **Coach a reviewer to suppress findings** — never instruct a reviewer to ignore or not flag an issue, or pre-rate a finding's severity. If your reviewer prompt contains "do not flag", "don't treat X as a defect", "at most Minor", or "the plan chose", stop: you are pre-judging. Let the reviewer raise it and adjudicate in the review loop.
 - Discard or defer a failed task to quietly descope a required deliverable, or let Model-Selection cost-minimization accept weaker correctness/security review — surface the trade-off, never take it silently (Production-Grade Doctrine)
 

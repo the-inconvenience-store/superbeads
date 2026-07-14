@@ -25,6 +25,33 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
+## Outcome Trace
+
+Before decomposing tasks, copy the spec's stable acceptance IDs into an outcome
+trace. For each ID record:
+
+`persona | starting route/interface | action | durable result | find-again/use path | failure/denied state | required evidence class | owning task/gate`
+
+If the spec has user-facing or durable behavior but no outcome contract, stop
+and return to brainstorming. Do not invent a task graph that can be locally green
+while the product journey is undefined.
+
+Rules:
+
+- Every acceptance ID MUST have an owning task and a final acceptance gate.
+- Every task `## Context` MUST list the acceptance IDs it enables or protects.
+- Unit tests, CI, conformance, static review, direct API calls, browser/live,
+  persistence, security, and rollback are distinct evidence classes. One does
+  not substitute for another named by the spec.
+- Decompose by vertical outcome where practical. Foundation tasks are allowed,
+  but the plan MUST reach a live vertical seam early, before building breadth.
+- Do not postpone first integration contact until the last task after a long run
+  of locally verified components. Add outcome checkpoints after seam-changing
+  batches and a final independent outcome review.
+- A scope cut names the affected acceptance IDs and requires explicit user
+  approval. A request to open a PR, run CI, or start follow-up work is not
+  approval to remove unfinished IDs.
+
 ## Verify Before You Write
 
 Every path, command, signature, and data shape in a task description must have
@@ -87,7 +114,7 @@ Write a bd graph JSON file with one epic node, one task node per task, and depen
       "title": "Epic: <feature name>",
       "type": "epic",
       "priority": 2,
-      "description": "<goal, architecture, tech stack, global constraints>\n\n## Success Criteria\n- <measurable outcome copied from the goal>"
+      "description": "<goal, architecture, tech stack, global constraints>\n\n## Outcome Trace\n- <acceptance-id>: <journey and required evidence class>\n\n## Success Criteria\n- <measurable outcome copied from the goal>"
     },
     {
       "key": "t1",
@@ -95,7 +122,7 @@ Write a bd graph JSON file with one epic node, one task node per task, and depen
       "type": "task",
       "priority": 2,
       "parent_key": "epic1",
-      "description": "<summary>\n\n## Context\n- Spec: `docs/specs/<spec-file>.md`\n- External ref: <GitHub/Jira/Linear/URL or \"None\">\n- Why this task exists: <requirement, user need, or risk it resolves>\n- Relevant constraints: <compatibility, security, performance, migration, repo conventions>\n\n## Files\n- Create: `exact/path/to/file.py`\n- Modify: `exact/path/to/existing.py:123`\n- Test: `tests/exact/path/to/test.py`\n\n## Interfaces\n- Consumes: <exact signatures and types>\n- Produces: <exact signatures and types>\n\n## Acceptance Criteria\n- <observable, testable outcome>\n\n## Skills\n- <skill-name>: use when <trigger>; helps because <task-specific reason>\n\n## Steps\n1. Write the failing test: <exact test code or command>\n2. Run it to verify it fails: `<command>`; expected: <failure>\n3. Implement the minimal code: <exact code or file edits>\n4. Run it to verify it passes: `<command>`; expected: PASS\n5. Commit: `git add ... && git commit -m \"...\"`"
+      "description": "<summary>\n\n## Context\n- Spec: `docs/specs/<spec-file>.md`\n- Outcome IDs: <stable acceptance IDs>\n- External ref: <GitHub/Jira/Linear/URL or \"None\">\n- Why this task exists: <requirement, user need, or risk it resolves>\n- Relevant constraints: <compatibility, security, performance, migration, repo conventions>\n\n## Files\n- Create: `exact/path/to/file.py`\n- Modify: `exact/path/to/existing.py:123`\n- Test: `tests/exact/path/to/test.py`\n\n## Interfaces\n- Consumes: <exact signatures and types>\n- Produces: <exact signatures and types>\n\n## Acceptance Criteria\n- <observable, testable outcome and evidence class>\n\n## Skills\n- <skill-name>: use when <trigger>; helps because <task-specific reason>\n\n## Steps\n1. Write the failing test: <exact test code or command>\n2. Run it to verify it fails: `<command>`; expected: <failure>\n3. Implement the minimal code: <exact code or file edits>\n4. Run it to verify it passes: `<command>`; expected: PASS\n5. Commit: `git add ... && git commit -m \"...\"`"
     },
     {
       "key": "t2",
@@ -125,7 +152,7 @@ Write a bd graph JSON file with one epic node, one task node per task, and depen
 Each task description MUST contain the full implementation plan for that task, in this order:
 
 1. Opening summary: what this task changes and the user-visible or system-visible outcome.
-2. `## Context`: spec path, external reference, why this task exists, and constraints the implementer must preserve.
+2. `## Context`: spec path, stable outcome IDs, external reference, why this task exists, and constraints the implementer must preserve.
 3. `## Files`: exact files to create, modify, and test.
 4. `## Interfaces`: exact functions, commands, schemas, types, flags, data shapes, or contracts consumed and produced.
 5. `## Acceptance Criteria`: externally observable done conditions.
@@ -165,6 +192,7 @@ Write acceptance criteria as externally observable outcomes, not implementation 
 Use `## Context` to preserve the fields the graph importer cannot store separately.
 
 - `Spec:` exact path to the spec or requirements document.
+- `Outcome IDs:` stable acceptance IDs this task enables or protects; use `None — internal-only` only with a reason.
 - `External ref:` issue URL, ticket ID, design doc URL, upstream PR, or `None`.
 - `Why this task exists:` the requirement, user need, bug, risk, or dependency this bead satisfies.
 - `Relevant constraints:` security rules, compatibility requirements, migrations, performance budgets, feature flags, repo conventions, and upstream decisions the implementer must not rediscover.
@@ -252,6 +280,12 @@ bd ready --parent <epic-id> --explain                                  # confirm
 **3. Placeholder scan:** Search the graph JSON and created bead descriptions for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
 
 **4. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+
+**5. Outcome coverage:** For every acceptance ID in the epic's `## Outcome Trace`, point to its implementation task, earliest integrated seam check, and final evidence gate. No orphaned IDs. Check that durable objects have create, find, view, refine/edit, use, permission/error, and archive/undo coverage or an explicitly approved scope cut.
+
+**6. Integration latency:** Identify the first task that proves each cross-service or user-facing seam in its real environment. If decisive integration is deferred until the final task after substantial breadth, restructure the graph to prove a thin vertical slice earlier.
+
+**7. Non-substitution:** Confirm each final gate names the exact required evidence classes and states that `FAIL`, `BLOCKED`, `SKIPPED`, or `NOT_RUN` keeps the gate open. CI or lower-level tests cannot replace required live evidence.
 
 If you find issues, fix the graph JSON and the created beads. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task bead.
 

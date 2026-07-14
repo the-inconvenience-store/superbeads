@@ -17,9 +17,19 @@ Claiming work is complete without verification is dishonesty, not efficiency.
 
 ```
 NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
+NO REQUIRED VERIFICATION MAY BE SUBSTITUTED BY A DIFFERENT EVIDENCE CLASS
 ```
 
 If you haven't run the verification command in this message, you cannot claim it passes.
+
+Every required check has exactly one state: `PASS`, `FAIL`, `BLOCKED`, or
+`NOT_RUN`. Only `PASS` satisfies it. Honest caveats improve reporting; they do
+not turn another state into completion.
+
+Evidence must match the named claim, commit/build, environment, and evidence
+class. Green unit tests cannot prove a browser journey; a direct API call cannot
+prove route wiring; CI cannot prove agent-off live behavior; conformance cannot
+prove the user-facing adapter unless the requirement explicitly names it.
 
 ## The Gate Function
 
@@ -33,7 +43,8 @@ BEFORE claiming any status or expressing satisfaction:
    - If NO: State actual status with evidence
    - If YES: State claim WITH evidence
 5. ONLY THEN: Make the claim
-6. CLOSE: If this verification gates a bead closure, run `bd close <id> --reason "description with evidence from step 4"`
+6. CLASSIFY: Record PASS / FAIL / BLOCKED / NOT_RUN for every required acceptance ID
+7. CLOSE: Only if every required ID is PASS, run `bd close <id> --reason "description with evidence from step 4"`
 
 Skip any step = lying, not verifying
 ```
@@ -78,6 +89,24 @@ When no verification command exists (no test suite, CI down, external dependency
 2. **Create a blocker:** `bd create "Set up verification for <feature>" -t task` and `bd dep add <current-task> <new-task>`
 3. **Document partial verification:** Note what WAS verifiable (e.g., "linter passes, manual smoke test done, but no automated test suite exists")
 4. **Never silently skip:** A bead closed without verification evidence AND without a documented gap is worse than a bead left open
+5. **Leave the gate open:** `BLOCKED` and `NOT_RUN` are valid honest results, but neither permits acceptance-gate or epic closure
+
+Opening a draft PR may still be useful when the user asks, but label it
+`READY_FOR_CODE_REVIEW — ACCEPTANCE_BLOCKED/NOT_RUN`; do not call it complete,
+merge-ready, or accepted.
+
+## Scope Cuts and Substitution
+
+A scope cut is valid only when the user explicitly approves the named
+acceptance IDs being removed or changed. Operational requests such as “open the
+PR”, “babysit CI”, “continue”, or “do not merge” are not waivers.
+
+When a required check cannot run:
+
+- never replace it with “equivalent confidence” from another check;
+- never close with an “honest note” that it was skipped;
+- keep the gate open and report the exact blocker;
+- rerun on the final relevant commit/environment after remediation.
 
 ## Red Flags - STOP
 
@@ -86,6 +115,9 @@ When no verification command exists (no test suite, CI down, external dependency
 - About to commit/push/PR without verification
 - Trusting agent success reports
 - Relying on partial verification
+- Treating a different evidence class as an acceptable substitute
+- Closing with a caveat that a required check failed, was blocked, or was not run
+- Inferring a scope waiver from a request to open a PR or proceed to follow-up work
 - Thinking "just this once"
 - About to claim done while a requirement was quietly dropped, or a security regression remains unverified (tests passing ≠ security verified)
 - Tired and wanting work over
@@ -104,6 +136,9 @@ When no verification command exists (no test suite, CI down, external dependency
 | "Partial check is enough" | Partial proves nothing |
 | "It's good enough to ship" | Production system, real users — no shortcut, no dropped requirement, no accepted security regression |
 | "Different words so rule doesn't apply" | Spirit over letter |
+| "CI is green, so live acceptance is redundant" | CI proves only the checks it ran; required live evidence remains NOT_RUN |
+| "I'll close it honestly and recommend manual QA" | Honest reporting does not satisfy acceptance; leave the gate open |
+| "The user redirected me to the PR" | A sequencing request is not explicit consent to remove named acceptance IDs |
 
 ## Key Patterns
 
@@ -166,9 +201,11 @@ From 24 failure memories:
 
 `bd close` without fresh verification evidence is lying. Before closing any bead:
 1. Run the verification command that proves the work is done
-2. Annotate the bead with evidence: `bd note <id> "test output: 14 passed, 0 failed"`
-3. Include the summary in the `--reason` flag
-4. Only then execute `bd close`
+2. If it is an acceptance gate, enumerate every required acceptance ID and its evidence class
+3. Annotate the bead with evidence: `bd note <id> "test output: 14 passed, 0 failed"`
+4. Confirm every required ID is PASS on the final relevant commit/environment
+5. Include the summary in the `--reason` flag
+6. Only then execute `bd close`
 
 Use `bd note` to attach detailed evidence (test output, diff stats, verification logs) to the bead before closing. The `--reason` flag is the summary; `bd note` is the full evidence trail.
 

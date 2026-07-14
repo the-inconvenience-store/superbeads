@@ -26,15 +26,16 @@ You MUST create the session bead + step children atomically via `bd create --gra
 The session bead always stays permanent (it's the audit trail). Graph JSON nodes do not accept an `ephemeral` field (verified: `bd create --graph ... --dry-run` silently drops unknown node fields with a warning), so step children created via `--graph` are permanent chores. If the operator prefers hidden ceremony beads for the step children instead, create them individually: `bd create "Step N: <title>" -t chore --parent <session-bead-id> --ephemeral` — trade-off: `--graph` is one call and permanent; individual creation is N calls and ephemeral. Ephemeral beads are hidden from `bd ready`/`bd list`/`bd count` by default and do not self-clean — sweep them eventually with `bd purge`.
 
 1. **Establish ground truth** — parallel exploration of plan, code, prerequisites, refs; present findings digest (see Ground Truth Before Questions)
-2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
-3. **Restate the goal, then ask clarifying questions** — open with a one-sentence goal restatement, then one question at a time on purpose/constraints/success criteria
-4. **Propose 2-3 approaches** — with trade-offs and your recommendation
-5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/specs/YYYY-MM-DD-<topic>-design.md` and commit
-7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **User reviews written spec** — ask user to review the spec file before proceeding
-9. **Spec-review gate offers stress-test** — the spec-review gate (step 8) includes an "Approved + stress-test" option, offered every time; if selected, invoke `stress-test` before writing-plans
-10. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+2. **Establish the product outcome contract** — for user-facing or durable behavior, map journeys, routes, lifecycle states, and stable acceptance IDs before decomposition
+3. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
+4. **Restate the goal, then ask clarifying questions** — open with a one-sentence goal restatement, then one question at a time on purpose/constraints/success criteria
+5. **Propose 2-3 approaches** — with trade-offs and your recommendation
+6. **Present design** — in sections scaled to their complexity, get user approval after each section
+7. **Write design doc** — save to `docs/specs/YYYY-MM-DD-<topic>-design.md` and commit
+8. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope, and orphaned outcomes (see below)
+9. **User reviews written spec** — ask user to review the spec file before proceeding
+10. **Spec-review gate runs or offers stress-test** — mandatory for milestones/high-risk cross-system work; offered for other specs
+11. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
 ## Ground Truth Before Questions
 
@@ -75,12 +76,43 @@ exception is a question needed to scope the exploration itself.
 | "I'll ask questions first, then explore based on answers" | Ungrounded questions waste the user's time; grounded questions answer themselves |
 | "I'll just present my findings as a file list" | Findings without design consequences are a dump, not a digest |
 
+## Product Outcome Contract
+
+For work that changes user-facing behavior or creates a durable object, establish
+the outcome contract before choosing components or sub-project boundaries. This
+prevents a technically complete design from omitting the product lifecycle.
+
+Create stable acceptance IDs and cover, as applicable:
+
+| Concern | Required answer |
+|---|---|
+| Journey | Who starts where, does what, and sees which durable result? |
+| Route and entry | What route owns each screen, and how does a user reach it? |
+| Lifecycle | How is the object created, found, viewed, refined/edited, used, archived/undone? |
+| States | What happens when empty, loading, invalid, denied, conflicted, offline, or narrow-screen? |
+| Design trace | Which wireframe/design state maps to which route and acceptance ID? |
+| Agent independence | Which behavior must survive without the agent/model/runtime? |
+| Evidence class | Which IDs need unit, integration, browser/live, persistence, security, or rollback evidence? |
+| Source status | Is each outcome original scope, a clarification, newly requested, or explicitly later? |
+
+Use IDs such as `M3-F5-AUTHOR-KEEP`; names must remain stable from spec through
+plan, execution, evidence, and closure. A durable noun without a find-again/use
+path is an incomplete product decision, not an implementation detail.
+
+**No silent lifecycle cuts:** if an operation is intentionally outside the
+milestone, say so beside the acceptance ID and get the user's approval. Never
+let decomposition by service or component orphan an outcome.
+
+For internal-only work with no user journey or durable lifecycle, write
+`Product outcome contract: Not applicable — <reason>` rather than inventing UI.
+
 ## Process Flow
 
 ```dot
 digraph brainstorming {
     "Establish ground truth\n(parallel exploration)" [shape=box];
     "Present findings digest" [shape=box];
+    "Establish product outcome contract\n(stable acceptance IDs)" [shape=box];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
     "Present design sections" [shape=box];
@@ -93,7 +125,8 @@ digraph brainstorming {
     "Invoke writing-plans skill" [shape=doublecircle];
 
     "Establish ground truth\n(parallel exploration)" -> "Present findings digest";
-    "Present findings digest" -> "Ask clarifying questions";
+    "Present findings digest" -> "Establish product outcome contract\n(stable acceptance IDs)";
+    "Establish product outcome contract\n(stable acceptance IDs)" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
     "Present design sections" -> "User approves design?";
@@ -103,13 +136,13 @@ digraph brainstorming {
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
     "User reviews spec?" -> "Stress-test selected\nat gate?" [label="approved"];
-    "Stress-test selected\nat gate?" -> "Invoke stress-test skill" [label="selected"];
-    "Stress-test selected\nat gate?" -> "Invoke writing-plans skill" [label="skipped"];
+    "Stress-test selected\nat gate?" -> "Invoke stress-test skill" [label="selected or mandatory"];
+    "Stress-test selected\nat gate?" -> "Invoke writing-plans skill" [label="optional and skipped"];
     "Invoke stress-test skill" -> "Invoke writing-plans skill";
 }
 ```
 
-**The terminal state is writing-plans.** The only other skill brainstorming may invoke is **stress-test** (optional, between spec approval and writing-plans). Do NOT invoke frontend-design, mcp-builder, or any other implementation skill.
+**The terminal state is writing-plans.** The only other skill brainstorming may invoke is **stress-test** (mandatory for milestone/high-risk work; otherwise optional, between spec approval and writing-plans). Do NOT invoke frontend-design, mcp-builder, or any other implementation skill.
 
 ## The Process
 
@@ -160,7 +193,7 @@ digraph brainstorming {
     }]
   }
   ```
-- Cover: architecture, components, data flow, error handling, security, testing
+- Cover: outcome contract, architecture, components, data flow, error handling, security, testing, and acceptance evidence
 - Be ready to go back and clarify if something doesn't make sense
 
 **Design for isolation and clarity:**
@@ -215,6 +248,7 @@ After writing the spec document, look at it with fresh eyes:
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
 5. **Assumption audit:** Does `## Assumptions` exist, and is every load-bearing claim in the spec binned there as verified/recalled/assumed with what breaks if it's wrong? An unlabeled guess presented as fact is a spec failure.
+6. **Outcome trace:** For user-facing or durable behavior, does every acceptance ID map to a journey, entry route, lifecycle destination, owning design section, and required evidence class? Any orphan is a spec failure. Confirm newly discovered requirements are labelled as new/clarified rather than retroactively attributed to the original brief.
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
@@ -259,8 +293,9 @@ Then immediately ask via your structured question tool (content below; shape sho
 ```
 
 Route on the answer:
-- **Approved + stress-test** → invoke the `stress-test` skill with the spec path (`docs/specs/YYYY-MM-DD-<topic>-design.md`) as the Mode-A artifact; when it completes, invoke `writing-plans`.
-- **Approved** → invoke `writing-plans` directly.
+- **Milestone, phase, security-sensitive, destructive, or cross-system spec:** invoke `stress-test` after approval; it is mandatory, so the plain Approved route means approved for the mandatory stress-test.
+- **Other specs — Approved + stress-test** → invoke the `stress-test` skill with the spec path (`docs/specs/YYYY-MM-DD-<topic>-design.md`) as the Mode-A artifact; when it completes, invoke `writing-plans`.
+- **Other specs — Approved** → invoke `writing-plans` directly.
 - **Needs changes** → make the requested changes and re-run the spec review loop. Only proceed once approved.
 
 **Implementation:**
@@ -316,5 +351,5 @@ If they agree to the companion, read the detailed guide before proceeding:
 ## Integration
 
 **Invokes:**
-- **stress-test** *(optional)* — offered at the spec-review gate every time (the "Approved + stress-test" option), before writing-plans.
+- **stress-test** — mandatory for milestone/high-risk work; otherwise offered at the spec-review gate (the "Approved + stress-test" option), before writing-plans.
 - **writing-plans** — terminal state. The only implementation skill brainstorming invokes.
