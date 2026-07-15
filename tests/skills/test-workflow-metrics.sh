@@ -9,6 +9,79 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
 python3 "$METRICS" snapshot --output "$TMP/snapshot.json"
+BSP_RENDER_FIXTURE=malicious BSP_RENDER_FORMAT=json \
+  python3 "$METRICS" snapshot --output "$TMP/poisoned-environment.json"
+cmp "$TMP/snapshot.json" "$TMP/poisoned-environment.json" || {
+  echo "FAIL: inherited renderer environment changed the standard snapshot"; exit 1;
+}
+cp -f "$PATHS" "$TMP/custom-paths.json"
+python3 "$METRICS" snapshot --paths "$TMP/custom-paths.json" \
+  --output "$TMP/custom-path-snapshot.json"
+python3 - "$TMP/custom-path-snapshot.json" "$TMP/custom-paths.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+snapshot = json.loads(Path(sys.argv[1]).read_text())
+assert snapshot["generated_from"]["path_manifest"] == str(Path(sys.argv[2]).resolve())
+PY
+
+make_broken_root() {
+  broken_root="$1"
+  delimiter="$2"
+  mkdir -p "$broken_root/hooks" "$broken_root/skills/using-superpowers" \
+    "$broken_root/tests/helpers"
+  cp -f "$ROOT/hooks/session-start" "$broken_root/hooks/session-start"
+  cp -f "$ROOT/skills/using-superpowers/SKILL.md" \
+    "$broken_root/skills/using-superpowers/SKILL.md"
+  cp -f "$ROOT/tests/helpers/render-session-context.sh" \
+    "$broken_root/tests/helpers/render-session-context.sh"
+  python3 - "$broken_root/hooks/session-start" "$delimiter" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+delimiter = sys.argv[2]
+source = path.read_text()
+if delimiter == "backslash":
+    line = "    local s=\"$1\" close='&lt;/beads-context&gt;' open='&lt;beads-context&gt;'\n"
+    replacement = "    local s=\"$1\" close='\\\\&lt;\\\\/beads-context\\\\&gt;' open='\\\\&lt;beads-context\\\\&gt;'\n"
+else:
+    line = {
+        "opening": '    s="${s//<beads-context>/$open}"\n',
+        "closing": '    s="${s//<\\/beads-context>/$close}"\n',
+    }[delimiter]
+    replacement = ""
+assert source.count(line) == 1, (delimiter, line)
+path.write_text(source.replace(line, replacement, 1))
+PY
+}
+
+cat > "$TMP/broken-paths.json" <<'JSON'
+{
+  "schema_version": 1,
+  "product_discovery": ["skills/using-superpowers/SKILL.md"],
+  "accepted_contract": ["skills/using-superpowers/SKILL.md"],
+  "internal_bypass": ["skills/using-superpowers/SKILL.md"],
+  "matched_legacy": ["skills/using-superpowers/SKILL.md"]
+}
+JSON
+for delimiter in opening closing backslash; do
+  make_broken_root "$TMP/broken-$delimiter" "$delimiter"
+  if python3 "$METRICS" snapshot --root "$TMP/broken-$delimiter" \
+      --paths "$TMP/broken-paths.json" --output "$TMP/broken-$delimiter.json" \
+      >"$TMP/broken-$delimiter.out" 2>&1; then
+    echo "FAIL: snapshot accepted unsafe malicious $delimiter delimiter"; exit 1
+  fi
+  if [ "$delimiter" = "backslash" ]; then
+    expected_error='security_render.malicious.opening_delimiter: delimiter contains literal backslashes'
+  else
+    expected_error="security_render.malicious.${delimiter}_delimiter: expected one real wrapper"
+  fi
+  grep -q "$expected_error" "$TMP/broken-$delimiter.out" || {
+    echo "FAIL: malicious $delimiter error was imprecise"; exit 1;
+  }
+done
 
 python3 - "$TMP/snapshot.json" <<'PY'
 import json

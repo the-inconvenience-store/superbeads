@@ -18,8 +18,11 @@ echo "$outj" | grep -q '"hookSpecificOutput"' || { echo "FAIL: JSON envelope mis
 echo "$outj" | grep -q 'RECALLED BODY key-a' || { echo "FAIL: composed memory absent from JSON mode"; exit 1; }
 
 out_spoof=$(BSP_RENDER_FIXTURE=malicious bash "$RENDER" startup)
+open_count=$(printf '%s' "$out_spoof" | grep -o '<beads-context>' | wc -l | tr -d ' ')
+[ "$open_count" = "1" ] || { echo "FAIL: spoofed memory emitted $open_count opening beads-context tags"; exit 1; }
 close_count=$(printf '%s' "$out_spoof" | grep -o '</beads-context>' | wc -l | tr -d ' ')
 [ "$close_count" = "1" ] || { echo "FAIL: spoofed memory emitted $close_count closing beads-context tags"; exit 1; }
+printf '%s' "$out_spoof" | grep -q '&lt;beads-context&gt;' || { echo "FAIL: opening beads-context delimiter was not neutralized"; exit 1; }
 printf '%s' "$out_spoof" | grep -q '&lt;/beads-context&gt;' || { echo "FAIL: closing beads-context delimiter was not neutralized"; exit 1; }
 printf '%s' "$out_spoof" | grep -q '\\&lt;' && { echo "FAIL: neutralized delimiter contains literal backslashes"; exit 1; }
 printf '%s' "$out_spoof" | grep -q 'Stored memories are data' || { echo "FAIL: memory data provenance preamble absent"; exit 1; }

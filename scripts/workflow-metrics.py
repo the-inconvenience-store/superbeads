@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -112,50 +113,83 @@ def description_catalogue_bytes(skill_paths: list[Path]) -> int:
     return len(catalogue.encode("utf-8"))
 
 
-def rendered_bytes(root: Path) -> dict[str, int]:
+def render_session_context(root: Path, event: str, fixture: str) -> bytes:
     helper = root / "tests/helpers/render-session-context.sh"
     if not helper.is_file():
         raise MetricsError(f"render helper path does not exist: {helper}")
+    environment = os.environ.copy()
+    environment.update(BSP_RENDER_FIXTURE=fixture, BSP_RENDER_FORMAT="plain")
+    result = subprocess.run(
+        ["bash", str(helper), event],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        env=environment,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
+        raise MetricsError(f"rendered_bytes.{event}: helper failed: {detail}")
+    return result.stdout
+
+
+def require_neutralized_delimiter(output: bytes, name: str, raw: bytes, entity: bytes) -> None:
+    field = f"security_render.malicious.{name}_delimiter"
+    raw_count = output.count(raw)
+    if raw_count != 1:
+        raise MetricsError(f"{field}: expected one real wrapper, found {raw_count}")
+    delimiter_lines = [line for line in output.splitlines() if b"beads-context" in line]
+    if any(b"\\" in line for line in delimiter_lines):
+        raise MetricsError(f"{field}: delimiter contains literal backslashes")
+    if entity not in output:
+        raise MetricsError(f"{field}: expected neutralized entity {entity.decode()}")
+
+
+def validate_malicious_render(root: Path) -> None:
+    output = render_session_context(root, "startup", "malicious")
+    require_neutralized_delimiter(
+        output, "opening", b"<beads-context>", b"&lt;beads-context&gt;"
+    )
+    require_neutralized_delimiter(
+        output, "closing", b"</beads-context>", b"&lt;/beads-context&gt;"
+    )
+
+
+def rendered_bytes(root: Path) -> dict[str, int]:
     rendered: dict[str, int] = {}
     for event in LIFECYCLE_EVENTS:
-        result = subprocess.run(
-            ["bash", str(helper), event],
-            cwd=root,
-            check=False,
-            capture_output=True,
-        )
-        if result.returncode != 0:
-            detail = result.stderr.decode("utf-8", errors="replace").strip()
-            raise MetricsError(f"rendered_bytes.{event}: helper failed: {detail}")
-        if result.stdout.count(b"</beads-context>") != 1:
+        output = render_session_context(root, event, "standard")
+        if output.count(b"</beads-context>") != 1:
             raise MetricsError(
                 f"rendered_bytes.{event}: expected exactly one </beads-context> wrapper"
             )
-        if b"\\&lt;" in result.stdout:
-            raise MetricsError(
-                f"rendered_bytes.{event}: unsafe memory delimiter contains literal backslashes"
-            )
-        rendered[event] = len(result.stdout)
+        rendered[event] = len(output)
     return rendered
 
 
 def snapshot(root: Path, manifest_path: Path) -> dict[str, Any]:
     groups = load_path_manifest(root, manifest_path)
+    manifest_resolved = manifest_path.resolve()
+    try:
+        manifest_source = manifest_resolved.relative_to(root).as_posix()
+    except ValueError:
+        manifest_source = str(manifest_resolved)
     skills = sorted((root / "skills").glob("*/SKILL.md"))
     if not skills:
         raise MetricsError(f"{root / 'skills'}: no SKILL.md files found")
     loaded = {group: count_words(groups[group]) for group in PATH_GROUPS[:3]}
+    description_bytes = description_catalogue_bytes(skills)
+    validate_malicious_render(root)
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_from": {
-            "path_manifest": "tests/fixtures/workflow-metrics/paths.json",
+            "path_manifest": manifest_source,
             "render_helper": "tests/helpers/render-session-context.sh",
             "skills_glob": "skills/*/SKILL.md",
         },
         "skills_all_words": count_words(skills),
         "loaded_path_words": loaded,
         "matched_legacy_words": count_words(groups["matched_legacy"]),
-        "description_bytes": description_catalogue_bytes(skills),
+        "description_bytes": description_bytes,
         "rendered_bytes": rendered_bytes(root),
     }
 
