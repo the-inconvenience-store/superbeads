@@ -1,0 +1,14 @@
+{
+  "graph_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "capability_tier": "isolated",
+  "capacity": {"workers": 2, "reviews": 2, "merges": 1, "resources": {"provider": 2}},
+  "acceptance_gates": "pending",
+  "speculation_limits": {"max_discard_files": 3, "max_rebase_commits": 2},
+  "tasks": [
+    {"id":"t1","status":"open","dependencies":[],"dependency_commits":{},"contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","current_contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","write_set":["src/t1.py"],"exclusive_resources":["schema-t1"],"capacity_resources":{},"phase":"pending","review_result":null,"speculation":null,"commit":null},
+    {"id":"t2","status":"open","dependencies":[],"dependency_commits":{},"contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","current_contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","write_set":["src/t2.py"],"exclusive_resources":["schema-t2"],"capacity_resources":{},"phase":"pending","review_result":null,"speculation":null,"commit":null},
+    {"id":"t3","status":"open","dependencies":["t1","t2"],"dependency_commits":{},"contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","current_contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","write_set":["src/t3.py"],"exclusive_resources":[],"capacity_resources":{},"phase":"pending","review_result":null,"speculation":null,"commit":null},
+    {"id":"t4","status":"open","dependencies":["t1","t2"],"dependency_commits":{},"contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","current_contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","write_set":["src/t4.py"],"exclusive_resources":[],"capacity_resources":{},"phase":"pending","review_result":null,"speculation":null,"commit":null},
+    {"id":"u1","status":"open","dependencies":[],"dependency_commits":{},"contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","current_contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","write_set":["src/unrelated.py"],"exclusive_resources":[],"capacity_resources":{"provider":1},"phase":"pending","review_result":null,"speculation":null,"commit":null}
+  ]
+}

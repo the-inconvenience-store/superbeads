@@ -9,7 +9,7 @@ description: Use when facing 2+ independent tasks that can be worked on without 
 
 You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
-When you have multiple independent tasks — whether bug investigations, plan tasks, or subsystem changes — executing them sequentially wastes time. Each task is independent and can happen in parallel, provided each agent gets its own isolated workspace.
+When you have multiple independent problem domains—such as unrelated bug investigations or subsystem failures—executing them sequentially wastes time. Each domain can proceed in parallel when agents have isolated workspaces. Graph-plan tasks route to SDD instead.
 
 **Core principle:** Dispatch one agent per independent problem domain. Let them work concurrently.
 
@@ -38,7 +38,6 @@ digraph when_to_use {
 - Multiple subsystems broken independently
 - Each problem can be understood without context from others
 - No shared state between investigations
-- 2+ independent plan tasks with no dependency edges between them
 - Multiple independent subsystem changes (different files, different concerns)
 
 **Don't use when:**
@@ -146,51 +145,20 @@ Return: Summary of what you found and what you fixed.
 ## Integration
 
 **Invoked by:**
-- **subagent-driven-development** — parallel batch mode dispatches independent plan tasks concurrently, each in its own worktree. Uses this skill's dispatch pattern. See SDD Integration below.
+- **subagent-driven-development** — uses this skill's generic concurrent-dispatch pattern after its scheduler proves graph work safe.
 - **getting-up-to-speed** — heavy path (150+ tracked files) dispatches @researcher + @explore in parallel via this pattern.
 
 **Invokes:** None — this is a dispatch pattern skill, not a pipeline skill.
 
 ## SDD Integration
 
-Subagent-Driven Development uses this skill's **pattern** — not the skill itself — when executing plans with independent tasks.
+This skill does not decide whether graph tasks are independent. Route graph execution to `superbeads:subagent-driven-development`, whose sole scheduling owner is:
 
-**How SDD uses the pattern:**
-
-1. SDD detects independent task batches via `bd ready --parent <epic-id>` (tasks with no unresolved dependencies)
-2. Orchestrator creates one `bd worktree` per task — subagent receives path, never creates worktrees itself
-3. Dispatches all implementer subagents in one message via multiple `Agent` tool calls (max 5 per batch)
-4. SDD handles merge-back into the epic worktree after review
-
-**Key difference from standalone use:** In SDD, the orchestrator manages the full lifecycle (worktree creation → dispatch → review → merge → cleanup). This skill describes the dispatch pattern; SDD adds the orchestration layer.
-
-**Example — plan task execution with per-task worktrees:**
-
-```
-Orchestrator identifies 3 unblocked tasks (no deps between them):
-  Task A: Add validation to user input (touches src/validation.py)
-  Task B: Add logging middleware (touches src/middleware.py)
-  Task C: Update API docs (touches docs/api.md)
-
-Orchestrator creates per-task worktrees:
-  bd worktree create task-a --branch feature/epic/task-a
-  bd worktree create task-b --branch feature/epic/task-b
-  bd worktree create task-c --branch feature/epic/task-c
-
-Dispatches 3 subagents in parallel (one Agent call each, same message):
-  Agent 1 → "Work from: .worktrees/task-a" → implements validation
-  Agent 2 → "Work from: .worktrees/task-b" → implements middleware
-  Agent 3 → "Work from: .worktrees/task-c" → updates docs
-
-After all 3 pass review:
-  git merge feature/epic/task-a (in epic worktree)
-  git merge feature/epic/task-b
-  git merge feature/epic/task-c
-  bd worktree remove task-a task-b task-c
-  Run full test suite → integration check
+```bash
+python3 "$PWD/skills/subagent-driven-development/scripts/sdd-scheduler.py" decide STATE.json
 ```
 
-> **Concurrent orchestrators (optional — `bd merge-slot`):** The merges above are run by a single orchestrator, one at a time, so there is no merge race in the normal flow. If two or more orchestrators or sessions ever run this pattern concurrently against the same repo, serialize their merges with the beads v1.0.5 merge slot: `bd merge-slot create` once, then `bd merge-slot acquire` before each `git merge` and `bd merge-slot release` after — so only one orchestrator resolves conflicts at a time.
+SDD validates dependencies, reviewed commits, contracts, write sets, exclusive/capacity resources, review reserve, host capability, and safe speculation before it invokes this generic pattern. Keep lifecycle, worktree, review, merge, and completion tutorials in SDD; do not duplicate them here.
 
 ## Real Example from Session
 

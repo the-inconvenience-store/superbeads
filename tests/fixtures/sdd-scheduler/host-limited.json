@@ -1,0 +1,11 @@
+{
+  "graph_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "capability_tier": "host-limited",
+  "capacity": {"workers": 4, "reviews": 2, "merges": 1, "resources": {}},
+  "acceptance_gates": "pending",
+  "speculation_limits": {"max_discard_files": 3, "max_rebase_commits": 2},
+  "tasks": [
+    {"id":"a","status":"open","dependencies":[],"dependency_commits":{},"contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","current_contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","write_set":["src/a.py"],"exclusive_resources":[],"capacity_resources":{},"phase":"pending","review_result":null,"speculation":null,"commit":null},
+    {"id":"b","status":"open","dependencies":[],"dependency_commits":{},"contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","current_contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","write_set":["src/b.py"],"exclusive_resources":[],"capacity_resources":{},"phase":"pending","review_result":null,"speculation":null,"commit":null}
+  ]
+}
