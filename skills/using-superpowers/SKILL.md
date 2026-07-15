@@ -19,23 +19,7 @@ If there is even a 1% chance a skill applies, invoke it. Applicable skills are m
 
 Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it has a checklist, track it with beads (see Beads below) — TodoWrite is forbidden.
 
-## Skill Priority
-
-When multiple skills apply, process skills come first — they set the approach, then implementation skills carry it out.
-
-- "Let's build X" → superbeads:brainstorming first, then implementation skills.
-- "Fix this bug" → superbeads:systematic-debugging first, then domain skills.
-
-## Red Flags
-
-These thoughts mean STOP — you're rationalizing:
-
-| Thought | Reality |
-|---------|---------|
-| "Simple question / need context / quick file check first" | Action = task. Check skills first. |
-| "This doesn't need a formal skill" | If a skill exists, use it. |
-| "The skill is overkill" | Simple things become complex. Use it. |
-| "I remember it / know what it means" | Skills evolve. Read current version. |
+When several skills apply, run process skills before implementation skills.
 
 ## Production-Grade Doctrine
 

@@ -9,6 +9,7 @@ RENDER="$ROOT/tests/helpers/render-session-context.sh"
 SKILL="$ROOT/skills/using-superpowers/SKILL.md"
 CEILING=6144
 WRAPPER_CEILING=1024
+RENDERED_CEILING=3878
 fail=0
 size=$(wc -c < "$SKILL")
 if [ "$size" -gt "$CEILING" ]; then
@@ -29,7 +30,9 @@ fi
 sizes=""
 for event in startup resume clear compact; do
   event_size=$(bash "$RENDER" "$event" | wc -c)
-  [ "$event_size" -lt 32768 ] || { echo "FAIL: $event output ${event_size}B >= 32KB budget"; fail=1; }
+  [ "$event_size" -le "$RENDERED_CEILING" ] || {
+    echo "FAIL: $event output ${event_size}B > ${RENDERED_CEILING}B budget"; fail=1;
+  }
   sizes="${sizes}${event}=${event_size}B "
 done
 
@@ -40,6 +43,6 @@ t1=$(date +%s)
 [ $((t1 - t0)) -lt 5 ] || { echo "FAIL: hook took $((t1 - t0))s (>=5s budget)"; fail=1; }
 
 if [ "$fail" = 0 ]; then
-  echo "PASS: composed budgets ${sizes}(< 32768B); latency $((t1 - t0))s < 5s"
+  echo "PASS: composed budgets ${sizes}(<= ${RENDERED_CEILING}B); latency $((t1 - t0))s < 5s"
 fi
 exit "$fail"

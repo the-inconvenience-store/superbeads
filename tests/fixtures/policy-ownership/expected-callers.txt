@@ -4,7 +4,7 @@ capture	skills/systematic-debugging/SKILL.md	220	pointer
 capture	skills/writing-plans/SKILL.md	79	pointer
 completion	CLAUDE.md	217	pointer
 completion	skills/executing-plans/SKILL.md	52	pointer
-completion	skills/using-superpowers/SKILL.md	50	pointer
+completion	skills/using-superpowers/SKILL.md	34	pointer
 economy	skills/brainstorming/SKILL.md	28	pointer
 economy	skills/executing-plans/SKILL.md	45	pointer
 economy	skills/getting-up-to-speed/SKILL.md	87	pointer

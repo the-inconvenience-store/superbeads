@@ -118,7 +118,7 @@ assert all(
     for name in snapshot["loaded_path_words"]
 )
 assert set(snapshot["rendered_bytes"]) == {"startup", "resume", "clear", "compact"}
-assert all(value <= 4563 for value in snapshot["rendered_bytes"].values())
+assert all(value <= 3878 for value in snapshot["rendered_bytes"].values())
 PY
 
 python3 "$METRICS" compare --baseline "$BASELINE" --candidate "$TMP/snapshot.json"
