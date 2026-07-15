@@ -44,16 +44,17 @@ path = Path(sys.argv[1])
 delimiter = sys.argv[2]
 source = path.read_text()
 if delimiter == "backslash":
-    line = "    local s=\"$1\" close='&lt;/beads-context&gt;' open='&lt;beads-context&gt;'\n"
-    replacement = "    local s=\"$1\" close='\\\\&lt;\\\\/beads-context\\\\&gt;' open='\\\\&lt;beads-context\\\\&gt;'\n"
+    assert source.count(r"\&lt;") == 2
+    assert source.count(r"\&gt;") == 2
+    source = source.replace(r"\&lt;", r"\\\&lt;").replace(r"\&gt;", r"\\\&gt;")
 else:
-    line = {
-        "opening": '    s="${s//<beads-context>/$open}"\n',
-        "closing": '    s="${s//<\\/beads-context>/$close}"\n',
+    expression = {
+        "opening": r"s#<beads-context>#\&lt;beads-context\&gt;#g",
+        "closing": r"s#</beads-context>#\&lt;/beads-context\&gt;#g",
     }[delimiter]
-    replacement = ""
-assert source.count(line) == 1, (delimiter, line)
-path.write_text(source.replace(line, replacement, 1))
+    assert source.count(expression) == 1, (delimiter, expression)
+    source = source.replace(expression, "s#never-match#never-match#g", 1)
+path.write_text(source)
 PY
 }
 
