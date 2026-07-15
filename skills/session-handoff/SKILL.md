@@ -1,6 +1,6 @@
 ---
 name: session-handoff
-description: A human-invoked utility that writes a grounded session-handoff document (plus a continuation pointer memory) so a fresh agent can resume in-progress work. Not auto-invoked; a human runs it deliberately.
+description: Human-invoked session handoff for resuming unfinished work in a fresh context.
 disable-model-invocation: true
 ---
 

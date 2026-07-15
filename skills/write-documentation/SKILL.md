@@ -1,6 +1,6 @@
 ---
 name: write-documentation
-description: "Use when writing or substantially rewriting human-facing prose: documentation, README, guides, blog posts, emails, Slack messages, PR descriptions, release notes, or any text a human will read. Not for code comments, commit messages, or agent-to-agent communication."
+description: Use when writing or substantially revising human-facing documentation, guides, messages, or release notes.
 ---
 
 # Write Documentation

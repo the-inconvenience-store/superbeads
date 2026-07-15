@@ -1,6 +1,6 @@
 ---
 name: memory-curator
-description: Use when session-close captured several new memories, or when memory cleanup is requested. Triggers on "curate memories", "clean up memories", "memory sweep".
+description: Use when several memories need deduplication, consolidation, or cleanup.
 ---
 
 # Memory Curator

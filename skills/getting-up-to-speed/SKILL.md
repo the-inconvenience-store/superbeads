@@ -1,6 +1,6 @@
 ---
 name: getting-up-to-speed
-description: Use when project state is unclear, at the start of a session on an unfamiliar or stale codebase, or after compaction. Triggers on "catch me up", "where are we", "orient me", "what's the state of this project", "bring me up to speed", "load context", "session orientation".
+description: Use when an unfamiliar, stale, compacted, or unclear project session needs orientation.
 ---
 
 # Getting Up to Speed

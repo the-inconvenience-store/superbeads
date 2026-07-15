@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: Use when beads/Dolt database initialization fails, when bd commands return errors about missing databases, when setting up beads in a new project, or when recovering from diverged Dolt history. Handles fresh init, bootstrap from remote, and recovery workflows.
+description: Use when Beads initialization, a missing database, remote bootstrap, or diverged Dolt history blocks tracker use.
 ---
 
 # Project Init: Beads/Dolt Database Setup and Recovery

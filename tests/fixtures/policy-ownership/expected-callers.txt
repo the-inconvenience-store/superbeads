@@ -22,10 +22,10 @@ memory	skills/getting-up-to-speed/SKILL.md	222	pointer
 memory	skills/project-init/SKILL.md	285	pointer
 memory	skills/receiving-code-review/SKILL.md	168	pointer
 memory	skills/requesting-code-review/SKILL.md	87	pointer
-memory	skills/research-driven-development/SKILL.md	241	pointer
+memory	skills/research-driven-development/SKILL.md	74	pointer
 memory	skills/subagent-driven-development/SKILL.md	102	pointer
 memory	skills/test-driven-development/SKILL.md	353	pointer
 memory	skills/using-git-worktrees/SKILL.md	259	pointer
 memory	skills/verification-before-completion/SKILL.md	69	pointer
 memory	skills/write-documentation/SKILL.md	372	pointer
-memory	skills/writing-skills/SKILL.md	690	pointer
+memory	skills/writing-skills/SKILL.md	69	pointer

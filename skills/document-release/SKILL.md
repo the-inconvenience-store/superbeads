@@ -1,6 +1,6 @@
 ---
 name: document-release
-description: Use after code changes are committed but before PR merge to ensure all project documentation accurately reflects shipped code. Covers README, ARCHITECTURE, CONTRIBUTING, CHANGELOG, CLAUDE.md, TODOS, and VERSION files. Triggers on "update docs", "sync documentation", "post-ship docs", "document release", "documentation audit".
+description: Use when committed code is awaiting merge and its project documentation may be stale.
 ---
 
 # Document Release: Post-Ship Documentation Update
