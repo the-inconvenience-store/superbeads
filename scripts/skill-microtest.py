@@ -256,12 +256,42 @@ def build_codex_launch(
     return {
         "argv": [
             "codex", "exec", "--ephemeral", "--ignore-user-config", "--ignore-rules",
+            "-c", 'shell_environment_policy.inherit="none"',
             "--sandbox", "read-only", "--ask-for-approval", "never",
             "--model", model, "-C", str(temp_root), "--output-schema", str(schema),
             "--output-last-message", str(output), "-",
         ],
         "cwd": str(temp_root),
     }
+
+
+def resolve_codex_home(environment: dict[str, str]) -> Path:
+    raw_path = environment.get("CODEX_HOME")
+    if raw_path is None:
+        parent_home = environment.get("HOME")
+        if not parent_home:
+            raise MicrotestError("Codex live provider requires CODEX_HOME or HOME")
+        raw_path = str(Path(parent_home) / ".codex")
+    path = Path(raw_path).expanduser()
+    if not path.is_absolute():
+        raise MicrotestError("CODEX_HOME must be an absolute directory")
+    resolved = path.resolve()
+    if not resolved.is_dir():
+        raise MicrotestError("CODEX_HOME must resolve to an existing directory")
+    return resolved
+
+
+def build_provider_environment(temp_root: Path, codex_home: Path | None) -> dict[str, str]:
+    environment = {
+        "HOME": str(temp_root),
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin",
+        "TMPDIR": str(temp_root),
+    }
+    if codex_home is not None:
+        environment["CODEX_HOME"] = str(codex_home)
+    return environment
 
 
 def build_claude_launch(
@@ -358,6 +388,7 @@ def execute_provider(
     sample_index: int,
     active: dict[str, int],
     active_lock: threading.Lock,
+    codex_home: Path | None,
 ) -> dict[str, Any]:
     sandbox_id = uuid.uuid4().hex
     with active_lock:
@@ -391,13 +422,7 @@ def execute_provider(
             prompt = build_provider_prompt(
                 scenario, variant, sample_index, candidate_skills, ROOT
             )
-            environment = {
-                "HOME": str(temp_root),
-                "LANG": "C.UTF-8",
-                "LC_ALL": "C.UTF-8",
-                "PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin",
-                "TMPDIR": str(temp_root),
-            }
+            environment = build_provider_environment(temp_root, codex_home)
             try:
                 result = subprocess.run(
                     launch["argv"],
@@ -429,6 +454,8 @@ def execute_provider(
                 provider_result, scenario["rubric"]
             )
             redaction_paths = [temp_root, raw_root, evidence_dir, ROOT]
+            if codex_home is not None:
+                redaction_paths.append(codex_home)
             return {
                 "score": round(score, 6),
                 "passed": passed,
@@ -514,6 +541,7 @@ def run_campaign(
     concurrency: int,
     evidence_dir: Path,
     max_cost_usd: float | None,
+    codex_home: Path | None,
 ) -> tuple[dict[str, Any], Path | None]:
     identity = evidence_identity(
         scenario, provider, model, fixtures, candidate_skills, runs
@@ -558,6 +586,7 @@ def run_campaign(
                     index,
                     active,
                     active_lock,
+                    codex_home,
                 ): (index, variant)
                 for index, variant in work
             }
@@ -684,6 +713,7 @@ def main() -> int:
             "codex": "",
             "claude": "not-live-tested",
         }[args.provider]
+        codex_home = resolve_codex_home(dict(os.environ)) if args.provider == "codex" else None
         if args.provider == "claude":
             report = claude_report(
                 scenario,
@@ -706,6 +736,7 @@ def main() -> int:
                 args.concurrency,
                 args.evidence_dir.resolve(),
                 args.max_cost_usd,
+                codex_home,
             )
             if raw_root is not None:
                 print(f"raw_transcript_root={raw_root}", file=sys.stderr)

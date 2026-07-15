@@ -26,6 +26,7 @@ output = tmp / "last-message.json"
 assert module.build_codex_launch(root, schema, output, "codex-model") == {
     "argv": [
         "codex", "exec", "--ephemeral", "--ignore-user-config", "--ignore-rules",
+        "-c", 'shell_environment_policy.inherit="none"',
         "--sandbox", "read-only", "--ask-for-approval", "never", "--model", "codex-model",
         "-C", str(root), "--output-schema", str(schema),
         "--output-last-message", str(output), "-",
@@ -41,6 +42,29 @@ assert module.build_claude_launch(root, schema, output, "claude-model") == {
     "cwd": str(root),
 }
 assert module.provider_status("claude") == "not_live_tested"
+
+codex_home = tmp / "codex-home"
+codex_home.mkdir()
+assert module.resolve_codex_home({"CODEX_HOME": str(codex_home)}) == codex_home.resolve()
+default_codex_home = tmp / "home" / ".codex"
+default_codex_home.mkdir(parents=True)
+assert module.resolve_codex_home({"HOME": str(tmp / "home")}) == default_codex_home.resolve()
+assert module.build_provider_environment(root, codex_home) == {
+    "HOME": str(root),
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin",
+    "TMPDIR": str(root),
+    "CODEX_HOME": str(codex_home),
+}
+assert "CODEX_HOME" not in module.build_provider_environment(root, None)
+for invalid_environment in ({}, {"CODEX_HOME": "relative"}, {"CODEX_HOME": str(tmp / "missing")}):
+    try:
+        module.resolve_codex_home(invalid_environment)
+    except module.MicrotestError:
+        pass
+    else:
+        raise AssertionError(f"invalid Codex auth home accepted: {invalid_environment}")
 
 allowed = tmp / "allowed"
 allowed.mkdir()
@@ -214,6 +238,9 @@ expect_preflight_failure cost-reservation 'reserved live cost|max-cost-usd' \
 expect_preflight_failure codex-model 'Codex.*--model|--model.*Codex' \
   --scenario "$SCENARIO" --provider codex --runs 1 --max-runs 5 --concurrency 1 \
   --confirm-cost --max-cost-usd 2
+CODEX_HOME="$TMP/missing-auth-home" expect_preflight_failure codex-auth-home 'CODEX_HOME.*directory' \
+  --scenario "$SCENARIO" --provider codex --model codex-model --runs 1 --max-runs 5 \
+  --concurrency 1 --confirm-cost --max-cost-usd 2
 
 for candidate_case in env outside-skills non-markdown; do
   case "$candidate_case" in
