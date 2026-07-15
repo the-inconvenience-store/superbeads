@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "product_discovery": [
+    "skills/using-superpowers/SKILL.md",
+    "skills/brainstorming/SKILL.md",
+    "skills/stress-test/SKILL.md",
+    "skills/writing-plans/SKILL.md",
+    "skills/subagent-driven-development/SKILL.md",
+    "skills/subagent-driven-development/implementer-prompt.md",
+    "skills/verification-before-completion/SKILL.md",
+    "skills/subagent-driven-development/task-reviewer-prompt.md",
+    "skills/subagent-driven-development/outcome-reviewer-prompt.md",
+    "skills/finishing-a-development-branch/SKILL.md"
+  ],
+  "accepted_contract": [
+    "skills/using-superpowers/SKILL.md",
+    "skills/brainstorming/SKILL.md",
+    "skills/stress-test/SKILL.md",
+    "skills/writing-plans/SKILL.md",
+    "skills/subagent-driven-development/SKILL.md",
+    "skills/subagent-driven-development/implementer-prompt.md",
+    "skills/verification-before-completion/SKILL.md",
+    "skills/subagent-driven-development/task-reviewer-prompt.md",
+    "skills/subagent-driven-development/outcome-reviewer-prompt.md",
+    "skills/finishing-a-development-branch/SKILL.md"
+  ],
+  "internal_bypass": [
+    "skills/using-superpowers/SKILL.md",
+    "skills/writing-plans/SKILL.md",
+    "skills/subagent-driven-development/SKILL.md",
+    "skills/subagent-driven-development/implementer-prompt.md",
+    "skills/verification-before-completion/SKILL.md",
+    "skills/subagent-driven-development/task-reviewer-prompt.md",
+    "skills/finishing-a-development-branch/SKILL.md"
+  ],
+  "matched_legacy": [
+    "skills/using-superpowers/SKILL.md",
+    "skills/brainstorming/SKILL.md",
+    "skills/stress-test/SKILL.md",
+    "skills/writing-plans/SKILL.md",
+    "skills/subagent-driven-development/SKILL.md",
+    "skills/subagent-driven-development/implementer-prompt.md",
+    "skills/verification-before-completion/SKILL.md",
+    "skills/subagent-driven-development/task-reviewer-prompt.md",
+    "skills/subagent-driven-development/outcome-reviewer-prompt.md",
+    "skills/finishing-a-development-branch/SKILL.md"
+  ]
+}

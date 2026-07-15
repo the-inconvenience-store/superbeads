@@ -24,6 +24,8 @@ selftest: bash tests/install-shape/selftest.sh
 # Shellcheck gate over tracked .sh with baseline + visible-SKIP
 lint: bash scripts/lint-shell.sh
 
+metrics OUTPUT=".internal/metrics/workflow.json": python3 scripts/workflow-metrics.py snapshot --output {{OUTPUT}}
+
 # Opt-in (extra deps)
 server: cd tests/brainstorm-server && npm install --no-audit --no-fund && npm test && bash windows-lifecycle.test.sh
 

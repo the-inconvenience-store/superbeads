@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "generated_from": {
+    "path_manifest": "tests/fixtures/workflow-metrics/paths.json",
+    "render_helper": "tests/helpers/render-session-context.sh",
+    "skills_glob": "skills/*/SKILL.md"
+  },
+  "skills_all_words": 48089,
+  "loaded_path_words": {
+    "product_discovery": 20598,
+    "accepted_contract": 20598,
+    "internal_bypass": 14648
+  },
+  "matched_legacy_words": 20598,
+  "description_bytes": 4067,
+  "rendered_bytes": {
+    "startup": 4563,
+    "resume": 4563,
+    "clear": 4563,
+    "compact": 4563
+  }
+}

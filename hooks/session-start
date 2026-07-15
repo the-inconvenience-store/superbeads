@@ -26,9 +26,9 @@ bsp_latest_continuation() {
 }
 
 neutralize_beads_context_delimiters() {
-    local s="$1"
-    s="${s//<\/beads-context>/\&lt;\/beads-context\&gt;}"
-    s="${s//<beads-context>/\&lt;beads-context\&gt;}"
+    local s="$1" close='&lt;/beads-context&gt;' open='&lt;beads-context&gt;'
+    s="${s//<\/beads-context>/$close}"
+    s="${s//<beads-context>/$open}"
     printf '%s' "$s"
 }
 
