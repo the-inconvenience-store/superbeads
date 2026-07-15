@@ -1,0 +1,7 @@
+{
+  "nodes": [
+    {"key": "epic1", "title": "Epic: Orphaned outcome", "type": "epic", "priority": 2, "description": "Deliver one slice but claim two.\n\n## Outcome Trace\n- PLAN-OWNED: maintainer | CLI | run | report | read | failure | evidence | Task 1, final Task 1.\n- PLAN-ORPHAN: auditor | CLI | audit | audit log | read | denied | security evidence | no owner.\n\n## Success Criteria\n- Both outcomes pass."},
+    {"key": "t1", "title": "Task 1: Final owned slice", "type": "task", "priority": 2, "parent_key": "epic1", "description": "Deliver the owned outcome.\n\n## Context\n- Product contract: `docs/product/x.md` revision 1.\n- Spec: `docs/specs/x.md`.\n- Outcome IDs: PLAN-OWNED.\n- External ref: None.\n- Why this slice exists: deliver a report.\n\n## Outcome\n- Actor / entry interface: maintainer runs `report`.\n- Observable result: report is shown.\n- Durable result / find-again path: report is saved and readable.\n- Denied/failure/recovery result: failure preserves prior data.\n\n## Domain Contract\n- Reports are atomic.\n\n## Files\n- Create: `src/report.py`.\n\n## Resources\n- Allowed write set: `src/report.py`.\n- Exclusive resources: report.\n- Capacity resources: None.\n\n## Interfaces\n- `report() -> Report`.\n\n## Acceptance Criteria\n- PLAN-OWNED passes at the CLI.\n\n## Integration Checkpoint\n- Run `pytest tests/test_report.py` against the CLI and store.\n\n## Implementation Notes\n1. Test and implement the report."}
+  ],
+  "edges": []
+}

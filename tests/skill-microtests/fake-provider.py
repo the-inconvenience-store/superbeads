@@ -20,7 +20,22 @@ def main() -> int:
         print("deterministic provider failure")
         return 7
     time.sleep(0.08)
-    if "brainstorming-product-aware-v1" in prompt:
+    if "writing-plans-vertical-v1" in prompt:
+        if args.variant == "candidate":
+            scores = {
+                "vertical_slice": 1.0,
+                "outcome_ownership": 1.0,
+                "resource_declarations": 0.75 if args.sample_index % 2 else 1.0,
+                "early_integration": 1.0,
+            }
+        else:
+            scores = {
+                "vertical_slice": 0.0,
+                "outcome_ownership": 0.25,
+                "resource_declarations": 0.0,
+                "early_integration": 0.0,
+            }
+    elif "brainstorming-product-aware-v1" in prompt:
         if args.variant == "candidate":
             scores = {
                 "no_repeat": 1.0,

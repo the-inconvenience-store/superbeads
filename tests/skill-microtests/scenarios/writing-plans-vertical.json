@@ -1,0 +1,21 @@
+{
+  "id": "writing-plans-vertical",
+  "control_prompt": "writing-plans-vertical-v1 control: Split the request into schema, backend, UI, and final integration tasks.",
+  "candidate_prompt": "writing-plans-vertical-v1 candidate: Produce independently demonstrable vertical slices with stable outcome ownership, explicit write/resources, and an early real integration seam.",
+  "candidate_skill_paths": [
+    "skills/writing-plans/SKILL.md",
+    "skills/writing-plans/slice-contract-template.md"
+  ],
+  "rubric": {
+    "version": "1",
+    "pass_score": 0.9,
+    "criteria": [
+      {"id": "vertical_slice", "weight": 0.25},
+      {"id": "outcome_ownership", "weight": 0.25},
+      {"id": "resource_declarations", "weight": 0.25},
+      {"id": "early_integration", "weight": 0.25}
+    ]
+  },
+  "output_schema": "tests/skill-microtests/schemas/result.schema.json",
+  "fixture_paths": ["writing-plans/request.md"]
+}
