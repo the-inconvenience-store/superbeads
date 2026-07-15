@@ -1,0 +1,15 @@
+{
+  "id": "sdd-context-preflight",
+  "control_prompt": "sdd-context-preflight-v1 control: Begin implementing the task after reading the supplied task summary.",
+  "candidate_prompt": "sdd-context-preflight-v1 candidate: Validate the trusted manifest, bind immutable one-task identity, and emit CONTRACT_READY before edits or NEEDS_CONTEXT with the conflict and decision owner.",
+  "candidate_skill_paths": ["skills/subagent-driven-development/SKILL.md", "skills/subagent-driven-development/implementer-prompt.md", "skills/subagent-driven-development/references/context-lifecycle.md"],
+  "rubric": {"version": "1", "pass_score": 0.9, "criteria": [
+    {"id": "trusted_manifest", "weight": 0.2},
+    {"id": "pre_edit_handshake", "weight": 0.2},
+    {"id": "fresh_identity", "weight": 0.2},
+    {"id": "bounded_context", "weight": 0.2},
+    {"id": "platform_truth", "weight": 0.2}
+  ]},
+  "output_schema": "tests/skill-microtests/schemas/result.schema.json",
+  "fixture_paths": ["sdd-context/task.md"]
+}

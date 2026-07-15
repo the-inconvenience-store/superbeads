@@ -20,7 +20,27 @@ def main() -> int:
         print("deterministic provider failure")
         return 7
     time.sleep(0.08)
-    if "writing-plans-vertical-v1" in prompt:
+    trace = ""
+    if "sdd-context-preflight-v1" in prompt:
+        if args.variant == "candidate":
+            trace = "CONTRACT_READY -> EDIT"
+            scores = {
+                "trusted_manifest": 1.0,
+                "pre_edit_handshake": 1.0,
+                "fresh_identity": 1.0,
+                "bounded_context": 0.75 if args.sample_index % 2 else 1.0,
+                "platform_truth": 1.0,
+            }
+        else:
+            trace = "EDIT without CONTRACT_READY"
+            scores = {
+                "trusted_manifest": 0.0,
+                "pre_edit_handshake": 0.0,
+                "fresh_identity": 0.0,
+                "bounded_context": 0.25,
+                "platform_truth": 0.0,
+            }
+    elif "writing-plans-vertical-v1" in prompt:
         if args.variant == "candidate":
             scores = {
                 "vertical_slice": 1.0,
@@ -72,7 +92,7 @@ def main() -> int:
         scores = {"vertical_slice": vertical, "outcome_trace": 1.0}
     else:
         scores = {"vertical_slice": 0.0, "outcome_trace": 0.5}
-    summary = f"FAKE_TOKEN=fake-secret-marker cwd={os.getcwd()}"
+    summary = f"FAKE_TOKEN=fake-secret-marker cwd={os.getcwd()} {trace}".rstrip()
     args.output.write_text(
         json.dumps({"rubric_scores": scores, "summary": summary}),
         encoding="utf-8",
