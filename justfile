@@ -26,6 +26,9 @@ lint: bash scripts/lint-shell.sh
 
 metrics OUTPUT=".internal/metrics/workflow.json": python3 scripts/workflow-metrics.py snapshot --output {{OUTPUT}}
 
+# Opt-in deterministic behavioral evaluation; intentionally outside `check`.
+microtest SCENARIO="tests/skill-microtests/scenarios/writing-plans-horizontal-baseline.json" PROVIDER="replay" RUNS="5" EVIDENCE=".internal/skill-microtests": python3 scripts/skill-microtest.py --scenario "{{SCENARIO}}" --provider "{{PROVIDER}}" --runs "{{RUNS}}" --max-runs 5 --concurrency 2 --evidence-dir "{{EVIDENCE}}"
+
 # Opt-in (extra deps)
 server: cd tests/brainstorm-server && npm install --no-audit --no-fund && npm test && bash windows-lifecycle.test.sh
 

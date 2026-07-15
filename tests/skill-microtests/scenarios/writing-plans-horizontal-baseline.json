@@ -1,0 +1,23 @@
+{
+  "id": "writing-plans-horizontal-baseline",
+  "control_prompt": "Plan the requested workflow improvements as separate research, design, implementation, and validation phases.",
+  "candidate_prompt": "Plan the requested workflow improvements as independently useful vertical slices. Preserve an explicit product outcome trace in every slice.",
+  "rubric": {
+    "version": "1",
+    "pass_score": 0.75,
+    "criteria": [
+      {
+        "id": "vertical_slice",
+        "weight": 0.5
+      },
+      {
+        "id": "outcome_trace",
+        "weight": 0.5
+      }
+    ]
+  },
+  "output_schema": "tests/skill-microtests/schemas/result.schema.json",
+  "fixture_paths": [
+    "writing-plans/request.md"
+  ]
+}
