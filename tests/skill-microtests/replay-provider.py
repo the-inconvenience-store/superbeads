@@ -39,7 +39,11 @@ def main() -> int:
     else:
         scores = {"vertical_slice": 0.0, "outcome_trace": 0.5}
         summary = "Control decomposes work horizontally with partial outcome trace."
-    result = {"rubric_scores": scores, "summary": summary}
+    result = {
+        "artifact": f"Deterministic {args.variant} product and implementation artifact.",
+        "rubric_scores": scores,
+        "summary": summary,
+    }
     args.output.write_text(json.dumps(result), encoding="utf-8")
     print(
         json.dumps(

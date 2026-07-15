@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 
-RUNNER_VERSION = "3"
+RUNNER_VERSION = "4"
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURE_ROOT = ROOT / "tests/fixtures/skill-microtests/allowed"
 SCHEMA_ROOT = ROOT / "tests/skill-microtests/schemas"
@@ -328,6 +328,15 @@ def build_provider_prompt(
         for path in candidate_skills:
             relative = path.resolve().relative_to(root).as_posix()
             prompt += f"\n--- candidate skill: {relative}\n{path.read_text(encoding='utf-8')}"
+    criteria = ", ".join(
+        criterion["id"] for criterion in scenario["rubric"]["criteria"]
+    )
+    prompt += (
+        "\n\nReturn one JSON object matching the supplied output schema. Put the "
+        "actual requested deliverable in artifact. rubric_scores must contain "
+        f"exactly these criterion IDs: {criteria}. Score each from 0 to 1, then "
+        "use summary for a concise evidence-based assessment."
+    )
     return prompt
 
 
@@ -335,8 +344,20 @@ def validate_provider_result(
     value: dict[str, Any], rubric: dict[str, Any]
 ) -> tuple[float, bool]:
     scores = value.get("rubric_scores")
-    if not isinstance(scores, dict) or not isinstance(value.get("summary"), str):
-        raise MicrotestError("provider result requires rubric_scores and summary")
+    if (
+        not isinstance(value.get("artifact"), str)
+        or not value["artifact"]
+        or not isinstance(scores, dict)
+        or not isinstance(value.get("summary"), str)
+    ):
+        raise MicrotestError("provider result requires artifact, rubric_scores, and summary")
+    expected_scores = {criterion["id"] for criterion in rubric["criteria"]}
+    if set(scores) != expected_scores:
+        raise MicrotestError(
+            "provider rubric_scores differ: "
+            f"missing={sorted(expected_scores - set(scores))}, "
+            f"extra={sorted(set(scores) - expected_scores)}"
+        )
     weighted = 0.0
     total_weight = 0.0
     for criterion in rubric["criteria"]:

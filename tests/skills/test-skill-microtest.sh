@@ -101,15 +101,47 @@ assert original_skill_hash != module.candidate_skill_hash(
 )
 (repo / "skills/one/SKILL.md").write_text("one changed\n", encoding="utf-8")
 assert original_skill_hash != module.candidate_skill_hash(skill_paths, repo)
-prompt_scenario = {"control_prompt": "control", "candidate_prompt": "candidate"}
+prompt_scenario = {
+    "control_prompt": "control",
+    "candidate_prompt": "candidate",
+    "rubric": {
+        "pass_score": 0.75,
+        "criteria": [
+            {"id": "vertical_slice", "weight": 1},
+            {"id": "outcome_trace", "weight": 1},
+        ],
+    },
+}
 candidate_provider_prompt = module.build_provider_prompt(
     prompt_scenario, "candidate", 1, skill_paths, repo
 )
 assert candidate_provider_prompt.index("skills/one/SKILL.md") < candidate_provider_prompt.index("skills/two/SKILL.md")
 assert "one changed" in candidate_provider_prompt and "two\n" in candidate_provider_prompt
+assert "actual requested deliverable" in candidate_provider_prompt
+assert "vertical_slice, outcome_trace" in candidate_provider_prompt
 assert "one changed" not in module.build_provider_prompt(
     prompt_scenario, "control", 1, skill_paths, repo
 )
+score, passed = module.validate_provider_result(
+    {
+        "artifact": "working vertical plan",
+        "rubric_scores": {"vertical_slice": 1.0, "outcome_trace": 0.5},
+        "summary": "one criterion is partial",
+    },
+    prompt_scenario["rubric"],
+)
+assert score == 0.75 and passed is True
+for invalid_result in (
+    {"rubric_scores": {"vertical_slice": 1.0, "outcome_trace": 1.0}, "summary": "missing artifact"},
+    {"artifact": "plan", "rubric_scores": {"vertical_slice": 1.0}, "summary": "missing score"},
+    {"artifact": "plan", "rubric_scores": {"vertical_slice": 1.0, "outcome_trace": 1.0, "extra": 1.0}, "summary": "extra score"},
+):
+    try:
+        module.validate_provider_result(invalid_result, prompt_scenario["rubric"])
+    except module.MicrotestError:
+        pass
+    else:
+        raise AssertionError(f"invalid provider result accepted: {invalid_result}")
 for unsafe_paths in (
     [".env"],
     ["README.md"],

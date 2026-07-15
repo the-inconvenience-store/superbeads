@@ -2,8 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": false,
-  "required": ["rubric_scores", "summary"],
+  "required": ["artifact", "rubric_scores", "summary"],
   "properties": {
+    "artifact": {
+      "type": "string",
+      "minLength": 1
+    },
     "rubric_scores": {
       "type": "object",
       "additionalProperties": {

@@ -110,8 +110,9 @@ def main() -> int:
     else:
         scores = {"vertical_slice": 0.0, "outcome_trace": 0.5}
     summary = f"FAKE_TOKEN=fake-secret-marker cwd={os.getcwd()} {trace}".rstrip()
+    artifact = f"Synthetic {args.variant} deliverable for sample {args.sample_index}. {trace}".rstrip()
     args.output.write_text(
-        json.dumps({"rubric_scores": scores, "summary": summary}),
+        json.dumps({"artifact": artifact, "rubric_scores": scores, "summary": summary}),
         encoding="utf-8",
     )
     print(summary)
