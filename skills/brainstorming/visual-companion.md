@@ -1,5 +1,7 @@
 # Visual Companion Guide
 
+Read this only after the user accepts a just-in-time visual offer for a specific unresolved design decision. It supports genuinely visual branches; return textual product, scope, and trade-off decisions to the terminal.
+
 Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
 
 ## When to Use

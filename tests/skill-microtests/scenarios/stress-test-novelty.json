@@ -1,0 +1,25 @@
+{
+  "id": "stress-test-novelty",
+  "control_prompt": "stress-test-novelty-v1 control: Summarize the design's stated risks and ask whether they are acceptable.",
+  "candidate_prompt": "stress-test-novelty-v1 candidate: Apply the coverage matrix, surface a complication absent from the design, give a falsifying authority or recovery example, and trace the finding to APPROVAL-AUTHORITY.",
+  "candidate_skill_paths": [
+    "skills/stress-test/SKILL.md",
+    "skills/stress-test/coverage-matrix.md"
+  ],
+  "rubric": {
+    "version": "1",
+    "pass_score": 0.9,
+    "criteria": [
+      {"id": "applicability_matrix", "weight": 0.2},
+      {"id": "novel_complication", "weight": 0.2},
+      {"id": "falsifying_case", "weight": 0.2},
+      {"id": "outcome_trace", "weight": 0.2},
+      {"id": "security_evidence", "weight": 0.2}
+    ]
+  },
+  "output_schema": "tests/skill-microtests/schemas/result.schema.json",
+  "fixture_paths": [
+    "design-coverage/approved-contract.md",
+    "design-coverage/hidden-flaw-design.md"
+  ]
+}

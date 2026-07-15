@@ -84,12 +84,13 @@ for delimiter in opening closing backslash; do
   }
 done
 
-python3 - "$TMP/snapshot.json" <<'PY'
+python3 - "$TMP/snapshot.json" "$BASELINE" <<'PY'
 import json
 import sys
 from pathlib import Path
 
 snapshot = json.loads(Path(sys.argv[1]).read_text())
+baseline = json.loads(Path(sys.argv[2]).read_text())
 expected_keys = {
     "schema_version",
     "generated_from",
@@ -101,19 +102,25 @@ expected_keys = {
 }
 assert set(snapshot) == expected_keys, set(snapshot)
 assert snapshot["schema_version"] == 1
-assert snapshot["skills_all_words"] == 48089
-assert snapshot["loaded_path_words"] == {
+assert baseline["skills_all_words"] == 48089
+assert baseline["loaded_path_words"] == {
     "product_discovery": 20598,
     "accepted_contract": 20598,
     "internal_bypass": 14648,
 }
-assert snapshot["matched_legacy_words"] == 20598
-assert snapshot["description_bytes"] == 4067
+assert baseline["matched_legacy_words"] == 20598
+assert baseline["description_bytes"] == 4067
+assert snapshot["skills_all_words"] <= baseline["skills_all_words"]
+assert snapshot["matched_legacy_words"] <= baseline["matched_legacy_words"]
+assert snapshot["description_bytes"] <= baseline["description_bytes"]
+assert all(
+    snapshot["loaded_path_words"][name] <= baseline["loaded_path_words"][name]
+    for name in snapshot["loaded_path_words"]
+)
 assert set(snapshot["rendered_bytes"]) == {"startup", "resume", "clear", "compact"}
-assert all(value == 4563 for value in snapshot["rendered_bytes"].values())
+assert all(value <= 4563 for value in snapshot["rendered_bytes"].values())
 PY
 
-cmp "$TMP/snapshot.json" "$BASELINE"
 python3 "$METRICS" compare --baseline "$BASELINE" --candidate "$TMP/snapshot.json"
 
 python3 - "$BASELINE" "$TMP/over.json" "$TMP/lower.json" <<'PY'

@@ -20,7 +20,39 @@ def main() -> int:
         print("deterministic provider failure")
         return 7
     time.sleep(0.08)
-    if args.variant == "candidate":
+    if "brainstorming-product-aware-v1" in prompt:
+        if args.variant == "candidate":
+            scores = {
+                "no_repeat": 1.0,
+                "evidence_questions": 1.0,
+                "safe_batching": 0.75 if args.sample_index % 2 else 1.0,
+                "narrow_product_route": 1.0,
+            }
+        else:
+            scores = {
+                "no_repeat": 0.0,
+                "evidence_questions": 0.25,
+                "safe_batching": 0.0,
+                "narrow_product_route": 0.0,
+            }
+    elif "stress-test-novelty-v1" in prompt:
+        if args.variant == "candidate":
+            scores = {
+                "applicability_matrix": 1.0,
+                "novel_complication": 0.75 if args.sample_index % 2 else 1.0,
+                "falsifying_case": 1.0,
+                "outcome_trace": 1.0,
+                "security_evidence": 1.0,
+            }
+        else:
+            scores = {
+                "applicability_matrix": 0.0,
+                "novel_complication": 0.0,
+                "falsifying_case": 0.0,
+                "outcome_trace": 0.25,
+                "security_evidence": 0.0,
+            }
+    elif args.variant == "candidate":
         vertical = 0.75 if args.sample_index % 2 else 1.0
         scores = {"vertical_slice": vertical, "outcome_trace": 1.0}
     else:

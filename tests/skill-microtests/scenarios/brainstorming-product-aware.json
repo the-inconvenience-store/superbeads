@@ -1,0 +1,23 @@
+{
+  "id": "brainstorming-product-aware",
+  "control_prompt": "brainstorming-product-aware-v1 control: Start a design discussion by asking the user to restate the actor, vocabulary, lifecycle, and desired outcome.",
+  "candidate_prompt": "brainstorming-product-aware-v1 candidate: Consume the approved contract without repeating resolved product questions. Cite repository evidence, batch independent low-risk choices up to three, ask dependency-changing choices serially, and route only missing or conflicting product truth to product-definition.",
+  "candidate_skill_paths": [
+    "skills/brainstorming/SKILL.md",
+    "skills/brainstorming/question-coverage.md"
+  ],
+  "rubric": {
+    "version": "1",
+    "pass_score": 0.9,
+    "criteria": [
+      {"id": "no_repeat", "weight": 0.25},
+      {"id": "evidence_questions", "weight": 0.25},
+      {"id": "safe_batching", "weight": 0.25},
+      {"id": "narrow_product_route", "weight": 0.25}
+    ]
+  },
+  "output_schema": "tests/skill-microtests/schemas/result.schema.json",
+  "fixture_paths": [
+    "design-coverage/approved-contract.md"
+  ]
+}
