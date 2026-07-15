@@ -1,0 +1,33 @@
+{
+  "id": "end-to-end-workflow",
+  "control_prompt": "end-to-end-workflow-v1 control: Given a request for a shared saved-search feature with owners and collaborators, produce an implementation plan and explain how you would execute and verify it.",
+  "candidate_prompt": "end-to-end-workflow-v1 candidate: Given a request for a shared saved-search feature with owners and collaborators, follow the supplied Superbeads skills from product contract through design, adversarial review, vertical graph planning, trusted task context, rolling execution, fresh review, and current acceptance evidence. Preserve host capability truth and identify any gate that cannot pass.",
+  "candidate_skill_paths": [
+    "skills/product-definition/SKILL.md",
+    "skills/brainstorming/SKILL.md",
+    "skills/stress-test/SKILL.md",
+    "skills/writing-plans/SKILL.md",
+    "skills/subagent-driven-development/SKILL.md",
+    "skills/subagent-driven-development/implementer-prompt.md",
+    "skills/subagent-driven-development/references/scheduling.md",
+    "skills/subagent-driven-development/references/review-evidence.md",
+    "skills/verification-before-completion/SKILL.md"
+  ],
+  "rubric": {
+    "version": "1",
+    "pass_score": 0.9,
+    "criteria": [
+      {"id": "SWF-PRODUCT-CONTRACT", "weight": 1},
+      {"id": "SWF-VERTICAL-SLICE", "weight": 1},
+      {"id": "SWF-CONTEXT-MANIFEST", "weight": 1},
+      {"id": "SWF-FRESH-CONTEXT", "weight": 1},
+      {"id": "SWF-ROLLING-FLOW", "weight": 1},
+      {"id": "SWF-EVIDENCE-GATE", "weight": 1},
+      {"id": "SWF-TOKEN-BUDGET", "weight": 1},
+      {"id": "SWF-CROSS-PLATFORM", "weight": 1},
+      {"id": "SWF-ADVERSARIAL-COVERAGE", "weight": 1}
+    ]
+  },
+  "output_schema": "tests/skill-microtests/schemas/result.schema.json",
+  "fixture_paths": []
+}

@@ -14,7 +14,9 @@ A plugin for Claude Code, Codex, OpenCode, and 6 more AI coding agents that make
 
 ## How it works
 
-When you start a task, the agent runs **brainstorming** to nail down requirements before touching code, then **writing-plans** to break the work into `bd`-tracked steps that survive session restarts. During implementation it follows **test-driven-development** (failing test first, always) and can fan out to parallel subagents via **subagent-driven-development** — each agent working in its own git worktree. `bd` stores every task, decision, and note in a local Dolt database, so the agent picks up exactly where it left off next session without relying on chat history.
+For substantial product work, the agent first establishes an approved **product-definition** contract: actors, authority, lifecycle, invariants, counterexamples, and stable outcome IDs. **Brainstorming** explores the solution against that product truth, **stress-test** searches systematically for complications, and **writing-plans** compiles the result into a dependency graph of vertical slices. This product-definition step is conditional, not mandatory for small fixes or already-complete requirements.
+
+During implementation, **subagent-driven-development** gives each worker one bounded Context Manifest, one task, and an isolated worktree. A rolling resource-aware scheduler starts newly unblocked work while fresh task reviews run, then merges approved slices and recomputes readiness. Unsupported hosts declare a host-limited serial fallback instead of claiming parallel isolation. Current acceptance evidence—not a completion claim—controls task and epic closure. `bd` stores tasks, decisions, and notes in a local Dolt database so work can resume without relying on chat history.
 
 Underneath all of it is a production-grade standard: the agent treats every task as if real users depend on it, so it won't quietly cut a corner, drop a requirement, or weaken a security control to move faster.
 
@@ -39,7 +41,7 @@ Underneath all of it is a production-grade standard: the agent treats every task
 | ----------------------------- | ------------------------------------------------------------------------------------------ |
 | `requesting-code-review`      | Dispatches a code-reviewer subagent with structured criteria                               |
 | `receiving-code-review`       | Anti-sycophancy reception — evaluates each finding on its merits                           |
-| `subagent-driven-development` | Fresh agent per task with spec + quality review; parallel batch mode for independent tasks |
+| `subagent-driven-development` | One-task Context Manifests, rolling resource-aware dispatch, fresh review, and evidence-gated closure |
 | `dispatching-parallel-agents` | Fan-out to 2+ independent agents without shared state                                      |
 
 ### Project management
@@ -49,8 +51,8 @@ Underneath all of it is a production-grade standard: the agent treats every task
 | `brainstorming`                  | Socratic design session before any code — produces a spec bead                                                       |
 | `stress-test`                    | Adversarial interrogation of plans with recommended answers                                                          |
 | `product-definition`             | Conditionally establishes approved product truth before solution design                                               |
-| `writing-plans`                  | Breaks work into bite-sized tasks, each tracked as a `bd` bead                                                       |
-| `executing-plans`                | Batch plan execution in a single session                                                                             |
+| `writing-plans`                  | Compiles approved outcomes into a validated dependency graph of working vertical slices                              |
+| `executing-plans`                | Executes a validated graph inline with evidence checkpoints                                                          |
 | `using-git-worktrees`            | Isolated development branches per task                                                                               |
 | `finishing-a-development-branch` | Merge/PR flow + Land the Plane (close beads, push)                                                                   |
 | `document-release`               | Post-ship doc audit — keeps README, CHANGELOG, and ARCHITECTURE in sync                                              |
@@ -58,7 +60,7 @@ Underneath all of it is a production-grade standard: the agent treats every task
 | `getting-up-to-speed`            | Session orientation — reads the latest session-handoff doc, loads `bd` context, and produces a current-state summary |
 | `memory-curator`                 | Session-close/on-demand memory consolidation — deduplicates and prunes the `bd` memory store                         |
 | `session-handoff`                | Human-invoked — writes a grounded handoff doc + continuation memory to resume in-progress work                       |
-| `research-driven-development`    | Parallel research agents → synthesized knowledge-base document                                                       |
+| `research-driven-development`    | Repository-only, external-only, or mixed research with bounded source manifests and synthesis                        |
 | `write-documentation`            | Human-quality prose — 14-rule writing system with context-first drafting                                             |
 
 ### Meta
@@ -68,6 +70,19 @@ Underneath all of it is a production-grade standard: the agent treats every task
 | `using-superpowers`       | Bootstrap — injected at session start, routes to the right skill |
 | `writing-skills`          | Meta-skill for creating or modifying skills in this plugin       |
 | `auditing-upstream-drift` | Detects staleness vs upstream superpowers and beads releases     |
+
+Workflow plans use the v0.12 graph JSON contract. This is a clean cutover: legacy
+Markdown implementation plans are not accepted and must be regenerated. Shared workflow
+policy has one canonical owner at
+`skills/using-superpowers/references/session-policy.md`; other skills link to the
+applicable section rather than copying it.
+
+Deterministic verification is available through `bash scripts/run-guards.sh`,
+`bash scripts/run-contracts.sh`, `bash scripts/run-hook-tests.sh`, and
+`bash tests/manifests/test-manifest-validation.sh`. Installation shape is not behavioral
+proof. The final outcome contract is checked with
+`bash tests/skills/test-workflow-outcomes.sh --require-pass`; it intentionally remains
+open when live, blocked, stale, or substituted evidence is present.
 
 ## Documentation
 

@@ -90,7 +90,7 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harn
 - `example-workflow/` — Ready-to-use project template: `CLAUDE.md` (Karpathy behavioral principles + beads integration) and `agents/yegge.md` (lean router — triages requests and routes to skills). `install.sh --with-yegge` installs `yegge.md` globally (opt-in; not installed by default).
 - `docs/` — Working knowledge base, not a website source tree. Current tracked content is `docs/research/`; skills also route graph plans to `docs/plans/` and ADRs to `docs/decisions/` when those directories are created.
 - `.internal/` — Local session scratch (gitignored), including handoff inbox/archive docs and transient agent/server artifacts. Do not put durable user-facing docs here.
-- `tests/` — deterministic suites (hooks, manifests, skills contracts, install-shape, installer Docker E2E, brainstorm-server Node tests) run via the `just` surface; the LLM-driven suites (claude-code, explicit-skill-requests, skill-triggering, subagent-driven-dev) are deprecated in place — see `tests/*/DEPRECATED.md`.
+- `tests/` — deterministic suites (hooks, manifests, skill contracts, install-shape, workflow outcome contract, installer Docker E2E, brainstorm-server Node tests) run directly or via the `just` surface. Install-shape proves packaging, not behavior. Live Codex micro-tests are cost-gated; Claude live testing is not required.
 - `scripts/` — `bump-version.sh` (sync version across 8 files), `check-skill-count.sh` (guard: forbid hardcoded skill counts + structural self-consistency), `check-agent-bead-stamp.sh`, `check-policy-ownership.sh` (enforce one canonical owner plus conditional callers for shared workflow policy), `lint-shell.sh` (shellcheck gate over tracked `.sh` with committed baseline; visible SKIP when shellcheck absent), `check-askuser-genericization.sh` (guard: skills use generic question-tool phrasing — ADR-0041).
 - `install.sh` — curl installer with 3-tier fallback chain (plugin system → npx → tarball/git clone). SHA-256 checksum validation, atomic rollback via staging directory, lazy prerequisites. Auto-detects Claude Code, Codex, OpenCode, and 6 more CLIs (Cursor, Copilot, Droid, Antigravity, Kimi, Pi).
 
@@ -101,7 +101,10 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harn
 - **`bd` replaces TodoWrite everywhere** — Every `TodoWrite` reference in upstream superpowers replaced with `bd` commands. Beads provides persistent cross-session memory that TodoWrite lacks.
 - **Three-layer architecture for example workflow** — `CLAUDE.md` (behavioral principles + project context) + `agents/yegge.md` (orchestration — triage + skill routing) + prompt templates (subagent dispatch). Each layer has a distinct responsibility. (See: ADR-0003, ADR-0032)
 - **README-first public docs** — The docs site was removed; README is now the canonical user-facing guide. `docs/` is reserved for working knowledge artifacts produced by skills.
-- **Per-task worktree isolation for parallel SDD** — Independent plan tasks execute in parallel (max 5), each in its own `bd worktree`. Prevents merge conflicts between concurrent subagents. (See: ADR-0002)
+- **Product contract before solution design when needed** — Substantial or ambiguous product work establishes stable actors, authority, lifecycle, invariants, counterexamples, and outcome IDs. Small fixes and already-complete requirements bypass it explicitly.
+- **Vertical graph plans, not horizontal task lists** — Each graph node demonstrates user-visible behavior or an operable capability with its first consumer. Legacy Markdown plans are regenerated; there is no compatibility layer.
+- **One-task context and rolling SDD** — Each worker receives one validated Context Manifest and isolated worktree. The resource-aware scheduler starts newly ready work while fresh reviews run, merges approved slices, and recomputes readiness. Hosts that cannot guarantee isolation use an explicit serial fallback.
+- **One owner for shared workflow policy** — `skills/using-superpowers/references/session-policy.md` owns shared policy; callers link to applicable sections and the ownership guard rejects duplicated normative blocks.
 
 ## Common Gotchas
 
@@ -224,9 +227,9 @@ This plugin uses `bd` (beads) for ALL task tracking.
 | brainstorming                  | Socratic design before code — creates session beads                                                                         |
 | stress-test                    | Adversarial design interrogation with recommended answers                                                                   |
 | product-definition             | Conditional product contract for actors, authority, lifecycle, counterexamples, and stable outcomes                         |
-| writing-plans                  | Bite-sized task plans — each task becomes a bead                                                                            |
-| subagent-driven-development    | Fresh agent per task + single task review (spec + quality verdicts); parallel batch mode for independent tasks              |
-| executing-plans                | Batch execution in single session                                                                                           |
+| writing-plans                  | Validated dependency graphs of working vertical slices, traced to stable product outcomes                                   |
+| subagent-driven-development    | One-task Context Manifests, rolling resource-aware scheduling, fresh review, and evidence-gated closure                     |
+| executing-plans                | Inline execution of validated graph plans with evidence checkpoints                                                        |
 | test-driven-development        | RED-GREEN-REFACTOR — Iron Law: no code without failing test                                                                 |
 | systematic-debugging           | 4-phase root cause analysis before proposing fixes                                                                          |
 | verification-before-completion | Evidence before claims — bd close requires evidence                                                                         |
@@ -240,7 +243,7 @@ This plugin uses `bd` (beads) for ALL task tracking.
 | writing-skills                 | Meta-skill for creating/modifying skills                                                                                    |
 | auditing-upstream-drift        | Detect staleness vs upstream superpowers/beads                                                                              |
 | getting-up-to-speed            | Session orientation — reads latest session-handoff doc + bd context + adaptive codebase deep-dive + structured current-state summary |
-| research-driven-development    | Parallel research agents → synthesized knowledge base document. Triggers on "research this", "what is X", "how does Y work" |
+| research-driven-development    | Repository-only, external-only, or mixed research with bounded source manifests and synthesis                              |
 | write-documentation            | Human-quality prose for all human-facing text — 14-rule writing system with context-first drafting and required checks      |
 | memory-curator                 | Session-close/on-demand memory consolidation — quality-gated extract, dedup, consolidate, prune (evidence-led)              |
 | session-handoff                | **Human-invoked only** — grounded session-handoff doc + continuation memory (not agent-routed)            |
@@ -270,7 +273,7 @@ Pre-commit covers commit-time hygiene; nothing here is CI-enforced by design.
 
 ```bash
 just            # = just check: guards + hooks + manifests + contracts + shape
-just guards     # all guard scripts (todowrite, bead-stamp, convention-sync,
+just guards     # all guard scripts (todowrite, bead-stamp, policy ownership,
                 #   skill-count + KNOWN_SKILLS drift, version sync, frontmatter, shell lint,
                 #   askuser-genericization)
 just lint       # shellcheck gate alone (tracked .sh, baseline'd; SKIPs if shellcheck absent)

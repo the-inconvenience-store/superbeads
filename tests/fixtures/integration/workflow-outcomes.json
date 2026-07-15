@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+  "campaign": {
+    "deterministic": "PASS",
+    "install_shape": "CODEX_ONLY_PASS",
+    "install_shape_reason": "The user restricted fixture execution to Codex; the all-host install-shape suite was not run.",
+    "just_check": "NOT_RUN",
+    "just_check_reason": "The just command is not installed in the verification environment.",
+    "whole_change_review": "SELF_REVIEW_ONLY",
+    "whole_change_review_reason": "The user switched execution to inline work, so no independent fresh-context reviewer was dispatched.",
+    "release_outcome_gate": "OPEN",
+    "codex_live": "UNTESTED",
+    "codex_live_reason": "Separate live-cost authorization has not been provided.",
+    "claude_live": "NOT_RUN",
+    "claude_live_reason": "Live Claude usage is forbidden for this campaign."
+  },
+  "deterministic_evidence": {
+    "elapsed_seconds": {
+      "guards": 3.44,
+      "contracts": 40.94,
+      "hooks": 23.90,
+      "manifests": 0.33,
+      "codex_install_shape": 1.97,
+      "scheduler": 2.19,
+      "evidence_gate": 2.31,
+      "outcome_contract": 0.14
+    },
+    "graph": {
+      "declared_tasks": 12,
+      "bead_issues": 14,
+      "closed_bead_issues": 13,
+      "ready_fronts": 10,
+      "max_parallelism": 2
+    },
+    "metrics": {
+      "skills_all_words": 28881,
+      "product_discovery_words": 13387,
+      "accepted_contract_words": 12623,
+      "internal_bypass_words": 10202,
+      "matched_legacy_words": 12623,
+      "incremental_product_definition_words": 764,
+      "description_bytes": 2384,
+      "rendered_lifecycle_bytes": 3814
+    }
+  },
+  "outcomes": [
+    {
+      "acceptance_id": "SWF-PRODUCT-CONTRACT",
+      "implementation_task": "beads-superpowers-4gl.1",
+      "earliest_seam": "product request to approved contract",
+      "evidence_class": "deterministic contract plus Codex behavior",
+      "commit": "0f19567",
+      "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+      "environment": "codex-live:not-authorized",
+      "fixture_revision": "end-to-end-workflow-v1",
+      "result": "UNTESTED",
+      "artifact": "tests/skill-microtests/scenarios/end-to-end-workflow.json"
+    },
+    {
+      "acceptance_id": "SWF-VERTICAL-SLICE",
+      "implementation_task": "beads-superpowers-pxf",
+      "earliest_seam": "approved outcomes to executable graph",
+      "evidence_class": "graph contract plus Codex behavior",
+      "commit": "7f61e52",
+      "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+      "environment": "codex-live:not-authorized",
+      "fixture_revision": "end-to-end-workflow-v1",
+      "result": "UNTESTED",
+      "artifact": "tests/skill-microtests/scenarios/end-to-end-workflow.json"
+    },
+    {
+      "acceptance_id": "SWF-CONTEXT-MANIFEST",
+      "implementation_task": "beads-superpowers-d3g",
+      "earliest_seam": "dispatchable task to worker preflight",
+      "evidence_class": "deterministic manifest mutation",
+      "commit": "5e8e3b2",
+      "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+      "environment": "codex:macos:isolated-fixture",
+      "fixture_revision": "sdd-context-v1",
+      "result": "PASS",
+      "artifact": "tests/skills/test-sdd-context-contract.sh"
+    },
+    {
+      "acceptance_id": "SWF-FRESH-CONTEXT",
+      "implementation_task": "beads-superpowers-d3g",
+      "earliest_seam": "task or review dispatch identity binding",
+      "evidence_class": "deterministic identity and reviewer mutation",
+      "commit": "5e8e3b2",
+      "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+      "environment": "codex:macos:isolated-fixture",
+      "fixture_revision": "sdd-context-v1",
+      "result": "PASS",
+      "artifact": "tests/skills/test-sdd-context-contract.sh"
+    },
+    {
+      "acceptance_id": "SWF-ROLLING-FLOW",
+      "implementation_task": "beads-superpowers-08e",
+      "earliest_seam": "ready graph to resource-aware dispatch",
+      "evidence_class": "deterministic scheduler fronts",
+      "commit": "a071237",
+      "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+      "environment": "python3:macos:pure-decision",
+      "fixture_revision": "sdd-scheduler-v1",
+      "result": "PASS",
+      "artifact": "tests/skills/test-sdd-scheduler.sh"
+    },
+    {
+      "acceptance_id": "SWF-EVIDENCE-GATE",
+      "implementation_task": "beads-superpowers-nfa",
+      "earliest_seam": "task or epic closure request",
+      "evidence_class": "deterministic stale, blocked, substitution, and review mutations",
+      "commit": "cbafa4d",
+      "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+      "environment": "python3:macos:pure-validator",
+      "fixture_revision": "sdd-evidence-v1",
+      "result": "PASS",
+      "artifact": "tests/skills/test-sdd-evidence-gate.sh"
+    },
+    {
+      "acceptance_id": "SWF-TOKEN-BUDGET",
+      "implementation_task": "beads-superpowers-mwj",
+      "earliest_seam": "candidate skill path measurement",
+      "evidence_class": "deterministic path, description, and rendered-context metrics",
+      "commit": "7a9572b",
+      "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+      "environment": "python3:macos:render-fixture",
+      "fixture_revision": "workflow-metrics-v1",
+      "result": "PASS",
+      "artifact": "tests/skills/test-workflow-metrics.sh"
+    },
+    {
+      "acceptance_id": "SWF-CROSS-PLATFORM",
+      "implementation_task": "beads-superpowers-4cr",
+      "earliest_seam": "host adapter dispatch and fallback",
+      "evidence_class": "deterministic adapters plus Codex behavior",
+      "commit": "0166e9e",
+      "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+      "environment": "codex-live:not-authorized",
+      "fixture_revision": "end-to-end-workflow-v1",
+      "result": "UNTESTED",
+      "artifact": "tests/skill-microtests/scenarios/end-to-end-workflow.json"
+    },
+    {
+      "acceptance_id": "SWF-ADVERSARIAL-COVERAGE",
+      "implementation_task": "beads-superpowers-hyf",
+      "earliest_seam": "approved product and design assumptions",
+      "evidence_class": "coverage contract plus Codex behavior",
+      "commit": "fd238d5",
+      "contract_revision": "0.12.0:fc886f10a83c3b373ad55da81948020c4cc58c2931d4d22a16958f4c88991cb4",
+      "environment": "codex-live:not-authorized",
+      "fixture_revision": "end-to-end-workflow-v1",
+      "result": "UNTESTED",
+      "artifact": "tests/skill-microtests/scenarios/end-to-end-workflow.json"
+    }
+  ],
+  "platforms": [
+    {
+      "host": "claude",
+      "model_requested": null,
+      "model_effective": null,
+      "model_control": "unavailable",
+      "capability_tier": "isolated",
+      "context_mode": "isolated",
+      "fallback_reason": "Live Claude usage is forbidden; deterministic adapter fixtures only.",
+      "live_tested": false
+    },
+    {
+      "host": "codex",
+      "model_requested": null,
+      "model_effective": null,
+      "model_control": "inherited",
+      "capability_tier": "isolated",
+      "context_mode": "isolated",
+      "fallback_reason": "Live cost authorization is absent; deterministic fixtures only.",
+      "live_tested": false
+    },
+    {
+      "host": "opencode",
+      "model_requested": null,
+      "model_effective": null,
+      "model_control": "unavailable",
+      "capability_tier": "host-limited",
+      "context_mode": "host-limited",
+      "fallback_reason": "No isolated worker adapter is verified; use the serial host-limited path.",
+      "live_tested": false
+    }
+  ]
+}
