@@ -67,14 +67,14 @@ Brainstorming is complete only when:
 - the written spec passes self-review and user approval; and
 - the next route is stress-test or writing-plans, never implementation directly.
 
-Open the spec in the user's editor as a standalone action, then use this compact review gate:
+Present the saved spec path, then use this compact review gate:
 
 <!-- Canonical 3-option stress-test gate — keep identical to writing-plans/SKILL.md -->
 
 ```json
 {
   "questions": [{
-    "question": "Spec opened in your editor at `<path>`. Review it and let me know how to proceed.",
+    "question": "Spec saved at `<path>`. Review it if you choose, then let me know how to proceed.",
     "header": "Spec review",
     "options": [
       {"label": "Approved + stress-test (Recommended)", "description": "Spec looks good — run an adversarial stress-test before writing the plan"},

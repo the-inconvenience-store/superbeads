@@ -14,6 +14,11 @@ for file in "$PRODUCT" "$DESIGN" "$PLAN"; do
     echo "FAIL: ${file#$ROOT/} lacks the shared artifact ownership contract" >&2
     exit 1
   }
+
+  if grep -Eiq "open (the )?(product contract|contract|spec|plan|artifact|document).*(user'?s )?editor|(product contract|contract|spec|plan|artifact|document) opened in (the )?user'?s editor|open (the )?(product contract|contract|spec|plan|artifact|document).*standalone action" "$file"; then
+    echo "FAIL: ${file#$ROOT/} instructs the agent to open a workflow artifact" >&2
+    exit 1
+  fi
 done
 
 grep -Fqi "observable atomicity and consistency invariants" "$PRODUCT_TEMPLATE"
