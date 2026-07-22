@@ -1,7 +1,7 @@
 {
   "task_id": "beads-superpowers-d3g",
   "contract_hash": "904361e92dbb0c1a5d0cac03e5980a4e49e1977328a4c4f27ea4c473a15dbd07",
-  "workflow_version": "0.13.1",
+  "workflow_version": "0.14.0",
   "graph_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "governing_artifacts": [
     {"path": "docs/product/workflow-product-contract.md", "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},

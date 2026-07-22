@@ -8,7 +8,7 @@ The controller supplies one authoritative task bead and one Context Manifest. Th
 
 Do not give the worker the whole graph, full planning transcript, brainstorming transcript, or unrelated task reports. Supporting history is pull-based: the worker opens a named artifact only when a current task decision depends on it.
 
-## Manifest v0.13.1
+## Manifest v0.14.0
 
 Required fields:
 
@@ -16,7 +16,7 @@ Required fields:
 |---|---|
 | `task_id` | One authoritative bead |
 | `contract_hash` | SHA-256 of the canonical contract fields below |
-| `workflow_version` | Exact SDD contract version (`0.13.1`) |
+| `workflow_version` | Exact SDD contract version (`0.14.0`) |
 | `graph_hash` | Dispatch-time graph SHA-256 |
 | `governing_artifacts[path,revision]` | Trusted repo-relative path and content SHA-256 |
 | `outcome_ids` | Non-empty outcomes owned by the slice |

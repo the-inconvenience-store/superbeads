@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 manifest = json.loads(Path(sys.argv[1]).read_text())
-manifest["workflow_version"] = "0.13.1"
+manifest["workflow_version"] = "0.14.0"
 manifest["generated_write_set"] = [manifest["report_path"]]
 manifest["write_scope_amendments"] = []
 scope = {
@@ -112,7 +112,7 @@ changes = {
     "contract_hash": "f" * 64,
     "base_commit": "3" * 40,
     "worktree": "/tmp/superbeads-task-other",
-    "workflow_version": "0.14.0",
+    "workflow_version": "0.15.0",
     "graph_hash": "d" * 64,
 }
 for field, value in changes.items():
@@ -180,7 +180,7 @@ python3 - "$PREPARED" <<'PY'
 import json, sys
 from pathlib import Path
 manifest=json.loads(Path(sys.argv[1]).read_text())
-assert manifest["workflow_version"] == "0.13.1"
+assert manifest["workflow_version"] == "0.14.0"
 assert manifest["allowed_write_set"] == ["src/approval.py", "tests/test_approval.py"]
 assert manifest["generated_write_set"] == [".internal/sdd/prepared-report.md"]
 assert len(manifest["write_scope_hash"]) == 64
