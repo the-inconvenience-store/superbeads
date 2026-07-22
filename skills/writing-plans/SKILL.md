@@ -7,6 +7,10 @@ description: Use when an approved product contract and solution design need a va
 
 Compile approved product outcomes into one graph producer whose tasks are independently rejectable vertical Slice Contracts.
 
+## Artifact Ownership
+
+The plan owns **how approved product and technical decisions are executed and proven**: vertical slices, outcome ownership, exact write zones, produced and consumed interface IDs, semantic prerequisites, resource constraints, and task-specific evidence. It must not introduce product behavior or architecture. A newly required product decision returns to product-definition; a newly required solution decision returns to brainstorming before planning resumes.
+
 **Announce at start:** "I'm using writing-plans to create and validate the implementation graph."
 
 Do not touch implementation code. Do not silently cut required behavior or weaken security, review, or evidence controls.
@@ -40,10 +44,10 @@ Beads `blocks` edges express execution prerequisites; **resource conflicts are n
 
 ## Workflow
 
-1. **Verify inputs.** Read the contract, design, relevant code, test/build targets, and recent plan conventions. Run or inspect every command, path, signature, and schema named in the graph; recalled detail is not plan evidence.
+1. **Verify inputs.** Read the contract, design, relevant code, test/build targets, and recent plan conventions. Run or inspect every command, path, signature, and schema named in the graph; recalled detail is not plan evidence. Stop if a slice would have to invent product behavior or architecture and route to the artifact owner.
 2. **Build the outcome ledger.** For every stable ID record actor/entry, action, durable result, find-again path, failure/denied state, evidence class, implementation owner, earliest real seam, and final gate.
 3. **Choose vertical boundaries.** Start with the thinnest end-to-end behavior. Fold horizontal setup into its first consuming slice. Split only where a reviewer could reject one result while accepting its neighbor.
-4. **Declare dependencies and resources.** Add `blocks` only for semantic prerequisites. Record allowed writes, exclusivity, capacity, and any safe speculative contract independently.
+4. **Declare dependencies and resources.** Add `blocks` only when the dependent consumes a stable interface produced by the prerequisite, or when it names a concrete irreversible migration/rollout constraint. Apply the **edge deletion test**: remove the candidate edge; if both tasks remain implementable against stable interfaces, leave it out. Record allowed writes, exclusivity, capacity, and any safe speculative contract independently.
 5. **Write the graph.** Read [slice-contract-template.md](slice-contract-template.md) now. Save `docs/plans/YYYY-MM-DD-<feature>.graph.json`; this JSON is the sole plan of record.
 6. **Validate before import.** Run `./skills/writing-plans/scripts/validate.sh <graph>`. Do **not** run `bd create --graph <graph> --dry-run`: its dry run creates issues, including duplicate epics. Fix every structural, verticality, outcome, DAG, or resource error before the single approved import.
 7. **Review.** Self-review outcome ownership, earliest seams, final gates, evidence non-substitution, placeholders, interface consistency, write conflicts, and speculative cost. Offer stress-test at the plan review gate; revalidate after any edit.
@@ -67,7 +71,7 @@ The graph is ready only when:
 - every epic outcome has an implementation owner, earliest integration seam, and terminal final gate;
 - every task satisfies the canonical section schema and produces a demonstrable slice;
 - the DAG is acyclic and edge direction is dependent → prerequisite;
-- parallel-ready tasks have disjoint writes/exclusive resources or explicit scheduling constraints;
+- parallel-ready tasks declare write/exclusive-resource conflicts for scheduler serialization rather than converting them to dependency edges;
 - required evidence classes are not substituted by lower-level checks;
 - `FAIL`, `BLOCKED`, `UNTESTED`, `SKIPPED`, or stale evidence leaves its outcome open; and
 - validator and user review pass.

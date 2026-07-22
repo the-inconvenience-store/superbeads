@@ -7,6 +7,10 @@ description: Use when shaping a feature, component, or behavior change into an a
 
 Turn approved product truth into an approved solution design through grounded, economical dialogue.
 
+## Artifact Ownership
+
+The technical spec owns **how approved product truth will be realized**: architecture, component and state ownership, data flow, entry and integration interfaces, security boundaries, failure and recovery responsibility, rollout, evidence strategy, and implementation topology. It references product outcome IDs rather than restating the contract and does not assign execution order or worker ownership.
+
 **Announce at start:** "I'm using brainstorming to develop the solution design."
 
 <HARD-GATE>
@@ -34,7 +38,7 @@ Before this workflow's first Beads read/write or claim decision, read [Beads Rea
 3. **Map unresolved decisions.** Read [question-coverage.md](question-coverage.md) now. Mark each applicable cell resolved, derivable from evidence, or unresolved; tie it to affected product outcome IDs.
 4. **Ask only consequential questions.** Each question cites observed evidence, states the decision consequence, and includes a recommendation. Ask up to three independent low-risk questions together; dependency-changing decisions remain serial. Prefer structured choices when the answer space is discrete.
 5. **Compare approaches.** Present two or three viable approaches with trade-offs and a recommendation. Never offer an option that violates a required outcome or security control.
-6. **Present the design.** Scale sections to complexity. Cover architecture, boundaries, domain model, data flow, failures/recovery, security, evidence, and rollout where applicable. Reference contract IDs rather than restating product truth.
+6. **Present the design.** Scale sections to complexity. Cover architecture, boundaries, domain model, data flow, failures/recovery, security, evidence, rollout, and the implementation topology from question coverage where applicable. Reference contract IDs rather than restating product truth.
 7. **Approve and write.** Obtain explicit section/design approval, then write `docs/specs/YYYY-MM-DD-<topic>-design.md`. Record the product contract path and revision plus an `## Assumptions` section with verified/recalled/assumed status and failure consequence.
 8. **Review and route.** Self-review for placeholders, contradictions, ambiguous authority, orphaned outcome IDs, missing recovery, and unverified assumptions. Ask the user to review the written spec. Stress-test milestone, security-sensitive, destructive, or cross-system work; otherwise offer it. The terminal route is writing-plans.
 

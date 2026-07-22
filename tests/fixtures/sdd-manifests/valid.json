@@ -1,7 +1,7 @@
 {
   "task_id": "beads-superpowers-d3g",
-  "contract_hash": "8369dd45c5cf99e048e382d9252a487d79778cf1cf69bf929fd915938834d410",
-  "workflow_version": "0.13.0",
+  "contract_hash": "904361e92dbb0c1a5d0cac03e5980a4e49e1977328a4c4f27ea4c473a15dbd07",
+  "workflow_version": "0.13.1",
   "graph_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "governing_artifacts": [
     {"path": "docs/product/workflow-product-contract.md", "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
@@ -17,6 +17,9 @@
   "reviewed_dependency_commits": ["2222222222222222222222222222222222222222"],
   "worktree": "/tmp/superbeads-task-d3g",
   "allowed_write_set": ["skills/subagent-driven-development/SKILL.md", "tests/skills/test-sdd-context-contract.sh"],
+  "generated_write_set": [".internal/sdd/task-d3g-report.md"],
+  "write_scope_hash": "ced6b8448b24b7a9039c4ef946116a92a857f6538728d7076120a8c9d465fb28",
+  "write_scope_amendments": [],
   "prohibited_paths": [".env", "docs/product/workflow-product-contract.md"],
   "allocated_resources": {"exclusive": ["sdd-spine"], "capacity": {"provider": 1}},
   "verification_commands": ["bash tests/skills/test-sdd-context-contract.sh"],

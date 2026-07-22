@@ -18,8 +18,10 @@ export PYTHONPYCACHEPREFIX="$TMP/pycache"
 python3 -m py_compile "$CHECKER"
 python3 "$CHECKER" check-task "$FIXTURES/pass.json" | tee "$TMP/pass-task.out"
 python3 "$CHECKER" check-epic "$FIXTURES/pass.json" | tee "$TMP/pass-epic.out"
+python3 "$CHECKER" check-dispatch "$FIXTURES/pass.json" | tee "$TMP/pass-dispatch.out"
 grep -Fq "PASS task: TASK-A, TASK-B" "$TMP/pass-task.out"
 grep -Fq "PASS epic: OUT-A" "$TMP/pass-epic.out"
+grep -Fq "PASS dispatch" "$TMP/pass-dispatch.out"
 
 expect_failure() {
   local command="$1" fixture="$2" output
@@ -40,6 +42,7 @@ expect_failure check-epic substituted OUT-A "substituted evidence class"
 expect_failure check-task blocked TASK-A TASK-B BLOCKED UNTESTED
 expect_failure check-epic blocked OUT-A FAIL
 expect_failure check-task two-rounds "diagnostic required" amend-contract split-slice resolve-product-decision adjudicate-reviewer
+expect_failure check-dispatch two-rounds "dispatch disallowed" "two failed review rounds"
 
 python3 - "$FIXTURES/two-rounds.json" "$TMP" <<'PY'
 import json, sys
@@ -92,6 +95,9 @@ for text in "current commit" "contract hash" environment fixture "acceptance mat
   grep -Fqi "$text" "$OUTCOME_PROMPT" || { echo "FAIL: outcome reviewer prompt missing $text" >&2; exit 1; }
 done
 for text in "two failed" amend-contract split-slice resolve-product-decision adjudicate-reviewer "fresh reviewer"; do
+  grep -Fqi "$text" "$REFERENCE" || { echo "FAIL: review reference missing $text" >&2; exit 1; }
+done
+for text in "check-dispatch" focused task integration release prepare implement review correction merge release; do
   grep -Fqi "$text" "$REFERENCE" || { echo "FAIL: review reference missing $text" >&2; exit 1; }
 done
 

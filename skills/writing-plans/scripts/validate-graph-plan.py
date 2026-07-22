@@ -7,6 +7,7 @@ import json
 import re
 import sys
 from collections import deque
+from itertools import combinations
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +32,10 @@ DEFERRED_SEAM = re.compile(
     r"(?i)(integration (?:is )?deferred|later downstream task|later task|"
     r"downstream task|final task only|no consumer|scaffolding only|schema-only)"
 )
+COMPLEXITY_BOUNDARIES = {
+    "authority", "parsing", "persistence", "concurrency", "recovery",
+    "protocol", "security", "evidence",
+}
 
 
 class GraphError(ValueError):
@@ -169,6 +174,11 @@ def validate_edges(edges: list[dict[str, Any]], tasks: set[str], errors: list[st
                 queue.append(dependent)
     if visited != len(tasks):
         error(errors, "graph", "Edges", "dependency graph contains a cycle")
+    for source, target in seen:
+        prerequisites[source].remove(target)
+        if reaches(source, target, prerequisites):
+            error(errors, source, "Edges", f"transitively redundant blocks edge to {target}")
+        prerequisites[source].add(target)
     return prerequisites
 
 
@@ -196,6 +206,23 @@ def validate_contracts(by_key: dict[str, dict[str, Any]], parsed: dict[str, dict
         for field in ("Product contract:", "Spec:", "Outcome IDs:", "External ref:", "Why this slice exists:"):
             if field.lower() not in context.lower():
                 error(errors, key, "Context", f"missing field {field}")
+        complexity = re.search(r"(?im)^\s*-\s*Complexity boundaries:\s*(.+)$", context)
+        if complexity:
+            values = {
+                value.strip().lower().rstrip(".")
+                for value in complexity.group(1).split(",")
+                if value.strip() and value.strip().lower().rstrip(".") != "none"
+            }
+            unknown = values - COMPLEXITY_BOUNDARIES
+            if unknown:
+                error(errors, key, "Context", f"unknown complexity boundaries: {', '.join(sorted(unknown))}")
+            if len(values) > 2:
+                error(
+                    errors,
+                    key,
+                    "Context",
+                    "slice complexity spans more than two high-risk boundaries; split the slice before SDD",
+                )
         outcome = body.get("Outcome", "")
         for field in (
             "Actor / entry interface:",
@@ -206,7 +233,7 @@ def validate_contracts(by_key: dict[str, dict[str, Any]], parsed: dict[str, dict
             if field.lower() not in outcome.lower():
                 error(errors, key, "Outcome", f"missing field {field}")
         resources = body.get("Resources", "")
-        for field in ("Allowed write set:", "Exclusive resources:", "Capacity resources:"):
+        for field in ("Exclusive resources:", "Capacity resources:"):
             if field.lower() not in resources.lower():
                 error(errors, key, "Resources", f"missing field {field}")
         integration = body.get("Integration Checkpoint", "")
@@ -248,6 +275,69 @@ def paths_for(body: str) -> set[str]:
     return paths
 
 
+def named_values(body: str, field: str) -> set[str] | None:
+    match = re.search(rf"(?im)^\s*-\s*{re.escape(field)}:\s*(.+)$", body)
+    if not match:
+        return None
+    value = match.group(1).strip().rstrip(".")
+    if value.lower() == "none":
+        return set()
+    return set(OUTCOME_ID.findall(value))
+
+
+def hard_ordering(body: str, tasks: set[str], key: str, errors: list[str]) -> dict[str, str]:
+    match = re.search(r"(?im)^\s*-\s*Hard ordering constraints:\s*(.+)$", body)
+    if not match:
+        error(errors, key, "Interfaces", "missing field Hard ordering constraints:")
+        return {}
+    value = match.group(1).strip().rstrip(".")
+    if value.lower() == "none":
+        return {}
+    result: dict[str, str] = {}
+    for item in value.split(";"):
+        parts = re.split(r"\s*(?::|—)\s*", item.strip(), maxsplit=1)
+        if len(parts) != 2 or parts[0] not in tasks or len(parts[1].split()) < 3:
+            error(errors, key, "Interfaces", "hard ordering requires '<task>: <concrete irreversible reason>'")
+            continue
+        if not re.search(r"(?i)irrevers|one-way|migration|rollout|destructive", parts[1]):
+            error(errors, key, "Interfaces", f"hard ordering for {parts[0]} lacks an irreversible rollout reason")
+            continue
+        result[parts[0]] = parts[1]
+    return result
+
+
+def validate_edge_semantics(
+    tasks: set[str],
+    parsed: dict[str, dict[str, str]],
+    prerequisites: dict[str, set[str]],
+    errors: list[str],
+) -> None:
+    produced: dict[str, set[str]] = {}
+    consumed: dict[str, set[str]] = {}
+    hard: dict[str, dict[str, str]] = {}
+    for key in tasks:
+        interfaces = parsed.get(key, {}).get("Interfaces", "")
+        produced_values = named_values(interfaces, "Produces")
+        consumed_values = named_values(interfaces, "Consumes")
+        if produced_values is None:
+            error(errors, key, "Interfaces", "missing field Produces:")
+        if consumed_values is None:
+            error(errors, key, "Interfaces", "missing field Consumes:")
+        produced[key] = produced_values or set()
+        consumed[key] = consumed_values or set()
+        hard[key] = hard_ordering(interfaces, tasks, key, errors)
+    for dependent, prereqs in prerequisites.items():
+        for prerequisite in prereqs:
+            shared = consumed[dependent] & produced[prerequisite]
+            if not shared and prerequisite not in hard[dependent]:
+                error(
+                    errors,
+                    dependent,
+                    "Edges",
+                    f"unjustified blocks edge to {prerequisite}: name a produced/consumed interface or irreversible hard ordering",
+                )
+
+
 def reaches(start: str, target: str, prerequisites: dict[str, set[str]]) -> bool:
     stack = list(prerequisites.get(start, ()))
     seen: set[str] = set()
@@ -261,32 +351,38 @@ def reaches(start: str, target: str, prerequisites: dict[str, set[str]]) -> bool
     return False
 
 
-def validate_resources(tasks: set[str], parsed: dict[str, dict[str, str]], prerequisites: dict[str, set[str]], errors: list[str]) -> None:
+def exclusive_values(body: str) -> set[str]:
+    match = re.search(r"(?im)^\s*-\s*Exclusive resources:\s*(.+)$", body)
+    if not match:
+        return set()
+    value = match.group(1).strip().rstrip(".")
+    if value.lower() == "none":
+        return set()
+    return {item.strip().strip("`").lower() for item in value.split(",") if item.strip()}
+
+
+def paths_overlap(left: set[str], right: set[str]) -> bool:
+    return any(
+        left_path == right_path
+        or left_path.startswith(right_path.rstrip("/") + "/")
+        or right_path.startswith(left_path.rstrip("/") + "/")
+        for left_path in left
+        for right_path in right
+    )
+
+
+def resource_conflicts(tasks: set[str], parsed: dict[str, dict[str, str]], prerequisites: dict[str, set[str]]) -> set[frozenset[str]]:
     files = {key: paths_for(parsed.get(key, {}).get("Files", "")) for key in tasks}
-    exclusive: dict[str, str] = {}
-    for key in tasks:
-        match = re.search(r"(?im)^\s*-\s*Exclusive resources:\s*(.+)$", parsed.get(key, {}).get("Resources", ""))
-        value = match.group(1).strip().lower() if match else ""
-        normalized = value.rstrip(".")
-        if normalized and normalized != "none":
-            exclusive[key] = normalized
+    exclusive = {key: exclusive_values(parsed.get(key, {}).get("Resources", "")) for key in tasks}
+    conflicts: set[frozenset[str]] = set()
     ordered = sorted(tasks)
     for index, left in enumerate(ordered):
         for right in ordered[index + 1 :]:
             if reaches(left, right, prerequisites) or reaches(right, left, prerequisites):
                 continue
-            overlap = sorted(
-                left_path
-                for left_path in files[left]
-                for right_path in files[right]
-                if left_path == right_path
-                or left_path.startswith(right_path.rstrip("/") + "/")
-                or right_path.startswith(left_path.rstrip("/") + "/")
-            )
-            if overlap:
-                error(errors, f"{left},{right}", "Resources", f"parallel write conflict: {', '.join(overlap)}")
-            if exclusive.get(left) and exclusive.get(left) == exclusive.get(right):
-                error(errors, f"{left},{right}", "Resources", f"parallel exclusive-resource conflict: {exclusive[left]}")
+            if paths_overlap(files[left], files[right]) or exclusive[left] & exclusive[right]:
+                conflicts.add(frozenset((left, right)))
+    return conflicts
 
 
 def ready_fronts(tasks: set[str], prerequisites: dict[str, set[str]]) -> list[list[str]]:
@@ -303,16 +399,31 @@ def ready_fronts(tasks: set[str], prerequisites: dict[str, set[str]]) -> list[li
     return fronts
 
 
-def validate(document: dict[str, Any]) -> tuple[list[str], int, int, int]:
+def constrained_width(fronts: list[list[str]], conflicts: set[frozenset[str]]) -> int:
+    widest = 0
+    for front in fronts:
+        for size in range(len(front), 0, -1):
+            if any(
+                all(frozenset(pair) not in conflicts for pair in combinations(group, 2))
+                for group in combinations(front, size)
+            ):
+                widest = max(widest, size)
+                break
+    return widest
+
+
+def validate(document: dict[str, Any]) -> tuple[list[str], int, int, int, int, int]:
     errors: list[str] = []
     nodes, edges = graph_shape(document, errors)
     by_key, parsed = validate_nodes(nodes, errors)
     tasks = {key for key, node in by_key.items() if node.get("type") == "task"}
     prerequisites = validate_edges(edges, tasks, errors)
     outcomes = validate_contracts(by_key, parsed, prerequisites, errors)
-    validate_resources(tasks, parsed, prerequisites, errors)
+    validate_edge_semantics(tasks, parsed, prerequisites, errors)
+    conflicts = resource_conflicts(tasks, parsed, prerequisites)
     fronts = ready_fronts(tasks, prerequisites)
-    return errors, len(tasks), len(outcomes), len(fronts)
+    semantic_width = max((len(front) for front in fronts), default=0)
+    return errors, len(tasks), len(outcomes), len(fronts), semantic_width, constrained_width(fronts, conflicts)
 
 
 def main() -> int:
@@ -325,11 +436,14 @@ def main() -> int:
     except GraphError as exc:
         print(f"graph: File: {exc}")
         return 1
-    errors, tasks, outcomes, fronts = validate(document)
+    errors, tasks, outcomes, fronts, semantic_width, resource_width = validate(document)
     if errors:
         print("\n".join(errors))
         return 1
-    print(f"valid graph: {tasks} tasks, {outcomes} outcomes, {fronts} ready fronts")
+    print(
+        f"valid graph: {tasks} tasks, {outcomes} outcomes, {fronts} ready fronts, "
+        f"semantic width {semantic_width}, resource-constrained width {resource_width}"
+    )
     return 0
 
 

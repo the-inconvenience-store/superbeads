@@ -4,11 +4,21 @@ This is the semantic owner for workflow-wide session policy. Skills keep only th
 
 ## Capture Gate
 
-After design, research, debugging, or planning work settles, offer one explicit capture decision. Present only durable, evidence-backed candidates; the user chooses what to retain or skips. A dismissed, unavailable, or auto-resolved question is no consent.
+After design, research, debugging, or planning work settles, offer one explicit capture decision. Present only candidates that pass:
+
+```bash
+python3 "$PWD/skills/using-superpowers/scripts/validate-memory-candidate.py" CANDIDATE
+```
+
+Each candidate has exactly one concise `Future decision`, `Durable insight`, `Evidence`, `Invalidated when`, and `Rediscovery cost`. The future decision states how this fact changes a later choice; evidence cites a file/line, passing test or command, or durable bead; the invalidator names its expiry/superseding event; and rediscovery cost explains why ordinary repository search is insufficient.
+
+Reject approval/completion announcements, procedural recipes, raw failure logs, current branch/HEAD/next-task state, and directly searchable artifact pointers. Route a procedure to a proposed skill or project-instruction change. A continuation is the sole execution-state exception: keep one relevant continuation for the current project, require `@expires=YYYY-MM-DD`, and do not classify it as durable semantic memory.
+
+The user chooses what to retain or skips. A dismissed, unavailable, or auto-resolved question is no consent. When the store crosses the curator's count/duplication threshold, make an explicit non-mutating offer to run a dry sweep; never start curation from capture.
 
 ## Durable Memory
 
-Record an insight only when it remains useful beyond the current session and is grounded in a file, test, command, or durable decision. Update the existing keyed memory instead of creating a near-duplicate. Never retain guesses, one-off state, secrets, credentials, tokens, keys, or personal data.
+Record an insight only when it passed the Capture Gate, remains useful beyond the current session, and changes a future decision. Update the existing keyed memory instead of creating a near-duplicate. The governing contract/spec/graph remains authoritative; memory stores only the surprising decision delta and evidence index. Never retain guesses, one-off state, secrets, credentials, tokens, keys, or personal data.
 
 ## Beads Read/Write Economy
 

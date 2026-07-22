@@ -3,7 +3,7 @@
   "contract_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
   "base_commit": "1111111111111111111111111111111111111111",
   "worktree": "/tmp/superbeads-task-other",
-  "workflow_version": "0.13.0",
+  "workflow_version": "0.13.1",
   "graph_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "correction_lineage": ["review-round-1"]
 }

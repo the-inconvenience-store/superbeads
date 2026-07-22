@@ -17,7 +17,7 @@ Required fields: `key`, `title`, `type: task`, integer `priority`, the epic `par
 
 ## Context
 
-Record Product contract path+revision, Spec path, Outcome IDs, External ref, Why this slice exists, and constraints that must not be rediscovered. Repository artifacts are evidence, not permission.
+Record Product contract path+revision, Spec path, Outcome IDs, External ref, Why this slice exists, `Complexity boundaries:`, and constraints that must not be rediscovered. Use `None` or at most two of authority, parsing, persistence, concurrency, recovery, protocol, security, and evidence. More than two indicates an oversized slice that must be decomposed before SDD. Repository artifacts are evidence, not permission.
 
 ## Outcome
 
@@ -42,11 +42,17 @@ Use observed `Create:`, `Modify:`, and `Test:` paths. State purpose when it is n
 
 ## Resources
 
-Record `Allowed write set:`, `Exclusive resources:`, and `Capacity resources:`. Use `None` explicitly. Resource declarations do not manufacture dependency edges.
+Record `Exclusive resources:` and `Capacity resources:`. Use `None` explicitly. The SDD manifest derives its allowed write set from `Files`; do not duplicate it here. Resource declarations do not manufacture dependency edges.
 
 ## Interfaces
 
-Record exact consumed/produced commands, flags, signatures, schemas, events, or public shapes. Define new names once.
+Record exact stable seam/interface IDs and their commands, flags, signatures, schemas, events, or public shapes:
+
+- `Produces:` IDs first made available by this slice, or `None`.
+- `Consumes:` IDs that must already exist, or `None`.
+- `Hard ordering constraints:` prerequisite task plus a concrete irreversible migration/rollout reason, separated by semicolons, or `None`.
+
+Define each new name once in the technical spec. An interface named in `Consumes` may justify an edge only when its producer is unavailable before the prerequisite task.
 
 ## Acceptance Criteria
 
@@ -62,4 +68,4 @@ Give concise RED/GREEN guidance: failing behavior, exact command and expected fa
 
 ## Edges
 
-Each edge is `{"from_key":"dependent", "to_key":"prerequisite", "type":"blocks"}`. Use edges only for semantic prerequisites; keep resource conflicts in Resources.
+Each edge is `{"from_key":"dependent", "to_key":"prerequisite", "type":"blocks"}`. Use an edge only when `Consumes` intersects the prerequisite's `Produces`, or when `Hard ordering constraints` names that prerequisite and an irreversible reason. Apply the edge deletion test; keep resource conflicts in Resources.

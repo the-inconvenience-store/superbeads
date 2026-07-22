@@ -20,9 +20,13 @@ bsp_select_memory_keys() {
     sed -n 's/^[[:space:]]*"\([^"]*\)":[[:space:]]*".*@salience=\([45]\).*/\2\t\1/p'
 }
 
-# Lexically-latest continuation-* key from the same JSON listing (dates sort lexically).
+# Lexically-latest unexpired continuation-* key. Continuations without explicit
+# @expires=YYYY-MM-DD are not ambient session context.
 bsp_latest_continuation() {
-    sed -n 's/^[[:space:]]*"\(continuation-[^"]*\)":.*/\1/p' | sort | tail -1
+    local today="${BSP_TODAY:-$(date +%F)}"
+    sed -n 's/^[[:space:]]*"\(continuation-[^"]*\)":[[:space:]]*".*@expires=\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\).*$/\2\t\1/p' |
+        awk -F '\t' -v today="$today" '$1 >= today {print $2}' |
+        sort | tail -1
 }
 
 neutralize_beads_context_delimiters() {

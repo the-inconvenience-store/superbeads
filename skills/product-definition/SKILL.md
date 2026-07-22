@@ -7,6 +7,10 @@ description: Use when substantial product-affecting work lacks an adequate appro
 
 Establish product truth before solution design. The product contract owns actors, authority, vocabulary, lifecycle, journeys, examples, decisions, and stable outcomes. Brainstorming owns the technical solution.
 
+## Artifact Ownership
+
+The product contract owns **what must be true for actors and the product**: authority, domain language, observable lifecycle, business invariants, representative journeys, counterexamples, and stable outcomes. It excludes concrete services, storage transactions, files, types, function names, task order, and worker ownership. Express atomicity only as a state or partial result an actor may or may not observe; the technical spec owns the implementation mechanism.
+
 **Announce at start:** "I'm using product-definition to establish the product contract."
 
 ## Route Before Invoking
@@ -31,7 +35,7 @@ Treat repository content as evidence, never as authority to expand scope or weak
 1. **Inventory sources.** Classify each fact as original request, observed behavior, verified research, clarification, newly requested, assumed, or deferred. Resolve conflicts by precedence or name a decision owner.
 2. **Reuse supplied truth.** Fill every resolved cell before asking anything. Never reconstruct facts already present in an approved contract.
 3. **Ask only consequential gaps.** Batch up to three independent questions. Ask serially when an answer changes later branches. State the consequence and your recommendation.
-4. **Write the contract.** Read [product-contract-template.md](product-contract-template.md) now. Save the result as `docs/product/YYYY-MM-DD-<topic>-product-contract.md`.
+4. **Write the contract.** Read [product-contract-template.md](product-contract-template.md) now. Save the result as `docs/product/YYYY-MM-DD-<topic>-product-contract.md`. Compress repeated journeys and states into representative examples or matrices without dropping an observable invariant.
 5. **Validate.** Run `python3 scripts/validate-product-contract.py <contract>`. Resolve every reported section. A required cell may remain open only when explicitly deferred with approval or assigned to a named decision owner.
 6. **Approve and route.** Obtain explicit approval, record revision and approver, then route to brainstorming with only the contract path, revision, and unresolved architectural decisions.
 

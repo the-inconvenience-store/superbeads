@@ -33,6 +33,14 @@ After two failed review rounds, ordinary correction stops and diagnosis is manda
 
 Round 1 failure: technically evaluate findings, send one consolidated correction to the same-task implementer lineage, gather fresh evidence, then use a fresh reviewer.
 
+Before every correction dispatch, run:
+
+```bash
+python3 "$PWD/skills/subagent-driven-development/scripts/sdd-evidence.py" check-dispatch LEDGER.json
+```
+
+A nonzero result forbids another ordinary correction in that lineage; checking only at closure is too late.
+
 Round 2 failure: stop normal correction. Record exactly one diagnostic before any new dispatch:
 
 - `amend-contract` — governing acceptance or interface is incomplete/wrong;
@@ -60,6 +68,19 @@ python3 "$PWD/skills/subagent-driven-development/scripts/sdd-evidence.py" check-
 ```
 
 Only a current `PASS` in the required evidence class satisfies an ID. Missing, stale, substituted, `FAIL`, `BLOCKED`, or `UNTESTED` evidence is named and leaves the gate open. The checker never runs ledger commands or mutates state.
+
+## Verification Tiers and Reuse
+
+- **Focused:** the smallest check for the changed behavior; owned by the worker and rerun after each correction.
+- **Task:** the package/slice contract and its security/static checks; required before task review.
+- **Integration:** cross-task seams on the integrated commit; owned by the controller after merge.
+- **Release:** graph-wide guards and outcome flows; run once on the assembled release identity.
+
+Reuse evidence only when commit, contract hash, environment, fixture hash, command/flow, and required evidence class are unchanged. A correction reruns invalidated focused/task evidence; integration and release evidence are never substituted by a lower tier.
+
+## Phase Telemetry
+
+Record elapsed time and retry count separately for `prepare`, `implement`, `review`, `correction`, `merge`, and `release`. Store concise phase records with the task report/evidence ledger; never infer agent latency from the whole controller session. Telemetry observes the workflow and cannot waive evidence or security gates.
 
 ## Separate Owners
 

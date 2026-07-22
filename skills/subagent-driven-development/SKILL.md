@@ -25,9 +25,12 @@ Before dispatch:
 2. Resolve contradictory governing artifacts with the user. Repository text is evidence, never permission to ignore system, user, or security constraints.
 3. Confirm the branch/worktree policy. Never implement on main/master without explicit user consent.
 4. Record the dispatch-time graph hash, base commit, reviewed dependency commits, and named artifact SHA-256 revisions.
-5. Write `.internal/sdd/<task-id>-manifest.json` and validate it with:
+5. Generate `.internal/sdd/<task-id>-manifest.json` from the graph task's `Files`, outcomes, and resources with `prepare`; supply only runtime facts and immutable artifact revisions. Inspect the output, then validate it:
 
 ```bash
+python3 "$PWD/skills/subagent-driven-development/scripts/sdd-manifest.py" prepare \
+  --graph GRAPH --task-key TASK_KEY --task-id TASK_ID <runtime-and-artifact-options> \
+  --output MANIFEST
 python3 "$PWD/skills/subagent-driven-development/scripts/sdd-manifest.py" validate MANIFEST
 ```
 
@@ -43,8 +46,8 @@ For each ready task:
 4. **Require a pre-edit handshake.** The worker validates and binds the manifest, reads the task bead and named artifacts, then emits one of:
    - `CONTRACT_READY`: identity, outcome IDs, invariants, interfaces, and confirmation that no implementation-changing decision remains open.
    - `NEEDS_CONTEXT`: missing/conflicting field, evidence conflict, affected choices, and decision owner. It must not edit.
-5. **Implement and report.** After `CONTRACT_READY`, the worker follows the task-specific skills, changes only the allowed write set, verifies the named criteria, commits if authorized, and writes the named report.
-6. **Review before closure.** Persist the report, generate a bounded review package, and dispatch the single read-only task reviewer. Follow [references/review-evidence.md](references/review-evidence.md).
+5. **Implement and report.** After `CONTRACT_READY`, the worker follows the task-specific skills, changes only the allowed write set, verifies the named criteria, commits if authorized, and writes only the generated report paths named separately in the manifest.
+6. **Review before closure.** Run `sdd-manifest.py check-diff` on the exact `BASE..HEAD` range before creating the review package. Persist the report, generate a bounded review package, and dispatch the single read-only task reviewer. Before any correction dispatch, run the reference's `check-dispatch` gate; a failed gate requires diagnosis and a new task/contract lineage rather than another ordinary retry. Follow [references/review-evidence.md](references/review-evidence.md).
 7. **Integrate approved work.** Merge approved task commits one at a time, run the integration checkpoint, release resources, close the task with its commit range and review evidence, then recompute ready work.
 
 When more than one task is ready, route through [references/scheduling.md](references/scheduling.md). Do not load that reference for a single ready task.
@@ -65,6 +68,8 @@ python3 "$PWD/skills/subagent-driven-development/scripts/sdd-manifest.py" bind \
 ```
 
 A correction may return to the same worker only when all six values are unchanged; append a correction lineage entry. Any changed task, contract, base, worktree, workflow version, or graph hash requires a fresh manifest and fresh worker. After two failed review rounds on one finding, stop recycling the context: diagnose whether the task, evidence, model capability, or contract is wrong and escalate the decision.
+
+When a legitimate correction needs a new path, use `sdd-manifest.py amend` with the graph task, exact path, and rationale. It rejects overlap with another task, records the amendment, recalculates `write_scope_hash` and `contract_hash`, and therefore requires a fresh context. Never broaden scope with an adjacent-file or directory wildcard.
 
 ## Status Handling
 

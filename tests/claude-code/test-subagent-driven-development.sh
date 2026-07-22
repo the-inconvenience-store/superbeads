@@ -13,7 +13,7 @@ echo ""
 # Test 1: Verify skill can be loaded
 echo "Test 1: Skill loading..."
 
-output=$(run_claude "What is the subagent-driven-development skill? Describe its key steps briefly." 30)
+output=$(run_claude "Describe the current subagent-driven-development skill concisely. Cover: its validated-graph and Context Manifest prerequisites; whether one task reviewer returns both spec-compliance and code-quality verdicts; the CONTRACT_READY/NEEDS_CONTEXT pre-edit handshake; how often the controller reads the graph; how the reviewer treats implementer claims and inspects the diff; what happens after the first and second failed review rounds and whether a third ordinary correction is allowed; task handoff through the task bead and bounded report/review files; required worktree/planning skills; and whether implementation may begin on main without explicit consent." 180)
 
 if assert_contains "$output" "subagent-driven-development\|Subagent-Driven Development\|Subagent Driven" "Skill is recognized"; then
     : # pass
@@ -21,7 +21,12 @@ else
     exit 1
 fi
 
-if assert_contains "$output" "Load Plan\|read.*plan\|extract.*tasks" "Mentions loading plan"; then
+if assert_contains "$output" "validat.*graph\|validated.*graph\|graph plan" "Requires a validated graph"; then
+    : # pass
+else
+    exit 1
+fi
+if assert_contains "$output" "manifest\|Context Manifest" "Mentions the task manifest"; then
     : # pass
 else
     exit 1
@@ -31,8 +36,6 @@ echo ""
 
 # Test 2: Verify skill describes the single-reviewer model
 echo "Test 2: Single task-reviewer model..."
-
-output=$(run_claude "In the subagent-driven-development skill, does ONE task reviewer return both a spec-compliance verdict and a code-quality verdict in a single pass, or are there two separate sequential reviewers? Answer briefly." 30)
 
 # Check that Claude identifies a single reviewer returning both verdicts
 # Use multiple greps since assert_contains uses basic grep (no -E for alternation)
@@ -47,18 +50,16 @@ fi
 
 echo ""
 
-# Test 3: Verify self-review is mentioned
-echo "Test 3: Self-review requirement..."
+# Test 3: Verify the pre-edit handshake
+echo "Test 3: Pre-edit manifest handshake..."
 
-output=$(run_claude "Does the subagent-driven-development skill require implementers to do self-review? What should they check?" 30)
-
-if assert_contains "$output" "self-review\|self review" "Mentions self-review"; then
+if assert_contains "$output" "CONTRACT_READY" "Requires CONTRACT_READY before edits"; then
     : # pass
 else
     exit 1
 fi
 
-if assert_contains "$output" "completeness\|Completeness" "Checks completeness"; then
+if assert_contains "$output" "NEEDS_CONTEXT\|must not edit\|no edit" "Missing context blocks edits"; then
     : # pass
 else
     exit 1
@@ -69,8 +70,6 @@ echo ""
 # Test 4: Verify plan is read once
 echo "Test 4: Plan reading efficiency..."
 
-output=$(run_claude "In subagent-driven-development, how many times should the controller read the plan file? When does this happen?" 30)
-
 if assert_contains "$output" "once\|one time\|single" "Read plan once"; then
     : # pass
 else
@@ -80,7 +79,7 @@ fi
 # Accept the range of vocabulary the model uses for "at the start, before the
 # per-task loop" ("up front", "first step", "begins" all mean the same thing;
 # assert_contains is case-insensitive). The concept is what matters, not the token.
-if assert_contains "$output" "Step 1\|begin\|start\|Load Plan\|first\|up.\?front\|outset\|initial" "Read at beginning"; then
+if assert_contains "$output" "Step 1\|begin\|start\|Load Plan\|first\|up.\?front\|outset\|initial\|before dispatch\|dispatch preparation" "Read at beginning"; then
     : # pass
 else
     exit 1
@@ -90,8 +89,6 @@ echo ""
 
 # Test 5: Verify the task reviewer is skeptical
 echo "Test 5: Task reviewer mindset..."
-
-output=$(run_claude "What is the task reviewer's attitude toward the implementer's report in subagent-driven-development?" 30)
 
 # Accept the range of vocabulary the model uses for an adversarial stance
 # ("skeptic" matches skeptical/skepticism; assert_contains is case-insensitive).
@@ -114,15 +111,19 @@ echo ""
 # Test 6: Verify review loops
 echo "Test 6: Review loop requirements..."
 
-output=$(run_claude "In subagent-driven-development, what happens if a reviewer finds issues? Is it a one-time review or a loop?" 30)
-
-if assert_contains "$output" "loop\|again\|repeat\|until.*approved\|until.*compliant" "Review loops mentioned"; then
+if assert_contains "$output" "first\|round 1\|correction" "First failure permits a bounded correction"; then
     : # pass
 else
     exit 1
 fi
 
-if assert_contains "$output" "implementer.*fix\|fix.*issues" "Implementer fixes issues"; then
+if assert_contains "$output" "two\|second\|diagnos\|split\|amend" "Second failure requires diagnosis"; then
+    : # pass
+else
+    exit 1
+fi
+
+if assert_contains "$output" "forbid\|must not\|cannot\|disallow\|no third" "Third ordinary correction is forbidden"; then
     : # pass
 else
     exit 1
@@ -133,15 +134,13 @@ echo ""
 # Test 7: Verify the task is handed off via the task bead description
 echo "Test 7: Task handoff via task bead..."
 
-output=$(run_claude "In subagent-driven-development, how does the controller hand the task to the implementer subagent — by pasting the full task text into the prompt, writing a task brief file, or using the task bead description?" 30)
-
 if assert_contains "$output" "bd show\|task bead\|bead description\|task description" "Hands off task via task bead description"; then
     : # pass
 else
     exit 1
 fi
 
-if assert_contains "$output" "comment\|bd comment\|report\|reviewer verdict" "Persists reports/reviews as bead comments"; then
+if assert_contains "$output" "report\|review package\|manifest" "Uses bounded file handoffs for reports/review"; then
     : # pass
 else
     exit 1
@@ -151,8 +150,6 @@ echo ""
 
 # Test 8: Verify worktree requirement
 echo "Test 8: Worktree requirement..."
-
-output=$(run_claude "What workflow skills are required before using subagent-driven-development? List any prerequisites or required skills." 30)
 
 if assert_contains "$output" "using-git-worktrees\|worktree" "Mentions worktree requirement"; then
     : # pass
@@ -164,8 +161,6 @@ echo ""
 
 # Test 9: Verify main branch warning
 echo "Test 9: Main branch red flag..."
-
-output=$(run_claude "In subagent-driven-development, is it okay to start implementation directly on the main branch?" 30)
 
 if assert_contains "$output" "worktree\|feature.*branch\|not.*main\|never.*main\|avoid.*main\|don't.*main\|consent\|permission" "Warns against main branch"; then
     : # pass

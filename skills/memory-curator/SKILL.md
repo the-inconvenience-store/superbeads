@@ -49,13 +49,13 @@ One pass. Input: the session (in context) + `bd memories --json`. Output: a **re
 `bd remember` / `bd forget` commands. Propose least-destructive changes first (enrich + exact-duplicate
 dedup); cross-cluster consolidation and pruning come after, and only where clearly safe.
 
-1. **Gather** — `bd memories --json` for the full store; `bd dolt status` to record the pre-sweep
+1. **Gather** — only after an explicit non-mutating offer is accepted, use `bd memories --json` for the full store; `bd dolt status` records the pre-sweep
    state for rollback.
 2. **Extract** — pull salient, self-contained, date-grounded facts; classify each by the taxonomy and
    normalize its `@type` to `class:subtype` (correcting any malformed `@type` it encounters). Store a
    fact ONLY if it carries checkable evidence (cited `file:line`,
    passing test, command output, closed bead) — the same bar as Agent-Filed Bead Discipline in
-   `verification-before-completion`. No evidence → drop, or store at low `@salience`. Procedural how-to
+   `verification-before-completion`. No evidence → do not store. Procedural how-to
    → flag for a skill, don't store. **Never persist secrets, credentials, tokens, keys, or PII** — the session hook
    injects curated memories into every future session (the full store via `bd prime`) and Dolt history outlives `bd forget`.
 3. **Reconcile** — ADD new facts; UPDATE a same-topic memory in place with `bd remember --key <existing>`,
@@ -104,3 +104,5 @@ see `finishing-a-development-branch` Step 7) and on-demand by the user.
 
 Memories arrive header-less from other skills; the curator assigns `@type` on contact. Do not add
 `@type` emission to other skills — header-less-until-curated is the intended state.
+
+The Capture Gate rejects approval/completion episodes, procedural recipes, raw failure output, current branch/HEAD/next-task state, and artifact pointers before storage. Curation does not weaken that bar. Preserve only the latest relevant continuation when it has an explicit `@expires=YYYY-MM-DD`; expired continuations are retirement candidates after user approval.

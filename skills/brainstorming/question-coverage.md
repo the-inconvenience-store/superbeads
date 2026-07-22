@@ -46,3 +46,12 @@ Before design presentation, emit:
 |---|---|---|---|---|---|
 
 A high-risk row cannot be `unknown`, omitted, or silently deferred. Record the named decision owner and approval for any explicit deferral.
+
+## Implementation Topology
+
+For each implementation seam, record the following ledger after solution decisions are resolved. This is technical design evidence for planning; it does not schedule tasks.
+
+| Seam ID | State / data owner | Entry / integration interface | Produces | Consumes | Security / authority boundary | Failure / recovery owner | Likely write zones | Semantic prerequisites | Resource conflicts |
+|---|---|---|---|---|---|---|---|---|---|
+
+Use stable seam/interface IDs. A semantic prerequisite means the consumed behavior or artifact does not exist before its producer. Shared paths, fixtures, generated clients, or exclusive resources belong under resource conflicts unless they also create a real produced/consumed dependency.

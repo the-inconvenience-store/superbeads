@@ -1,7 +1,7 @@
 {
   "task_id": "beads-superpowers-d3g",
   "contract_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-  "workflow_version": "0.13.0",
+  "workflow_version": "0.13.1",
   "graph_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "governing_artifacts": [{"path": "docs/specs/workflow-design.md", "revision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}],
   "outcome_ids": [],
@@ -9,6 +9,9 @@
   "reviewed_dependency_commits": [],
   "worktree": "/tmp/superbeads-task-d3g",
   "allowed_write_set": ["skills/subagent-driven-development/SKILL.md"],
+  "generated_write_set": [".internal/sdd/task-d3g-report.md"],
+  "write_scope_hash": "74da137a5c6dea0ab2bb5bb2dbe2aaa8ab1e5922a2a19b8bec4c72d8e33a41df",
+  "write_scope_amendments": [],
   "prohibited_paths": [],
   "allocated_resources": {"exclusive": [], "capacity": {}},
   "verification_commands": ["bash tests/skills/test-sdd-context-contract.sh"],

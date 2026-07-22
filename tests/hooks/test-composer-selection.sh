@@ -26,8 +26,9 @@ cat > "$TMP/fixtures/memories.json" <<'FIX'
   "medium-design": "@type=semantic:design @created=2026-07-02 @salience=4 @tags=y medium design full body",
   "long-refs-lesson": "@type=semantic:lesson @created=2026-07-03 @refs=aaaa,bbbb,cccc,dddd,eeee,ffff,gggg,hhhh,iiii,jjjj,kkkk,llll,mmmm,nnnn @tags=alpha,beta,gamma,delta,epsilon @salience=4 late-salience body",
   "low-note": "@type=episodic:done @created=2026-07-03 @salience=2 @tags=z low note body",
-  "continuation-2026-07-06-old": "continuation old body",
-  "continuation-2026-07-07-new": "continuation new body",
+  "continuation-2026-07-06-old": "@expires=2000-01-01 continuation old body",
+  "continuation-2026-07-07-new": "@expires=2099-01-01 continuation new body",
+  "continuation-2026-07-08-expired": "@expires=2000-01-01 expired latest body",
   "schema_version": 1
 }
 FIX
@@ -54,7 +55,7 @@ echo "$out" | grep -q "FULL BODY OF BIG LESSON"    || { echo "FAIL: s5 body abse
 echo "$out" | grep -q "FULL BODY OF MEDIUM DESIGN" || { echo "FAIL: s4 body absent"; exit 1; }
 [ "$(echo "$out" | grep -n 'BIG LESSON' | cut -d: -f1)" -lt "$(echo "$out" | grep -n 'MEDIUM DESIGN' | cut -d: -f1)" ] \
   || { echo "FAIL: s5 not before s4"; exit 1; }
-echo "$out" | grep -q "core memories: 4 of 6 injected" || { echo "FAIL: disclosure line wrong"; exit 1; }
+echo "$out" | grep -q "core memories: 4 of 7 injected" || { echo "FAIL: disclosure line wrong"; exit 1; }
 
 # 3. ceiling clip: tiny ceiling keeps continuation, clips the rest, emits tail
 out=$(bsp_compose_memories 40)
@@ -80,7 +81,7 @@ echo "$out" | grep -q "2 memories stored" || { echo "FAIL: pre-sweep count inclu
 cat > "$TMP/fixtures/memories.json" <<'FIX'
 {
   "utf8-lesson": "@type=semantic:lesson @created=2026-07-07 @salience=5 multi-byte body",
-  "continuation-2026-07-07-x": "continuation x body",
+  "continuation-2026-07-07-x": "@expires=2099-01-01 continuation x body",
   "schema_version": 1
 }
 FIX

@@ -22,7 +22,7 @@ Define canonical terms, rejected synonyms, entities, relationships, and owner.
 
 ## Lifecycle and Invariants
 
-Define transitions, business invariants, transaction boundaries, side effects, and recovery.
+Define transitions, business invariants, observable atomicity and consistency invariants, actor-visible side effects, and recovery. State forbidden partial results; leave storage and service mechanisms to the technical spec.
 
 ## Journeys and States
 

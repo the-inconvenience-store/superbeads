@@ -319,10 +319,23 @@ def check(ledger: dict[str, Any], gate_name: str, label: str) -> tuple[bool, lis
     return True, [f"PASS {label}: {ids}"]
 
 
+def check_dispatch(ledger: dict[str, Any]) -> tuple[bool, list[str]]:
+    validate_ledger(ledger)
+    failed_rounds = sum(
+        round_record["result"] == "FAIL" for round_record in ledger["review_rounds"]
+    )
+    if failed_rounds >= 2:
+        return False, [
+            "FAIL dispatch",
+            "- dispatch disallowed for the old lineage after two failed review rounds; record the diagnostic and create the named new task or contract identity",
+        ]
+    return True, ["PASS dispatch: ordinary correction remains within the two-round limit"]
+
+
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
     commands = root.add_subparsers(dest="command", required=True)
-    for command in ("check-task", "check-epic"):
+    for command in ("check-task", "check-epic", "check-dispatch"):
         child = commands.add_parser(command)
         child.add_argument("ledger", type=Path)
     return root
@@ -334,8 +347,10 @@ def main() -> int:
         ledger = read_json(args.ledger)
         if args.command == "check-task":
             passed, lines = check(ledger, "task_gate", "task")
-        else:
+        elif args.command == "check-epic":
             passed, lines = check(ledger, "epic_gate", "epic")
+        else:
+            passed, lines = check_dispatch(ledger)
     except EvidenceError as exc:
         print(f"sdd evidence error: {exc}", file=sys.stderr)
         return 1
