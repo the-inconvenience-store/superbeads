@@ -423,6 +423,26 @@ def check_wave(document: dict[str, Any]) -> tuple[bool, list[str]]:
     return True, [f"PASS wave: {', '.join(expected)}"]
 
 
+def check_reuse(
+    ledger: dict[str, Any], acceptance_id: str, evidence_class: str, command_or_flow: str
+) -> tuple[bool, list[str]]:
+    validate_ledger(ledger)
+    current = ledger["current"]
+    candidates = [
+        record for record in ledger["evidence"]
+        if record["acceptance_id"] == acceptance_id
+        and record["evidence_class"] == evidence_class
+        and record["command_or_flow"] == command_or_flow
+        and record["result"] == "PASS"
+    ]
+    exact = [record for record in candidates if not identity_differences(record, current)]
+    if exact:
+        return True, [f"PASS reuse: {acceptance_id} {evidence_class} exact identity"]
+    changed = sorted({field for record in candidates for field in identity_differences(record, current)})
+    reason = f"stale identity: {', '.join(changed)}" if changed else "no matching PASS record"
+    return False, [f"FAIL reuse: rerun required for {acceptance_id} {evidence_class} ({reason})"]
+
+
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
     commands = root.add_subparsers(dest="command", required=True)
@@ -432,6 +452,11 @@ def parser() -> argparse.ArgumentParser:
     dispatch = commands.add_parser("check-dispatch")
     dispatch.add_argument("ledger", type=Path)
     dispatch.add_argument("--lineage", type=Path, required=True)
+    reuse = commands.add_parser("check-reuse")
+    reuse.add_argument("ledger", type=Path)
+    reuse.add_argument("--acceptance-id", required=True)
+    reuse.add_argument("--evidence-class", required=True)
+    reuse.add_argument("--command-or-flow", required=True)
     return root
 
 
@@ -445,6 +470,10 @@ def main() -> int:
             passed, lines = check(ledger, "epic_gate", "epic")
         elif args.command == "check-wave":
             passed, lines = check_wave(ledger)
+        elif args.command == "check-reuse":
+            passed, lines = check_reuse(
+                ledger, args.acceptance_id, args.evidence_class, args.command_or_flow
+            )
         else:
             passed, lines = check_dispatch(ledger, read_json(args.lineage))
     except EvidenceError as exc:

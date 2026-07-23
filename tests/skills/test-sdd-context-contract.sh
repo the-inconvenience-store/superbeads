@@ -21,6 +21,9 @@ from pathlib import Path
 
 manifest = json.loads(Path(sys.argv[1]).read_text())
 manifest["workflow_version"] = "0.14.0"
+manifest["verification_commands"] = [
+    {"tier":"task", "command":"bash tests/skills/test-sdd-context-contract.sh"}
+]
 manifest["generated_write_set"] = [manifest["report_path"]]
 manifest["write_scope_amendments"] = []
 scope = {
@@ -52,6 +55,9 @@ conflicting_authority["governing_artifacts"].append({
     "revision": "d" * 64,
 })
 (target.parent / "conflicting-authority.json").write_text(json.dumps(conflicting_authority))
+invalid_tier = json.loads(json.dumps(manifest))
+invalid_tier["verification_commands"] = [{"tier":"broad", "command":"bash tests/all.sh"}]
+(target.parent / "invalid-tier.json").write_text(json.dumps(invalid_tier))
 PY
 
 python3 -m py_compile "$VALIDATOR"
@@ -81,6 +87,8 @@ expect_failure missing-outcomes outcome_ids \
   python3 "$VALIDATOR" validate "$TMP/missing-outcomes.json"
 expect_failure conflicting-authority governing_artifacts \
   python3 "$VALIDATOR" validate "$TMP/conflicting-authority.json"
+expect_failure invalid-tier verification_commands \
+  python3 "$VALIDATOR" validate "$TMP/invalid-tier.json"
 
 python3 - "$VALID" "$TMP" <<'PY'
 import json
@@ -171,7 +179,7 @@ python3 "$VALIDATOR" prepare \
   --governing-artifact docs/product/approval-product-contract.md=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
   --governing-artifact docs/specs/approval-design.md=cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc \
   --reviewed-dependency 2222222222222222222222222222222222222222 \
-  --prohibited .env --verify "pytest tests/test_approval.py" \
+  --prohibited .env --verify "focused::pytest tests/test_approval.py" \
   --model-requested codex-5 --model-effective codex-5 --model-control explicit \
   --capability-tier isolated --context-mode isolated \
   --report-path .internal/sdd/prepared-report.md --output "$PREPARED"
@@ -186,6 +194,7 @@ assert manifest["generated_write_set"] == [".internal/sdd/prepared-report.md"]
 assert len(manifest["write_scope_hash"]) == 64
 assert manifest["write_scope_amendments"] == []
 assert manifest["allocated_resources"]["exclusive"] == ["approval command contract"]
+assert manifest["verification_commands"] == [{"tier":"focused","command":"pytest tests/test_approval.py"}]
 PY
 
 mkdir -p "$TMP/repo/src" "$TMP/repo/tests"
@@ -240,7 +249,7 @@ for reference in context-lifecycle scheduling review-evidence; do
   }
 done
 
-for text in CONTRACT_READY NEEDS_CONTEXT contract_hash outcome_ids allowed_write_set prohibited_paths \
+for text in CONTRACT_READY NEEDS_CONTEXT contract_hash outcome_ids allowed_write_set prohibited_paths "verification tiers" \
   "controller owns Beads" "task-specific skills" "scope and security" "DONE_WITH_CONCERNS"; do
   grep -Fqi "$text" "$PROMPT" || { echo "FAIL: implementer prompt missing $text" >&2; exit 1; }
 done

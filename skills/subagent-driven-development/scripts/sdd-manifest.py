@@ -37,6 +37,7 @@ IDENTITY_FIELDS = (
 HEX40 = re.compile(r"[0-9a-f]{40}")
 HEX64 = re.compile(r"[0-9a-f]{64}")
 STABLE_ID = re.compile(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+){1,}\b")
+VERIFICATION_TIERS = {"focused", "task", "integration", "release"}
 
 
 class ManifestError(ValueError):
@@ -199,7 +200,22 @@ def validate(manifest: dict[str, Any]) -> None:
         for name, amount in resources["capacity"].items()
     ):
         raise ManifestError("allocated_resources: capacity values must be positive integers")
-    require_string_array(manifest, "verification_commands", nonempty=True)
+    verification = manifest["verification_commands"]
+    if not isinstance(verification, list) or not verification:
+        raise ManifestError("verification_commands: expected non-empty array")
+    seen_verification: set[tuple[str, str]] = set()
+    for index, entry in enumerate(verification):
+        if not isinstance(entry, dict) or set(entry) != {"tier", "command"}:
+            raise ManifestError(f"verification_commands[{index}]: requires tier and command")
+        tier, command = entry["tier"], entry["command"]
+        if tier not in VERIFICATION_TIERS:
+            raise ManifestError(f"verification_commands[{index}].tier: invalid verification tier")
+        if not isinstance(command, str) or not command.strip():
+            raise ManifestError(f"verification_commands[{index}].command: required")
+        identity = (tier, command)
+        if identity in seen_verification:
+            raise ManifestError("verification_commands: duplicate tier and command")
+        seen_verification.add(identity)
     conflicts = manifest["known_conflicts"]
     if not isinstance(conflicts, list):
         raise ManifestError("known_conflicts: expected array")
@@ -325,6 +341,13 @@ def artifact_record(value: str) -> dict[str, str]:
     return {"path": path, "revision": revision}
 
 
+def verification_record(value: str) -> dict[str, str]:
+    if "::" not in value:
+        raise ManifestError("verify: expected TIER::COMMAND")
+    tier, command = value.split("::", 1)
+    return {"tier": tier, "command": command}
+
+
 def prepare(args: argparse.Namespace) -> dict[str, Any]:
     _, body = graph_task(args.graph, args.task_key)
     context = body.get("Context", "")
@@ -354,7 +377,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
             "exclusive": exclusive,
             "capacity": parse_capacity(resource_values(body.get("Resources", ""), "Capacity resources")),
         },
-        "verification_commands": args.verify,
+        "verification_commands": [verification_record(value) for value in args.verify],
         "known_conflicts": [],
         "model_requested": args.model_requested,
         "model_effective": args.model_effective,

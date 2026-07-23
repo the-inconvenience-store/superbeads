@@ -14,7 +14,7 @@
   "write_scope_amendments": [],
   "prohibited_paths": [],
   "allocated_resources": {"exclusive": [], "capacity": {}},
-  "verification_commands": ["bash tests/skills/test-sdd-context-contract.sh"],
+  "verification_commands": [{"tier":"task","command":"bash tests/skills/test-sdd-context-contract.sh"}],
   "known_conflicts": [],
   "model_requested": "codex-5", "model_effective": "codex-5", "model_control": "explicit",
   "capability_tier": "isolated", "context_mode": "isolated",

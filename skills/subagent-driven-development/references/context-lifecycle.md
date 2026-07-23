@@ -29,7 +29,7 @@ Required fields:
 | `write_scope_amendments` | Resolved path, rationale, overlap evidence, and status records |
 | `prohibited_paths` | Explicit denial boundary, including hidden paths when relevant |
 | `allocated_resources` | `exclusive` names and positive integer `capacity` allocations |
-| `verification_commands` | Non-empty task-specific evidence commands |
+| `verification_commands` | Non-empty `{tier,command}` records; tier is `focused`, `task`, `integration`, or `release` |
 | `known_conflicts` | Resolved conflict records only |
 | `model_requested`, `model_effective`, `model_control` | Model-control truth |
 | `capability_tier`, `context_mode` | Isolation truth |
@@ -67,7 +67,7 @@ Every edit turn binds this identity before work. A same-task correction may add 
 
 ## Generate, Check, Amend
 
-`prepare` is the normal construction path. It hashes the graph, reads the selected task's stable outcome IDs, derives `allowed_write_set` only from `Files` `Create`/`Modify`/`Test` paths, derives allocated resources, separates the generated report path, calculates both hashes, and validates the result. The controller supplies runtime/model facts, artifact revisions, prohibited paths, and verification commands; it does not recopy task scope.
+`prepare` is the normal construction path. It hashes the graph, reads the selected task's stable outcome IDs, derives `allowed_write_set` only from `Files` `Create`/`Modify`/`Test` paths, derives allocated resources, separates the generated report path, calculates both hashes, and validates the result. The controller supplies runtime/model facts, artifact revisions, prohibited paths, and tiered verification as `--verify TIER::COMMAND`; it does not recopy task scope. Ordinary workers receive focused and task tiers. Integration and release tiers stay with controller checkpoints unless this task owns that real seam.
 
 Before review and merge, `check-diff` compares the exact Git range with `allowed_write_set`. Any undeclared path stops review.
 

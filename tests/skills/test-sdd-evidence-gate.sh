@@ -49,6 +49,15 @@ fi
 grep -Fq "outcome lineage" "$TMP/exhausted-lineage.out"
 grep -Fq "task-replacement" "$TMP/exhausted-lineage.out"
 python3 "$CHECKER" check-dispatch "$FIXTURES/pass.json" --lineage "$FIXTURES/lineage-new-outcome.json" | grep -Fq "PASS dispatch"
+python3 "$CHECKER" check-reuse "$FIXTURES/pass.json" --acceptance-id TASK-A --evidence-class unit --command-or-flow "bash tests/unit.sh" | grep -Fq "PASS reuse"
+if python3 "$CHECKER" check-reuse "$FIXTURES/stale.json" --acceptance-id TASK-A --evidence-class unit --command-or-flow "bash tests/unit.sh" >"$TMP/stale-reuse.out" 2>&1; then
+  echo "FAIL: stale evidence was reused" >&2; exit 1
+fi
+grep -Fq "rerun required" "$TMP/stale-reuse.out"
+if python3 "$CHECKER" check-reuse "$FIXTURES/pass.json" --acceptance-id TASK-A --evidence-class integration --command-or-flow "bash tests/unit.sh" >"$TMP/class-reuse.out" 2>&1; then
+  echo "FAIL: lower evidence class substituted during reuse" >&2; exit 1
+fi
+grep -Fq "rerun required" "$TMP/class-reuse.out"
 
 python3 - "$TMP" "$(git -C "$ROOT" rev-parse HEAD~2)" "$(git -C "$ROOT" rev-parse HEAD~1)" "$(git -C "$ROOT" rev-parse HEAD)" <<'PY'
 import json, sys

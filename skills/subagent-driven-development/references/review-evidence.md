@@ -82,7 +82,7 @@ Only a current `PASS` in the required evidence class satisfies an ID. Missing, s
 - **Integration:** cross-task seams on the integrated commit; owned by the controller after merge.
 - **Release:** graph-wide guards and outcome flows; run once on the assembled release identity.
 
-Reuse evidence only when commit, contract hash, environment, fixture hash, command/flow, and required evidence class are unchanged. A correction reruns invalidated focused/task evidence; integration and release evidence are never substituted by a lower tier.
+Reuse evidence only when commit, contract hash, environment, fixture hash, command/flow, and required evidence class are unchanged. Confirm it with `sdd-evidence.py check-reuse`; record the reuse decision as reuse, not a fresh run. A correction reruns invalidated focused/task evidence; integration and release evidence are never substituted by a lower tier.
 
 ## Phase Telemetry
 
