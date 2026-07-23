@@ -186,6 +186,7 @@ python3 "$VALIDATOR" prepare \
   --governing-artifact docs/product/approval-product-contract.md=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
   --governing-artifact docs/specs/approval-design.md=cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc \
   --reviewed-dependency 2222222222222222222222222222222222222222 \
+  --speculative-dependency '{"task_id":"dep-b","commit":"3333333333333333333333333333333333333333","frozen_interface":"APPROVAL-API","disjoint_resources":true,"discard_files":1,"rebase_commits":1}' \
   --prohibited .env --verify "focused::pytest tests/test_approval.py" \
   --model-requested codex-5 --model-effective codex-5 --model-control explicit \
   --capability-tier isolated --context-mode isolated \
@@ -202,7 +203,7 @@ assert len(manifest["write_scope_hash"]) == 64
 assert manifest["write_scope_amendments"] == []
 assert manifest["allocated_resources"]["exclusive"] == ["approval command contract"]
 assert manifest["verification_commands"] == [{"tier":"focused","command":"pytest tests/test_approval.py"}]
-assert manifest["speculative_dependency_commits"] == []
+assert manifest["speculative_dependency_commits"] == [{"task_id":"dep-b","commit":"3"*40,"frozen_interface":"APPROVAL-API","disjoint_resources":True,"discard_files":1,"rebase_commits":1}]
 PY
 
 mkdir -p "$TMP/repo/src" "$TMP/repo/tests"

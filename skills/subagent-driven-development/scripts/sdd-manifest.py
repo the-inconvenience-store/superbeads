@@ -373,6 +373,16 @@ def verification_record(value: str) -> dict[str, str]:
     return {"tier": tier, "command": command}
 
 
+def speculative_dependency_record(value: str) -> dict[str, Any]:
+    try:
+        record = json.loads(value)
+    except json.JSONDecodeError as exc:
+        raise ManifestError(f"speculative_dependency: invalid JSON: {exc}") from exc
+    if not isinstance(record, dict):
+        raise ManifestError("speculative_dependency: expected JSON object")
+    return record
+
+
 def prepare(args: argparse.Namespace) -> dict[str, Any]:
     _, body = graph_task(args.graph, args.task_key)
     context = body.get("Context", "")
@@ -392,7 +402,9 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         "outcome_ids": outcomes,
         "base_commit": args.base_commit,
         "reviewed_dependency_commits": args.reviewed_dependency,
-        "speculative_dependency_commits": [],
+        "speculative_dependency_commits": [
+            speculative_dependency_record(value) for value in args.speculative_dependency
+        ],
         "worktree": args.worktree,
         "allowed_write_set": task_paths(body.get("Files", "")),
         "generated_write_set": [report_path],
@@ -488,6 +500,7 @@ def parser() -> argparse.ArgumentParser:
     prepare_parser.add_argument("--worktree", required=True)
     prepare_parser.add_argument("--governing-artifact", action="append", required=True)
     prepare_parser.add_argument("--reviewed-dependency", action="append", default=[])
+    prepare_parser.add_argument("--speculative-dependency", action="append", default=[])
     prepare_parser.add_argument("--prohibited", action="append", default=[])
     prepare_parser.add_argument("--verify", action="append", required=True)
     prepare_parser.add_argument("--model-requested")
