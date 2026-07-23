@@ -55,3 +55,12 @@ For each implementation seam, record the following ledger after solution decisio
 |---|---|---|---|---|---|---|---|---|---|
 
 Use stable seam/interface IDs. A semantic prerequisite means the consumed behavior or artifact does not exist before its producer. Shared paths, fixtures, generated clients, or exclusive resources belong under resource conflicts unless they also create a real produced/consumed dependency.
+
+## Technical Risk Capsule
+
+For each proposed implementation seam, record only applicable risks:
+
+| Seam ID | High-risk boundaries | Acceptance surface | Evidence tier | Likely correction shape |
+|---|---|---|---|---|
+
+High-risk boundaries use the planning vocabulary: authority, parsing, persistence, concurrency, recovery, protocol, security, and evidence. The acceptance surface names the one coherent behavior or operable capability a reviewer can accept or reject. If a seam crosses more than two high-risk boundaries or contains several independently rejectable results, split the design seam before planning. This capsule supplements product truth; it does not replace actors, outcomes, lifecycle, invariants, or failure semantics.

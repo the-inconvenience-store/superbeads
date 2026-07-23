@@ -17,7 +17,7 @@ Required fields: `key`, `title`, `type: task`, integer `priority`, the epic `par
 
 ## Context
 
-Record Product contract path+revision, Spec path, Outcome IDs, External ref, Why this slice exists, `Complexity boundaries:`, and constraints that must not be rediscovered. Use `None` or at most two of authority, parsing, persistence, concurrency, recovery, protocol, security, and evidence. More than two indicates an oversized slice that must be decomposed before SDD. Repository artifacts are evidence, not permission.
+Record Product contract path+revision, Spec path, Outcome IDs, External ref, Why this slice exists, `Complexity boundaries:`, `Acceptance surface:`, and constraints that must not be rediscovered. Use `None` or at most two of authority, parsing, persistence, concurrency, recovery, protocol, security, and evidence. The acceptance surface is one coherent behavior or operable capability; more than six independently asserted acceptance results indicates the slice needs decomposition before SDD. Repository artifacts are evidence, not permission.
 
 ## Outcome
 

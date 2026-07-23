@@ -29,6 +29,10 @@ require_text "$BRAIN" "Agent-Filed Bead Discipline"
 require_text "$QUESTIONS" "Observed evidence"
 require_text "$QUESTIONS" "Affected outcome IDs"
 require_text "$QUESTIONS" "Known product fact"
+require_text "$QUESTIONS" "Technical Risk Capsule"
+require_text "$QUESTIONS" "Acceptance surface"
+require_text "$BRAIN" "technical risk capsule"
+require_text "$BRAIN" "supplements product truth"
 
 for column in Applicable Evidence "Question / recommendation" "Falsifying example" Resolution "Affected outcome IDs"; do
   require_text "$MATRIX" "$column"

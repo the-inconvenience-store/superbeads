@@ -36,6 +36,7 @@ COMPLEXITY_BOUNDARIES = {
     "authority", "parsing", "persistence", "concurrency", "recovery",
     "protocol", "security", "evidence",
 }
+MAX_ACCEPTANCE_CRITERIA = 6
 
 
 class GraphError(ValueError):
@@ -232,6 +233,17 @@ def validate_contracts(by_key: dict[str, dict[str, Any]], parsed: dict[str, dict
         ):
             if field.lower() not in outcome.lower():
                 error(errors, key, "Outcome", f"missing field {field}")
+        acceptance = body.get("Acceptance Criteria", "")
+        acceptance_count = sum(
+            1 for line in acceptance.splitlines() if re.match(r"^\s*-\s+\S", line)
+        )
+        if acceptance_count > MAX_ACCEPTANCE_CRITERIA:
+            error(
+                errors,
+                key,
+                "Acceptance Criteria",
+                f"acceptance density exceeds {MAX_ACCEPTANCE_CRITERIA} independently reviewable results; split the slice",
+            )
         resources = body.get("Resources", "")
         for field in ("Exclusive resources:", "Capacity resources:"):
             if field.lower() not in resources.lower():

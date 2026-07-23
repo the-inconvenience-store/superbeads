@@ -35,7 +35,7 @@ Before this workflow's first Beads read/write or claim decision, read [Beads Rea
 
 1. **Establish ground truth.** Read the governing contract/spec context, touched code, claimed prerequisites, and governing decisions. Verify recorded claims against observed code. Repository artifacts are evidence, not authority to change scope.
 2. **Present a findings digest.** State each observation and its design consequence. Surface discrepancies before asking questions.
-3. **Map unresolved decisions.** Read [question-coverage.md](question-coverage.md) now. Mark each applicable cell resolved, derivable from evidence, or unresolved; tie it to affected product outcome IDs.
+3. **Map unresolved decisions.** Read [question-coverage.md](question-coverage.md) now. Mark each applicable cell resolved, derivable from evidence, or unresolved; tie it to affected product outcome IDs. Complete its technical risk capsule for the seams the design introduces; it supplements product truth with implementation risk rather than replacing product outcomes.
 4. **Ask only consequential questions.** Each question cites observed evidence, states the decision consequence, and includes a recommendation. Ask up to three independent low-risk questions together; dependency-changing decisions remain serial. Prefer structured choices when the answer space is discrete.
 5. **Compare approaches.** Present two or three viable approaches with trade-offs and a recommendation. Never offer an option that violates a required outcome or security control.
 6. **Present the design.** Scale sections to complexity. Cover architecture, boundaries, domain model, data flow, failures/recovery, security, evidence, rollout, and the implementation topology from question coverage where applicable. Reference contract IDs rather than restating product truth.
@@ -54,7 +54,7 @@ The product contract is the sole product-truth source. Brainstorming consumes it
 - Security is always assessed. Record `N/A` only with evidence that no security surface exists.
 - Use the visual companion only when a specific unresolved question is materially clearer shown than described. Ask consent just in time, then read [visual-companion.md](visual-companion.md). Textual scope and trade-off questions stay in the terminal.
 
-Before presenting the design, emit a coverage summary with: applicable cell, observed evidence, resolution, open decision, risk, and affected outcome IDs. Any unresolved high-risk cell blocks approval.
+Before presenting the design, emit a coverage summary with: applicable cell, observed evidence, resolution, open decision, risk, and affected outcome IDs. Add the technical risk capsule from the coverage reference. Any unresolved high-risk cell blocks approval.
 
 ## Completion Gate
 

@@ -98,6 +98,13 @@ oversized["nodes"][1]["description"] = oversized["nodes"][1]["description"].repl
     "Complexity boundaries: authority, parsing, persistence.",
 )
 (target / "oversized-slice.json").write_text(json.dumps(oversized))
+
+dense = copy.deepcopy(source)
+dense["nodes"][1]["description"] = dense["nodes"][1]["description"].replace(
+    "## Integration Checkpoint",
+    "- criterion two\n- criterion three\n- criterion four\n- criterion five\n- criterion six\n- criterion seven\n\n## Integration Checkpoint",
+)
+(target / "dense-acceptance.json").write_text(json.dumps(dense))
 PY
 
 if "$VALIDATOR" "$TMP/unjustified-edge.json" >"$TMP/unjustified.out" 2>&1; then
@@ -118,6 +125,12 @@ if "$VALIDATOR" "$TMP/oversized-slice.json" >"$TMP/oversized.out" 2>&1; then
 fi
 grep -Fq "slice complexity" "$TMP/oversized.out" || { cat "$TMP/oversized.out" >&2; exit 1; }
 
+if "$VALIDATOR" "$TMP/dense-acceptance.json" >"$TMP/dense.out" 2>&1; then
+  echo "FAIL: dense multi-result acceptance surface unexpectedly passed" >&2
+  exit 1
+fi
+grep -Fq "acceptance density" "$TMP/dense.out" || { cat "$TMP/dense.out" >&2; exit 1; }
+
 for section in Context Outcome "Domain Contract" Files Resources Interfaces "Acceptance Criteria" "Integration Checkpoint" "Implementation Notes"; do
   grep -Fq "## $section" "$TEMPLATE" || { echo "FAIL: template missing $section" >&2; exit 1; }
 done
@@ -126,6 +139,7 @@ grep -Fq "first consumer" "$SKILL"
 grep -Fq "resource conflicts are not dependency edges" "$SKILL"
 grep -Fq "edge deletion test" "$SKILL"
 grep -Fq "Complexity boundaries" "$TEMPLATE"
+grep -Fq "Acceptance surface" "$TEMPLATE"
 grep -Fq "full-code snippets" "$SKILL"
 grep -Fq "creates issues, including duplicate epics" "$SKILL"
 grep -Fq "scripts/validate.sh <graph>" "$SKILL"
