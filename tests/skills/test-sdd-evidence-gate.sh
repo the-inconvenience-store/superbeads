@@ -11,6 +11,7 @@ VERIFY="$ROOT/skills/verification-before-completion/SKILL.md"
 FINISH="$ROOT/skills/finishing-a-development-branch/SKILL.md"
 RUNNER="$ROOT/scripts/skill-microtest.py"
 SCENARIO="$ROOT/tests/skill-microtests/scenarios/sdd-review-correction.json"
+PACKAGE="$ROOT/skills/subagent-driven-development/scripts/review-package"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 export PYTHONPYCACHEPREFIX="$TMP/pycache"
@@ -48,6 +49,36 @@ fi
 grep -Fq "outcome lineage" "$TMP/exhausted-lineage.out"
 grep -Fq "task-replacement" "$TMP/exhausted-lineage.out"
 python3 "$CHECKER" check-dispatch "$FIXTURES/pass.json" --lineage "$FIXTURES/lineage-new-outcome.json" | grep -Fq "PASS dispatch"
+
+python3 - "$TMP" "$(git -C "$ROOT" rev-parse HEAD~2)" "$(git -C "$ROOT" rev-parse HEAD~1)" "$(git -C "$ROOT" rev-parse HEAD)" <<'PY'
+import json, sys
+from pathlib import Path
+target=Path(sys.argv[1]); base,mid,head=sys.argv[2:]
+tasks=[
+ {"task_id":"task-a","contract_hash":"a"*64,"base":base,"head":mid,"independent":True,"risk_boundaries":["evidence"]},
+ {"task_id":"task-b","contract_hash":"b"*64,"base":mid,"head":head,"independent":True,"risk_boundaries":["security"]},
+]
+target.joinpath("wave.json").write_text(json.dumps({"schema_version":1,"tasks":tasks}))
+target.joinpath("wave-large.json").write_text(json.dumps({"schema_version":1,"tasks":tasks+[dict(tasks[0],task_id="task-c"),dict(tasks[0],task_id="task-d")]}))
+target.joinpath("wave-coupled.json").write_text(json.dumps({"schema_version":1,"tasks":[dict(tasks[0],independent=False),tasks[1]]}))
+result={"schema_version":1,"reviewer_context_id":"wave-reviewer","expected_task_ids":["task-a","task-b"],"tasks":[
+ {"task_id":"task-a","contract_hash":"a"*64,"risk_boundaries":["evidence"],"result":"PASS","acceptance_results":{"A-1":"PASS"},"findings":[],"complementary_reviewer_context_id":None},
+ {"task_id":"task-b","contract_hash":"b"*64,"risk_boundaries":["security"],"result":"PASS","acceptance_results":{"B-1":"PASS"},"findings":[],"complementary_reviewer_context_id":"security-reviewer"},
+]}
+target.joinpath("wave-result.json").write_text(json.dumps(result))
+target.joinpath("wave-partial.json").write_text(json.dumps(dict(result,tasks=result["tasks"][:1])))
+target.joinpath("wave-high-risk-single.json").write_text(json.dumps(dict(result,tasks=[dict(result["tasks"][1],complementary_reviewer_context_id=None)],expected_task_ids=["task-b"])))
+PY
+"$PACKAGE" --wave "$TMP/wave.json" "$TMP/wave.diff" | grep -Fq "2 task(s)"
+grep -Fq "## Task task-a" "$TMP/wave.diff"
+grep -Fq "## Task task-b" "$TMP/wave.diff"
+if "$PACKAGE" --wave "$TMP/wave-large.json" "$TMP/large.diff" >"$TMP/large.out" 2>&1; then echo "FAIL: oversized review wave passed" >&2; exit 1; fi
+if "$PACKAGE" --wave "$TMP/wave-coupled.json" "$TMP/coupled.diff" >"$TMP/coupled.out" 2>&1; then echo "FAIL: coupled review wave passed" >&2; exit 1; fi
+python3 "$CHECKER" check-wave "$TMP/wave-result.json" | grep -Fq "PASS wave"
+if python3 "$CHECKER" check-wave "$TMP/wave-partial.json" >"$TMP/wave-partial.out" 2>&1; then echo "FAIL: partial wave passed" >&2; exit 1; fi
+grep -Fq "missing task results" "$TMP/wave-partial.out"
+if python3 "$CHECKER" check-wave "$TMP/wave-high-risk-single.json" >"$TMP/wave-risk.out" 2>&1; then echo "FAIL: high-risk single review passed" >&2; exit 1; fi
+grep -Fq "complementary review" "$TMP/wave-risk.out"
 
 python3 - "$FIXTURES/two-rounds.json" "$TMP" <<'PY'
 import json, sys
@@ -88,7 +119,7 @@ if python3 "$CHECKER" check-task "$TMP/contradictory.json" >"$TMP/contradictory.
 fi
 grep -Fq "conflicting current results" "$TMP/contradictory.out"
 
-for text in MANIFEST_FILE REPORT_FILE BASE_SHA HEAD_SHA DOMAIN_CAPSULE "acceptance_matrix" \
+for text in MANIFEST_FILE REPORT_FILE BASE_SHA HEAD_SHA DOMAIN_CAPSULE "acceptance_matrix" "review wave" \
   finding_id finding_ancestry severity acceptance_ids classification evidence invalidated_assumption correction counterexample contract_hash review_round \
   "fresh reviewer"; do
   grep -Fqi "$text" "$TASK_PROMPT" || { echo "FAIL: task reviewer prompt missing $text" >&2; exit 1; }

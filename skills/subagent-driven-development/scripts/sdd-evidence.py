@@ -45,6 +45,12 @@ DIAGNOSTICS = {
     "amend-contract", "split-slice", "resolve-product-decision",
     "adjudicate-reviewer",
 }
+WAVE_FIELDS = {"schema_version", "reviewer_context_id", "expected_task_ids", "tasks"}
+WAVE_TASK_FIELDS = {
+    "task_id", "contract_hash", "risk_boundaries", "result",
+    "acceptance_results", "findings", "complementary_reviewer_context_id",
+}
+COMPLEMENTARY_RISKS = {"authority", "protocol", "security", "recovery"}
 
 
 class EvidenceError(ValueError):
@@ -370,10 +376,57 @@ def check_dispatch(ledger: dict[str, Any], lineage: dict[str, Any]) -> tuple[boo
     return True, [f"PASS dispatch: outcome lineage {lineage['lineage_id']} remains within the two-round limit"]
 
 
+def check_wave(document: dict[str, Any]) -> tuple[bool, list[str]]:
+    wave = require_fields(document, WAVE_FIELDS, "review_wave")
+    if wave["schema_version"] != 1:
+        raise EvidenceError("review_wave.schema_version: expected 1")
+    reviewer = nonempty_string(wave["reviewer_context_id"], "review_wave.reviewer_context_id")
+    expected = wave["expected_task_ids"]
+    if not isinstance(expected, list) or not 1 <= len(expected) <= 3 or len(set(expected)) != len(expected) or any(not isinstance(item, str) or not item for item in expected):
+        raise EvidenceError("review_wave.expected_task_ids: expected one to three unique IDs")
+    tasks = wave["tasks"]
+    if not isinstance(tasks, list):
+        raise EvidenceError("review_wave.tasks: expected array")
+    actual = [task.get("task_id") for task in tasks if isinstance(task, dict)]
+    if set(actual) != set(expected) or len(actual) != len(expected):
+        return False, ["FAIL wave", "- missing task results or unexpected task identities"]
+    errors: list[str] = []
+    for index, raw in enumerate(tasks):
+        task = require_fields(raw, WAVE_TASK_FIELDS, f"review_wave.tasks[{index}]")
+        task_id = nonempty_string(task["task_id"], f"review_wave.tasks[{index}].task_id")
+        if not HEX64.fullmatch(str(task["contract_hash"])):
+            raise EvidenceError(f"review_wave.tasks[{index}].contract_hash: expected SHA-256")
+        risks = task["risk_boundaries"]
+        if not isinstance(risks, list) or len(set(risks)) != len(risks) or any(not isinstance(item, str) or not item for item in risks):
+            raise EvidenceError(f"review_wave.tasks[{index}].risk_boundaries: expected unique strings")
+        if task["result"] not in RESULTS:
+            raise EvidenceError(f"review_wave.tasks[{index}].result: invalid result")
+        acceptance = task["acceptance_results"]
+        if not isinstance(acceptance, dict) or not acceptance or any(not isinstance(key, str) or not key or value not in RESULTS for key, value in acceptance.items()):
+            raise EvidenceError(f"review_wave.tasks[{index}].acceptance_results: invalid result map")
+        findings = task["findings"]
+        if not isinstance(findings, list):
+            raise EvidenceError(f"review_wave.tasks[{index}].findings: expected array")
+        for finding_index, finding in enumerate(findings):
+            validate_finding(finding, 1, set(acceptance), f"review_wave.tasks[{index}].findings[{finding_index}]")
+        complementary = task["complementary_reviewer_context_id"]
+        if COMPLEMENTARY_RISKS & set(risks):
+            if not isinstance(complementary, str) or not complementary or complementary == reviewer:
+                errors.append(f"- {task_id}: complementary review required for high-risk boundaries")
+        elif complementary is not None:
+            nonempty_string(complementary, f"review_wave.tasks[{index}].complementary_reviewer_context_id")
+        nonpass = sorted(key for key, value in acceptance.items() if value != "PASS")
+        if task["result"] != "PASS" or nonpass:
+            errors.append(f"- {task_id}: result {task['result']}; non-PASS acceptance {', '.join(nonpass) if nonpass else 'none'}")
+    if errors:
+        return False, ["FAIL wave", *errors]
+    return True, [f"PASS wave: {', '.join(expected)}"]
+
+
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
     commands = root.add_subparsers(dest="command", required=True)
-    for command in ("check-task", "check-epic"):
+    for command in ("check-task", "check-epic", "check-wave"):
         child = commands.add_parser(command)
         child.add_argument("ledger", type=Path)
     dispatch = commands.add_parser("check-dispatch")
@@ -390,6 +443,8 @@ def main() -> int:
             passed, lines = check(ledger, "task_gate", "task")
         elif args.command == "check-epic":
             passed, lines = check(ledger, "epic_gate", "epic")
+        elif args.command == "check-wave":
+            passed, lines = check_wave(ledger)
         else:
             passed, lines = check_dispatch(ledger, read_json(args.lineage))
     except EvidenceError as exc:

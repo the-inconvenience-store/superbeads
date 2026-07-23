@@ -9,6 +9,64 @@
 # (named per range, so a re-review after fixes gets a distinct fresh file).
 set -euo pipefail
 
+if [ "${1:-}" = "--wave" ]; then
+  if [ $# -ne 3 ]; then
+    echo "usage: review-package --wave WAVE_JSON OUTFILE" >&2
+    exit 2
+  fi
+  python3 - "$2" "$3" <<'PY'
+import json, re, subprocess, sys
+from pathlib import Path
+
+source, output = Path(sys.argv[1]), Path(sys.argv[2])
+try:
+    document = json.loads(source.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as exc:
+    raise SystemExit(f"invalid review wave: {exc}")
+if not isinstance(document, dict) or set(document) != {"schema_version", "tasks"} or document["schema_version"] != 1:
+    raise SystemExit("invalid review wave: expected schema_version 1 and tasks")
+tasks = document["tasks"]
+if not isinstance(tasks, list) or not 1 <= len(tasks) <= 3:
+    raise SystemExit("invalid review wave: expected one to three tasks")
+required = {"task_id", "contract_hash", "base", "head", "independent", "risk_boundaries"}
+seen = set()
+sections = [f"# Review wave: {len(tasks)} independent task(s)", ""]
+for index, task in enumerate(tasks):
+    if not isinstance(task, dict) or set(task) != required:
+        raise SystemExit(f"invalid review wave task {index}: fields differ")
+    task_id = task["task_id"]
+    if not isinstance(task_id, str) or not task_id or task_id in seen:
+        raise SystemExit(f"invalid review wave task {index}: unique task_id required")
+    seen.add(task_id)
+    if task["independent"] is not True:
+        raise SystemExit(f"invalid review wave task {task_id}: coupled package requires independent review")
+    if not re.fullmatch(r"[0-9a-f]{64}", str(task["contract_hash"])):
+        raise SystemExit(f"invalid review wave task {task_id}: contract_hash")
+    risks = task["risk_boundaries"]
+    if not isinstance(risks, list) or any(not isinstance(item, str) or not item for item in risks):
+        raise SystemExit(f"invalid review wave task {task_id}: risk_boundaries")
+    for field in ("base", "head"):
+        proc = subprocess.run(["git", "rev-parse", "--verify", "--quiet", str(task[field])], text=True, capture_output=True)
+        if proc.returncode:
+            raise SystemExit(f"invalid review wave task {task_id}: bad {field}")
+    base, head = str(task["base"]), str(task["head"])
+    log = subprocess.run(["git", "log", "--oneline", f"{base}..{head}"], check=True, text=True, capture_output=True).stdout
+    stat = subprocess.run(["git", "diff", "--stat", f"{base}..{head}"], check=True, text=True, capture_output=True).stdout
+    diff = subprocess.run(["git", "diff", "-U10", f"{base}..{head}"], check=True, text=True, capture_output=True).stdout
+    sections.extend([
+        f"## Task {task_id}",
+        f"Contract: {task['contract_hash']}",
+        f"Risk boundaries: {', '.join(risks) if risks else 'None'}",
+        f"Range: {base}..{head}", "", "### Commits", log.rstrip(), "",
+        "### Files changed", stat.rstrip(), "", "### Diff", diff.rstrip(), "",
+    ])
+output.parent.mkdir(parents=True, exist_ok=True)
+output.write_text("\n".join(sections), encoding="utf-8")
+print(f"wrote {output}: {len(tasks)} task(s), {output.stat().st_size} bytes")
+PY
+  exit $?
+fi
+
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
   echo "usage: review-package BASE HEAD [OUTFILE]" >&2
   exit 2

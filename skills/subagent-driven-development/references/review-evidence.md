@@ -27,6 +27,12 @@ Classification is one of `contract-gap`, `implementation-defect`, `evidence-gap`
 
 Each review round uses a fresh reviewer context. `finding_ancestry` is the stable root-to-current finding chain and survives replacement task IDs. The implementer may retain the same task identity only while the six-field Context Manifest identity remains unchanged.
 
+## Bounded Review Waves
+
+Batch two or three completed tasks into one first-pass review wave only when their contracts, ranges, and resources are independent. `review-package --wave WAVE_JSON OUTFILE` creates one bounded package with a separate section per task. The reviewer returns a separate contract hash, acceptance map, findings, and verdict for every expected task; `sdd-evidence.py check-wave RESULT.json` rejects aggregate or partial results.
+
+Wave batching changes dispatch overhead, not ownership. Corrections, evidence ledgers, and closure remain per task. Authority, protocol, security, and recovery work requires a distinct complementary reviewer context before PASS. Coupled tasks, more than three packages, or a wave that cannot preserve per-task identity use independent reviews.
+
 ## Two-Round Correction Limit
 
 After two failed review rounds in one outcome lineage, ordinary correction stops and diagnosis is mandatory. The controller persists outcome IDs, finding ancestry, task IDs, and cumulative failed rounds; creating or nesting a replacement task does not reset the budget.

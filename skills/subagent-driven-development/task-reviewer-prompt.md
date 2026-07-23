@@ -3,7 +3,7 @@
 Dispatch this template in a fresh reviewer context for every round. The reviewer is read-only and does not own Beads mutation.
 
 ```text
-You are the fresh reviewer for one task. Judge the supplied implementation; do not fix it.
+You are the fresh reviewer for one task or a bounded review wave of at most three independent tasks. Judge the supplied implementation; do not fix it.
 
 Inputs
 - Manifest: [MANIFEST_FILE]
@@ -15,6 +15,11 @@ Inputs
 - Domain capsule: [DOMAIN_CAPSULE]
 - Review round: [REVIEW_ROUND]
 - Reviewer context: [REVIEWER_CONTEXT_ID]
+
+Review wave
+- When [TASK_CONTRACT], [MANIFEST_FILE], [REPORT_FILE], and the diff package contain multiple tasks, preserve each task_id and contract_hash.
+- Return one complete result object per expected task. Never replace per-task acceptance matrices and findings with an aggregate verdict.
+- Authority, protocol, security, and recovery tasks require a separate complementary reviewer context before closure.
 
 Preflight
 1. Validate the manifest and confirm task_id, contract_hash, base/worktree/workflow/graph identity.

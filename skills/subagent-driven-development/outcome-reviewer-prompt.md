@@ -27,6 +27,7 @@ Rules
 4. Record command/flow, timestamp, expected/observed, and artifact path.
 5. Give every acceptance ID exactly one result: PASS, FAIL, BLOCKED, or UNTESTED. Only PASS satisfies it.
 6. Conflicting/obsolete requirements remain unsatisfied until explicit human adjudication names the IDs.
+7. Bounded task review waves remain per-task evidence. Reject an aggregate wave verdict or a missing task result; do not treat batching as outcome review.
 
 Write [REPORT_FILE] with an acceptance matrix:
 
