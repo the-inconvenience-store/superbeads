@@ -16,9 +16,12 @@ The controller—not this skill invocation, CI, or an agent report—supplies th
 ```bash
 python3 "$PWD/skills/subagent-driven-development/scripts/sdd-evidence.py" check-task LEDGER.json
 python3 "$PWD/skills/subagent-driven-development/scripts/sdd-evidence.py" check-epic LEDGER.json
+python3 "$PWD/skills/subagent-driven-development/scripts/sdd-evidence.py" \
+  check-human LEDGER.json --review .internal/sdd/human-review.json \
+  --head "$HEAD_SHA"
 ```
 
-The task gate proves implementation/review evidence. The epic gate proves every product outcome on the current commit, contract, environment, and fixture. A whole-branch code review remains separate. Never substitute one gate for another.
+The task gate proves implementation/review evidence. The epic gate proves every product outcome on the current commit, contract, environment, and fixture. A whole-branch agent code review remains separate. The human gate binds an approved review or approved mechanical bypass to the exact base..head range. Never substitute one gate for another.
 
 Classify readiness:
 
@@ -26,9 +29,12 @@ Classify readiness:
 |---|---|---|
 | `READY_FOR_CODE_REVIEW` | Code may be reviewed, but task or outcome evidence is missing/failed/blocked/untested | Open draft PR, keep, or discard; never merge/close epic |
 | `READY_FOR_ACCEPTANCE` | Code and task gate pass; epic outcome evidence still must run | Run acceptance; draft PR only if requested |
-| `ACCEPTANCE_PASSED` | Code checks, task gate, whole-branch review, and epic gate all pass | Merge or ready PR options allowed |
+| `READY_FOR_HUMAN_REVIEW` | Code checks, task gate, whole-branch review, and epic gate pass; required human review or approved bypass is missing/stale | Open draft PR, keep, or discard; never merge |
+| `ACCEPTANCE_PASSED` | Code checks, task gate, whole-branch review, epic gate, and current human-review gate all pass | Merge or ready PR options allowed |
 
-Checker failure output names every unsatisfied ID. Do not offer merge while any required evidence is stale, substituted, `FAIL`, `BLOCKED`, or `UNTESTED`, or while a security regression remains.
+Checker failure output names every unsatisfied ID. Do not offer merge while any required evidence is stale, substituted, `FAIL`, `BLOCKED`, or `UNTESTED`, while a security regression remains, or while human review is missing or stale.
+
+The approved design records whether human review is required and why. Establish the ledger's base commit from the confirmed branch/worktree base before review, and resolve `HEAD_SHA` from Git immediately before the human check. The record names the reviewer and exact base..head range; a changed ledger base or current head invalidates it. “Merge it” is not review attestation. The agent may prepare a review map of behavior, interfaces, high-risk files, findings, and verification evidence, but may not approve on the human's behalf.
 
 ## 2. Inspect Git Context
 
@@ -38,7 +44,7 @@ Determine worktree/detached state, current branch, base branch, and exact base..
 
 Use the structured question tool when available; otherwise provide a numbered list and stop. A dismissed/auto-resolved answer is not consent.
 
-For `READY_FOR_CODE_REVIEW` or `READY_FOR_ACCEPTANCE`, state unmet IDs and offer only:
+For `READY_FOR_CODE_REVIEW`, `READY_FOR_ACCEPTANCE`, or `READY_FOR_HUMAN_REVIEW`, state unmet IDs and offer only:
 
 1. **Open draft PR** — label the exact acceptance state; no merge or gate/epic closure.
 2. **Keep as-is** — preserve branch/worktree for evidence or corrections.

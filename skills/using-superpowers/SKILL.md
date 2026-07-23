@@ -33,7 +33,7 @@ For hard-to-reverse, surprising trade-offs, offer an ADR in `docs/decisions`; ne
 
 `bd` (beads) is the task tracker for ALL work — TodoWrite is forbidden, as are TaskCreate and markdown TODOs. The session hook injects composed beads context (curated memories + workflow pointer) at session start; if none was injected this session, run `bd prime`. Only the orchestrating agent manages beads — subagents never touch them. Include bead IDs in commit messages. When the session completes, read [Session Completion](references/session-policy.md#session-completion) and follow it.
 
-Shared capture, memory, Beads-economy, claim-boundary, and completion meanings are owned by `references/session-policy.md`.
+Shared capture, memory, Beads economy, claim, routing (`scripts/workflow-route.py`), and completion policy lives in `references/session-policy.md`.
 
 ## Platform Adaptation
 

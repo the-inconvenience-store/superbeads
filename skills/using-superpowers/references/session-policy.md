@@ -28,6 +28,10 @@ Use bounded reads, filtered output, and a single batch for related mutations. Pr
 
 Auto-claim only inside an explicitly authorized autonomous take-next-task flow. When the user chose the work, orientation and planning remain read-only until the user authorizes execution. Efficiency cannot widen consent.
 
+## Workflow Routing
+
+When resuming or advancing substantial work with durable product, design, plan, or acceptance artifacts, read [Workflow Routing](workflow-routing.md). Build its regenerable state snapshot from artifacts and bounded Beads reads, then use the validated next phase instead of chat memory.
+
 ## Session Completion
 
 The completion sequence is exactly: `bd close` → `bd dolt push` → `git pull --rebase && git push` → `git status`. Close only verified work, honor explicit user limits on remote actions, and never describe unsynced authorized work as landed.

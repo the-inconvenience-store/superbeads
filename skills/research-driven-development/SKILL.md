@@ -38,8 +38,8 @@ After selecting, read [research-modes.md](research-modes.md) for that mode's sou
 
 1. **Bound the question.** If the decision, scope, or source class is unclear, ask only the questions needed to resolve it. Complete when the question, decision, boundaries, and mode are explicit.
 2. **Open one research bead.** Create and claim a task named `Research: <topic>`. Search bounded memories and `docs/research/` for prior coverage. Complete when reusable evidence is identified or its absence is established.
-3. **Plan evidence coverage.** Split comparison/open-ended work into complementary, non-overlapping sub-questions. Simple work stays inline. When isolated workers would reduce clock time, read [researcher-prompt.md](researcher-prompt.md), supply one bounded brief per worker, and cap a round at five workers. Without workers, execute the same briefs inline. Complete when every load-bearing question has one owner and an evidence class.
-4. **Gather within the selected mode.** Repository work uses LSP where available plus targeted `rg`, tests, history, and executable checks. External work starts broad, then narrows to primary or authoritative sources. Mixed work keeps local and external evidence distinguishable. Complete when each load-bearing claim has decisive evidence or is marked unresolved.
+3. **Plan evidence coverage.** Split comparison/open-ended work into complementary, non-overlapping sub-questions. For repository current-state research, read [question-planner-prompt.md](question-planner-prompt.md): the controller that knows the request produces solution-neutral questions, then a fresh context receives only those questions and repository boundaries. Decision-informing repository observation does not stay inline; if the host cannot create a fresh context, persist the neutral questions and stop for a fresh-session handoff. Inline work is limited to decision-aware synthesis or a direct-answer non-trigger. When isolated workers would reduce clock time, read [researcher-prompt.md](researcher-prompt.md), supply one bounded brief per worker, and cap a round at five workers. Complete when every load-bearing question has one owner and evidence class, and no repository-observer packet reveals proposed implementation details.
+4. **Gather within the selected mode.** Repository observers report current-state facts, contradictions, and unresolved evidence without recommending an implementation. Repository work uses LSP where available plus targeted `rg`, tests, history, and executable checks. External work starts broad, then narrows to primary or authoritative sources. Mixed work keeps blinded repository observation separate from decision-aware external research and synthesis. Complete when each load-bearing claim has decisive evidence or is marked unresolved.
 5. **Synthesize once.** Merge duplicates, test whether evidence entails each claim, resolve contradictions by authority and recency, assign confidence with a reason, and retain refuted claims when their removal affects the decision. Complete when findings answer every sub-question and recommendations follow from cited evidence.
 6. **Close material gaps.** Run at most one narrow follow-up round of one or two briefs for unresolved load-bearing claims. A remaining gap becomes an explicit limitation or blocker, never an invented source. Complete when the gap is resolved or its decision consequence is recorded.
 7. **Write the artifact.** Write `docs/research/YYYY-MM-DD-<topic>.md` or an existing matching category path. Use the mode's document contract and cite the current repository revision for repository evidence. Complete when a fresh reader can trace every load-bearing claim to evidence and understand the recommendation.
@@ -51,6 +51,7 @@ Research is complete when all of these are true:
 
 - the selected mode's evidence requirements pass;
 - every load-bearing claim is cited, supported, and confidence-rated;
+- repository current-state findings remain distinguishable from later interpretation and recommendations;
 - contradictions, limitations, and refuted claims that affect the verdict are visible;
 - recommendations name an actor and action;
 - the research artifact records its date, bead, status, mode, and repository revision when applicable; and
@@ -68,6 +69,7 @@ Repository-only completion requires decisive `path:line` or command/test evidenc
 ## Conditional References
 
 - Read [research-modes.md](research-modes.md) after mode selection; read only the selected branch plus the shared evidence shape.
+- Read [question-planner-prompt.md](question-planner-prompt.md) before repository current-state research that informs a decision or plan.
 - Read [researcher-prompt.md](researcher-prompt.md) only when dispatching a research worker.
 - Read the repository's LSP/tool guidance only when repository evidence is in scope.
 

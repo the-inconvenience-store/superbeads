@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current": {"commit":"1111111111111111111111111111111111111111","contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","environment":"codex:macos:isolated","fixture_hash":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+  "current": {"base_commit":"0000000000000000000000000000000000000000","commit":"1111111111111111111111111111111111111111","contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","environment":"codex:macos:isolated","fixture_hash":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
   "task_gate": {
     "required_acceptance": {"TASK-A":"unit","TASK-B":"integration"},
     "review": {"kind":"task","result":"PASS","reviewer_context_id":"fresh-task-reviewer","report_path":".internal/sdd/task-review.json","commit":"1111111111111111111111111111111111111111","contract_hash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","environment":"codex:macos:isolated","fixture_hash":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}

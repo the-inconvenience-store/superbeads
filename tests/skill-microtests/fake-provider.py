@@ -21,7 +21,22 @@ def main() -> int:
         return 7
     time.sleep(0.08)
     trace = ""
-    if "sdd-review-correction-v1" in prompt:
+    if "research-neutral-observer-v1" in prompt:
+        if args.variant == "candidate":
+            scores = {
+                "solution_neutral_questions": 1.0,
+                "fresh_observer_context": 1.0,
+                "current_state_only": 0.75 if args.sample_index % 2 else 1.0,
+                "decision_aware_synthesis_separate": 1.0,
+            }
+        else:
+            scores = {
+                "solution_neutral_questions": 0.0,
+                "fresh_observer_context": 0.0,
+                "current_state_only": 0.25,
+                "decision_aware_synthesis_separate": 0.0,
+            }
+    elif "sdd-review-correction-v1" in prompt:
         if args.variant == "candidate":
             scores = {
                 "typed_findings": 1.0,

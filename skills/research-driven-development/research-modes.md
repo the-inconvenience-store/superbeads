@@ -27,7 +27,8 @@ Use repository evidence at the revision being studied:
 - cite decisive source, test, configuration, history, or documentation as `path:line`;
 - include the command and observed result when behavior, rather than prose, proves the claim;
 - use LSP definitions/references where available to verify relationships;
-- distinguish observed behavior from an unimplemented requirement; and
+- distinguish observed behavior from an unimplemented requirement;
+- keep current-state facts separate from decision-aware interpretation or recommendations; and
 - record the repository revision so future readers can detect drift.
 
 External URL evidence is **not required**. Do not browse merely to satisfy a source count, and do not invent an external analogue for a local fact. Completion requires every load-bearing claim to have decisive repository evidence or an explicit unresolved consequence.

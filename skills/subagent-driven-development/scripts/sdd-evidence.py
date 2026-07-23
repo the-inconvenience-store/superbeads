@@ -15,7 +15,7 @@ HEX40 = re.compile(r"[0-9a-f]{40}")
 HEX64 = re.compile(r"[0-9a-f]{64}")
 RESULTS = {"PASS", "FAIL", "BLOCKED", "UNTESTED"}
 IDENTITY_FIELDS = ("commit", "contract_hash", "environment", "fixture_hash")
-CURRENT_FIELDS = set(IDENTITY_FIELDS)
+CURRENT_FIELDS = {"base_commit", *IDENTITY_FIELDS}
 GATE_FIELDS = {"required_acceptance", "review"}
 REVIEW_FIELDS = {
     "kind", "result", "reviewer_context_id", "report_path", *IDENTITY_FIELDS,
@@ -51,6 +51,10 @@ WAVE_TASK_FIELDS = {
     "acceptance_results", "findings", "complementary_reviewer_context_id",
 }
 COMPLEMENTARY_RISKS = {"authority", "protocol", "security", "recovery"}
+HUMAN_REVIEW_FIELDS = {
+    "schema_version", "required", "reason", "base", "head", "reviewer",
+    "verdict", "recorded_at",
+}
 
 
 class EvidenceError(ValueError):
@@ -209,6 +213,8 @@ def validate_ledger(ledger: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
         raise EvidenceError("schema_version: expected 1")
     current = require_fields(ledger["current"], CURRENT_FIELDS, "current")
     validate_identity(current, "current")
+    if not HEX40.fullmatch(str(current["base_commit"])):
+        raise EvidenceError("current.base_commit: expected full Git SHA")
 
     gates: dict[str, dict[str, Any]] = {}
     review_contexts: list[str] = []
@@ -443,12 +449,65 @@ def check_reuse(
     return False, [f"FAIL reuse: rerun required for {acceptance_id} {evidence_class} ({reason})"]
 
 
+def check_human_review(
+    ledger: dict[str, Any],
+    review_document: dict[str, Any],
+    expected_head: str,
+) -> tuple[bool, list[str]]:
+    validate_ledger(ledger)
+    if not HEX40.fullmatch(expected_head):
+        raise EvidenceError("human_review.expected_head: expected full Git SHA")
+    if expected_head != ledger["current"]["commit"]:
+        return False, [
+            "FAIL human review",
+            "- stale current head: supplied Git head does not match the evidence ledger",
+        ]
+    review = require_fields(review_document, HUMAN_REVIEW_FIELDS, "human_review")
+    if review["schema_version"] != 1:
+        raise EvidenceError("human_review.schema_version: expected 1")
+    if not isinstance(review["required"], bool):
+        raise EvidenceError("human_review.required: expected boolean")
+    for field in ("reason", "reviewer", "recorded_at"):
+        nonempty_string(review[field], f"human_review.{field}")
+    for field in ("base", "head"):
+        if not HEX40.fullmatch(str(review[field])):
+            raise EvidenceError(f"human_review.{field}: expected full Git SHA")
+    if review["base"] == review["head"]:
+        raise EvidenceError("human_review: base and head must identify an exact diff range")
+    expected_verdict = "APPROVED" if review["required"] else "NOT_REQUIRED"
+    if review["verdict"] != expected_verdict:
+        raise EvidenceError(
+            f"human_review.verdict: expected {expected_verdict} for required={review['required']}"
+        )
+    if review["base"] != ledger["current"]["base_commit"]:
+        return False, [
+            "FAIL human review",
+            "- stale base: approval does not match the evidence ledger base",
+        ]
+    if review["head"] != expected_head:
+        return False, [
+            "FAIL human review",
+            "- stale head: approval does not match the current commit",
+        ]
+    if review["required"]:
+        return True, [
+            f"PASS human review: {review['reviewer']} approved {review['base']}..{review['head']}"
+        ]
+    return True, [
+        f"PASS human review bypass: {review['reviewer']} approved NOT_REQUIRED for {review['base']}..{review['head']}"
+    ]
+
+
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
     commands = root.add_subparsers(dest="command", required=True)
     for command in ("check-task", "check-epic", "check-wave"):
         child = commands.add_parser(command)
         child.add_argument("ledger", type=Path)
+    human = commands.add_parser("check-human")
+    human.add_argument("ledger", type=Path)
+    human.add_argument("--review", type=Path, required=True)
+    human.add_argument("--head", required=True)
     dispatch = commands.add_parser("check-dispatch")
     dispatch.add_argument("ledger", type=Path)
     dispatch.add_argument("--lineage", type=Path, required=True)
@@ -473,6 +532,10 @@ def main() -> int:
         elif args.command == "check-reuse":
             passed, lines = check_reuse(
                 ledger, args.acceptance_id, args.evidence_class, args.command_or_flow
+            )
+        elif args.command == "check-human":
+            passed, lines = check_human_review(
+                ledger, read_json(args.review), args.head
             )
         else:
             passed, lines = check_dispatch(ledger, read_json(args.lineage))

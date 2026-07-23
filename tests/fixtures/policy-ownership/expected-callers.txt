@@ -17,12 +17,12 @@ economy	skills/writing-plans/SKILL.md	57	pointer
 memory	skills/dispatching-parallel-agents/SKILL.md	206	pointer
 memory	skills/document-release/SKILL.md	172	pointer
 memory	skills/executing-plans/SKILL.md	92	pointer
-memory	skills/finishing-a-development-branch/SKILL.md	72	pointer
+memory	skills/finishing-a-development-branch/SKILL.md	78	pointer
 memory	skills/getting-up-to-speed/SKILL.md	222	pointer
 memory	skills/project-init/SKILL.md	285	pointer
 memory	skills/receiving-code-review/SKILL.md	168	pointer
-memory	skills/requesting-code-review/SKILL.md	87	pointer
-memory	skills/research-driven-development/SKILL.md	74	pointer
+memory	skills/requesting-code-review/SKILL.md	91	pointer
+memory	skills/research-driven-development/SKILL.md	76	pointer
 memory	skills/subagent-driven-development/SKILL.md	107	pointer
 memory	skills/test-driven-development/SKILL.md	353	pointer
 memory	skills/using-git-worktrees/SKILL.md	259	pointer

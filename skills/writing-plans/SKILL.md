@@ -50,7 +50,7 @@ Beads `blocks` edges express execution prerequisites; **resource conflicts are n
 4. **Declare dependencies and resources.** Add `blocks` only when the dependent consumes a stable interface produced by the prerequisite, or when it names a concrete irreversible migration/rollout constraint. Apply the **edge deletion test**: remove the candidate edge; if both tasks remain implementable against stable interfaces, leave it out. Record allowed writes, exclusivity, capacity, and any safe speculative contract independently.
 5. **Write the graph.** Read [slice-contract-template.md](slice-contract-template.md) now. Save `docs/plans/YYYY-MM-DD-<feature>.graph.json`; this JSON is the sole plan of record.
 6. **Validate before import.** Run `./skills/writing-plans/scripts/validate.sh <graph>`. Do **not** run `bd create --graph <graph> --dry-run`: its dry run creates issues, including duplicate epics. Fix every structural, verticality, outcome, DAG, or resource error before the single approved import.
-7. **Review.** Self-review outcome ownership, earliest seams, final gates, evidence non-substitution, placeholders, interface consistency, write conflicts, and speculative cost. Offer stress-test at the plan review gate; revalidate after any edit.
+7. **Review.** Self-review outcome ownership, earliest seams, final gates, evidence non-substitution, placeholders, interface consistency, write conflicts, and speculative cost. Run `python3 "$PWD/skills/writing-plans/scripts/render-review-digest.py" <graph>` and present its destination, slice outline, interface deltas, checkpoints, hotspots, graph path, and graph SHA-256. The digest is generated and never becomes a second plan of record. Human approval applies to the named graph hash; any graph edit invalidates it. Offer stress-test at the plan review gate; revalidate and regenerate the digest after any edit.
 8. **Import once.** After approval, run `bd create --graph <graph>` once. Record the epic/task IDs and confirm imported descriptions match the graph.
 9. **Hand off execution.** Offer subagent-driven or inline execution and pass only the epic ID, graph path, and governing revisions.
 
@@ -76,7 +76,7 @@ The graph is ready only when:
 - `FAIL`, `BLOCKED`, `UNTESTED`, `SKIPPED`, or stale evidence leaves its outcome open; and
 - validator and user review pass.
 
-Use the standard three-option plan review: Approved + stress-test, Approved, or Needs changes. Stress-test edits the graph artifact before revalidation; it does not import beads.
+Use the standard three-option plan review against the compact digest: Approved + stress-test, Approved, or Needs changes. The full graph remains available for spot-checking and machine validation. Stress-test edits the graph artifact before revalidation; it does not import beads.
 
 > When filing a bead for discovered/follow-up work, stamp it per **Agent-Filed Bead Discipline** (`verification-before-completion`).
 

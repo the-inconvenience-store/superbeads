@@ -60,7 +60,7 @@ The diagnostic names a new task or contract strategy and sets dispatch disallowe
 
 The controller maintains one JSON ledger with:
 
-- current commit, contract hash, environment, and fixture hash;
+- dispatch-time base commit plus current commit, contract hash, environment, and fixture hash;
 - task and epic acceptance-ID-to-evidence-class maps;
 - fresh task/outcome review identities and reports;
 - evidence records with command/flow, timestamp, artifact, result, and full identity;
@@ -93,8 +93,23 @@ Record elapsed time and retry count separately for `prepare`, `implement`, `revi
 - Task review: one task diff, Slice Contract, code quality, and task evidence.
 - Whole-branch code review: integrated implementation risks across task boundaries.
 - Outcome review: user/system entry routes and every epic outcome ID on the integrated commit/environment/fixture.
+- Human code review: a named human reviews the exact base-to-head implementation diff when the approved policy requires it. Agent review, tests, and outcome evidence prepare this review but never satisfy it.
 
 One gate cannot impersonate another. CI, unit tests, conformance, static review, direct API, browser/live, persistence, rollback, security, and agent-off evidence are distinct unless the product contract explicitly equates them.
+
+## Human Review Evidence
+
+Before a merge-capable branch disposition, record `.internal/sdd/human-review.json` with schema version, required flag, policy reason, exact base and head SHAs, human reviewer, `APPROVED` or approved `NOT_REQUIRED` verdict, and timestamp. The controller may prepare a risk-oriented review map but may not approve on the human's behalf.
+
+Run:
+
+```bash
+python3 "$PWD/skills/subagent-driven-development/scripts/sdd-evidence.py" \
+  check-human LEDGER.json --review .internal/sdd/human-review.json \
+  --head "$HEAD_SHA"
+```
+
+The ledger's base commit is established from the confirmed branch/worktree base before review. Resolve `HEAD_SHA` from Git immediately before the check. Any changed ledger base or current head makes the review stale. A missing, malformed, or stale record permits a draft PR or preserved branch, never local merge or a ready PR.
 
 ## Closure
 

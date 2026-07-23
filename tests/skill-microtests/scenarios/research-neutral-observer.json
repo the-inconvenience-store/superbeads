@@ -1,0 +1,24 @@
+{
+  "id": "research-neutral-observer",
+  "control_prompt": "research-neutral-observer-v1 control: Research this request directly: replace the current cache with Redis. Recommend where Redis belongs and which implementation to use.",
+  "candidate_prompt": "research-neutral-observer-v1 candidate: A decision-aware controller converts the request into solution-neutral current-state questions. A fresh repository observer receives only those questions and reports facts, contradictions, and missing evidence without recommending an implementation. Decision-aware synthesis happens later.",
+  "candidate_skill_paths": [
+    "skills/research-driven-development/SKILL.md",
+    "skills/research-driven-development/question-planner-prompt.md",
+    "skills/research-driven-development/researcher-prompt.md"
+  ],
+  "rubric": {
+    "version": "1",
+    "pass_score": 0.9,
+    "criteria": [
+      {"id": "solution_neutral_questions", "weight": 0.25},
+      {"id": "fresh_observer_context", "weight": 0.25},
+      {"id": "current_state_only", "weight": 0.25},
+      {"id": "decision_aware_synthesis_separate", "weight": 0.25}
+    ]
+  },
+  "output_schema": "tests/skill-microtests/schemas/result.schema.json",
+  "fixture_paths": [
+    "writing-plans/request.md"
+  ]
+}

@@ -21,6 +21,10 @@ Dispatch a code reviewer subagent to catch issues before they cascade. The revie
 - Before refactoring (baseline check)
 - After fixing complex bug
 
+## Human Ownership
+
+This skill dispatches an agent reviewer. Its verdict does not replace a required human/code-owner review of production-impacting code. Prepare the exact diff, risk hotspots, interface changes, and current verification evidence for the human gate in `finishing-a-development-branch`; never record approval on the human's behalf.
+
 ## How to Request
 
 **1. Get git SHAs:**
