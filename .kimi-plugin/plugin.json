@@ -16,10 +16,7 @@
     "agents"
   ],
   "skills": "./skills/",
-  "sessionStart": {
-    "skill": "using-superpowers"
-  },
-  "skillInstructions": "When a skill references Claude Code tools, map them to Kimi-native equivalents: use AskUserQuestion for clarifying choices; use the Agent tool (subagent_type coder/explore/plan) for subagent dispatch; use the native Skill tool to load skills; Read/Write/Edit for files; Bash for shell; Grep/Glob for search; FetchURL/WebSearch for web. IMPORTANT: this plugin tracks ALL tasks with the `bd` (beads) CLI run via Bash — do NOT use TodoList/TodoWrite for task tracking. Run `bd prime` at the start of each session to load persistent project memory.",
+  "skillInstructions": "When a skill references Claude Code tools, map them to Kimi-native equivalents: use AskUserQuestion for clarifying choices; use the Agent tool (subagent_type coder/explore/plan) for subagent dispatch; use the native Skill tool to load skills; Read/Write/Edit for files; Bash for shell; Grep/Glob for search; FetchURL/WebSearch for web. IMPORTANT: in projects initialized with Beads, this plugin tracks ALL tasks with the `bd` (beads) CLI run via Bash — do NOT use TodoList/TodoWrite for task tracking.",
   "interface": {
     "displayName": "Superbeads",
     "shortDescription": "Process-discipline skills + persistent beads memory.",

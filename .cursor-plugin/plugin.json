@@ -17,6 +17,5 @@
     "issue-tracking",
     "agents"
   ],
-  "skills": "./skills/",
-  "hooks": "./hooks/hooks-cursor.json"
+  "skills": "./skills/"
 }

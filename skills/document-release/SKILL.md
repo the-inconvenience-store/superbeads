@@ -5,8 +5,6 @@ description: Use when committed code is awaiting merge and its project documenta
 
 # Document Release: Post-Ship Documentation Update
 
-> **Source:** Adapted from [garrytan/gstack](https://github.com/garrytan/gstack/tree/main/document-release) (Garry Tan)
-
 **Announce at start:** "I'm using the document-release skill to audit and update project documentation."
 
 Run after code changes are committed but before PR merge. Ensures all project documentation accurately reflects shipped code.

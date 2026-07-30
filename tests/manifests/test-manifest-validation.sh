@@ -24,7 +24,7 @@ ver_match() {
   fi
 }
 for f in .claude-plugin/plugin.json .codex-plugin/plugin.json .cursor-plugin/plugin.json \
-         hooks/hooks-cursor.json .kimi-plugin/plugin.json; do
+         .kimi-plugin/plugin.json; do
   if [ -f "$f" ]; then
     valid_json "$f"
   else
@@ -46,18 +46,19 @@ jq -e --arg market "$EXPECTED_MARKETPLACE" --arg name "$EXPECTED_NAME" '.name==$
 jq -e --arg market "$EXPECTED_MARKETPLACE" --arg name "$EXPECTED_NAME" '.name==$market and .plugins[0].name==$name' .codex-plugin/marketplace.json >/dev/null && echo "codex marketplace name OK" || fail=1
 jq -e --arg name "$EXPECTED_NAME" '.name==$name and .plugins[0].name==$name and .interface.displayName==$name' .agents/plugins/marketplace.json >/dev/null && echo "agents marketplace name OK" || fail=1
 jq -e '.skills=="./skills/"' .cursor-plugin/plugin.json >/dev/null && echo "cursor skills OK" || fail=1
-jq -e '.sessionStart.skill=="using-superpowers"' .kimi-plugin/plugin.json >/dev/null && echo "kimi sessionStart OK" || fail=1
+jq -e 'has("hooks") | not' .cursor-plugin/plugin.json >/dev/null && echo "cursor global hooks absent" || fail=1
+jq -e 'has("sessionStart") | not' .kimi-plugin/plugin.json >/dev/null && echo "kimi global sessionStart absent" || fail=1
 
-# Referenced-path resolution (catches runtime breakage that JSON validation misses)
-need() {
-  if [ -e "$1" ]; then
-    echo "PATH OK: $1"
+for f in hooks/hooks.json hooks/codex-hooks.json hooks/hooks-cursor.json; do
+  if [ -e "$f" ]; then
+    echo "GLOBAL HOOK MANIFEST PRESENT: $f"; fail=1
   else
-    echo "MISSING REF: $1"; fail=1
+    echo "GLOBAL HOOK MANIFEST ABSENT: $f"
   fi
-}
-# .kimi-plugin sessionStart.skill must map to a real skill dir
-need "skills/$(jq -r .sessionStart.skill .kimi-plugin/plugin.json)/SKILL.md"
-# hooks-cursor.json command target (run-hook.cmd) must exist
-need "hooks/run-hook.cmd"
+done
+if grep -qE 'pi\.on\("(session_start|context|session_compact)"' .pi/extensions/superpowers.ts; then
+  echo "GLOBAL PI SESSION INJECTION PRESENT"; fail=1
+else
+  echo "GLOBAL PI SESSION INJECTION ABSENT"
+fi
 exit $fail

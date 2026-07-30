@@ -3,8 +3,8 @@
 # https://github.com/the-inconvenience-store/superbeads
 #
 # Preferred install for Claude Code / Codex: use the native plugin system.
-# For OpenCode: use this script (it deploys the TypeScript plugin natively).
-# Use this script for: beads/Dolt bootstrap, npx/scripted hook registration,
+# For OpenCode: use this script to install the skills globally.
+# Use this script for: beads/Dolt bootstrap, skill installation,
 # optional yegge.md agent install (--with-yegge), version pinning (--version), or CI automation.
 #
 # Scripted usage:
@@ -24,7 +24,7 @@ SKILLS_DIR="${SUPERBEADS_SKILLS_DIR:-${BEADS_SUPERPOWERS_SKILLS_DIR:-$HOME/.clau
 HOOKS_DIR="$HOME/.claude/hooks"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 PLUGINS_FILE="$HOME/.claude/plugins/installed_plugins.json"
-HOOK_SCRIPT="$HOOKS_DIR/superbeads-session-start.sh"
+HOOK_SCRIPT="$SKILLS_DIR/project-init/assets/session-start"
 AGENTS_DIR="$HOME/.claude/agents"
 VERSION_FILE="$SKILLS_DIR/.superbeads-version"
 
@@ -200,8 +200,8 @@ Preferred install for Tier-1 CLIs:
   OpenCode:     see https://github.com/the-inconvenience-store/superbeads#opencode
 
 Use this script when you need:
-  - beads/Dolt bootstrap and hook registration outside the plugin system
-  - npx/scripted install path with SessionStart hook wiring
+  - beads/Dolt bootstrap and project-local hook support
+  - npx/scripted skill installation
   - optional yegge.md orchestrator agent install (opt-in via --with-yegge)
   - version pinning (--version) or CI automation
 
@@ -215,7 +215,7 @@ Flags:
   --test          Install to /tmp/superbeads-test/ (verifies then cleans up)
   --with-yegge    Also install the yegge.md orchestrator agent (default: not installed;
                   forces the tarball/git install tier — plugin/npx tiers are skipped)
-  --uninstall     Remove superbeads skills, hook, and settings entry
+  --uninstall     Remove global superbeads skills and legacy global hook entries
   --version X.Y.Z Pin to a specific version (default: latest GitHub release)
   --source DIR    Install from a local checkout (dev/test; bypasses download tiers, no network)
   --skip-checksum   Skip SHA-256 checksum verification (tarball downloads)
@@ -429,7 +429,6 @@ install_codex_from() {
 
 install_opencode_from() {
   local source_dir="$1"
-  local extract_dir="${2:-}"
   local oc_skills="$HOME/.config/opencode/skills"
   mkdir -p "$oc_skills"
   local installed=0
@@ -440,27 +439,6 @@ install_opencode_from() {
     fi
   done
   success "OpenCode: installed $installed skills to $oc_skills/"
-
-  # Copy TS plugin if available from extract dir
-  if [ -n "$extract_dir" ]; then
-    local oc_plugins="$HOME/.config/opencode/plugins"
-    mkdir -p "$oc_plugins"
-    if [ -f "$extract_dir/opencode/superbeads-plugin.ts" ]; then
-      cp -f "$extract_dir/opencode/superbeads-plugin.ts" "$oc_plugins/"
-      success "OpenCode: installed plugin to $oc_plugins/"
-    fi
-
-    # Canonical composer hook: the TS plugin execs <opencode-root>/hooks/session-start
-    # --emit-plain (bead 7bod). The hook resolves PLUGIN_ROOT as its parent dir, so
-    # <opencode-root>/skills/using-superpowers/SKILL.md (installed above) resolves.
-    if [ -f "$extract_dir/hooks/session-start" ]; then
-      local oc_hooks="$HOME/.config/opencode/hooks"
-      mkdir -p "$oc_hooks"
-      cp -f "$extract_dir/hooks/session-start" "$oc_hooks/session-start"
-      chmod +x "$oc_hooks/session-start"  # direct exec relies on the bash shebang
-      success "OpenCode: installed canonical hook to $oc_hooks/"
-    fi
-  fi
 }
 
 # Optional agent install — opt-in via --with-yegge (default: not installed).
@@ -475,31 +453,23 @@ install_agents_from() {
   done
 }
 
-setup_hooks() {
+install_hook_runtime() {
   local source_root="${1:-}"
-  if [ "$HAS_PYTHON3" = 0 ]; then
-    warn "python3 not found — cannot register hooks in settings.json"
-    warn "Re-run install.sh once python3 is available to configure hooks"
-    return 1
-  fi
-
-  mkdir -p "$HOOKS_DIR"
-
-  info "Creating SessionStart hook..."
+  info "Installing project-init SessionStart runtime..."
   write_hook_script "$source_root"
-
-  if [ -f "$SETTINGS_FILE" ]; then
-    local backup
-    backup="${SETTINGS_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
-    cp -f "$SETTINGS_FILE" "$backup"
-    info "Settings backup: ${backup/$HOME/\~}"
-  fi
-
   cleanup_stale_reminder "$SETTINGS_FILE"
+  cleanup_legacy_sessionstart "$SETTINGS_FILE"
 
-  info "Registering hooks in settings.json..."
-  register_hook
-
+  local target
+  for target in \
+    "$HOME/.codex/skills/project-init/assets/session-start" \
+    "$HOME/.config/opencode/skills/project-init/assets/session-start"; do
+    if [ -d "$(dirname "$(dirname "$target")")" ]; then
+      mkdir -p "$(dirname "$target")"
+      cp -f "$HOOK_SCRIPT" "$target"
+      chmod +x "$target"
+    fi
+  done
   return 0
 }
 
@@ -522,7 +492,7 @@ try_local_install() {
 
   install_agents_from "$STAGING_DIR/repo"
 
-  setup_hooks "$STAGING_DIR/repo" || warn "Hook setup failed — re-run install.sh once python3 is available"
+  install_hook_runtime "$STAGING_DIR/repo" || warn "Project hook runtime setup failed"
 
   INSTALL_TIER="local"
   return 0
@@ -581,8 +551,7 @@ try_npx_install() {
   if npx skills add the-inconvenience-store/superbeads $agents -g --copy -y 2>/dev/null; then
     success "Skills installed via npx"
 
-    # npx doesn't install hooks — do it ourselves
-    setup_hooks || warn "Hook setup failed after npx install — re-run install.sh once python3 is available"
+    install_hook_runtime || warn "Project hook runtime setup failed after npx install"
 
     INSTALL_TIER="npx"
     return 0
@@ -625,7 +594,7 @@ try_tarball_install() {
 
   install_agents_from "$STAGING_DIR/extracted"
 
-  setup_hooks "$STAGING_DIR/extracted" || warn "Hook setup failed — re-run install.sh once python3 is available"
+  install_hook_runtime "$STAGING_DIR/extracted" || warn "Project hook runtime setup failed"
 
   INSTALL_TIER="tarball"
   return 0
@@ -649,7 +618,7 @@ try_git_install() {
 
   install_agents_from "$STAGING_DIR/repo"
 
-  setup_hooks "$STAGING_DIR/repo" || warn "Hook setup failed — re-run install.sh once python3 is available"
+  install_hook_runtime "$STAGING_DIR/repo" || warn "Project hook runtime setup failed"
 
   INSTALL_TIER="git"
   return 0
@@ -692,21 +661,8 @@ do_auto_uninstall_previous() {
       done
       rm -f "$HOOK_SCRIPT" "$HOOKS_DIR/superbeads-reminder.sh" 2>/dev/null
       rm -rf "$HOOKS_DIR/superbeads" 2>/dev/null
-      if [ -f "$SETTINGS_FILE" ] && [ "$HAS_PYTHON3" = 1 ]; then
-        python3 -c "
-import json
-sf = '$SETTINGS_FILE'
-with open(sf) as f:
-    s = json.load(f)
-h = s.get('hooks', {})
-for k in ['SessionStart', 'UserPromptSubmit']:
-    if k in h:
-        h[k] = [e for e in h[k] if 'superbeads' not in json.dumps(e)]
-with open(sf, 'w') as f:
-    json.dump(s, f, indent=2)
-    f.write('\n')
-" 2>/dev/null || true
-      fi
+      cleanup_stale_reminder "$SETTINGS_FILE"
+      cleanup_legacy_sessionstart "$SETTINGS_FILE"
       ;;
   esac
   uninstall_codex_support 2>/dev/null || true
@@ -735,49 +691,29 @@ do_install() {
 }
 
 # write_hook_script [source_root]
-# Checkout tiers (local/tarball/git) pass a repo root: the canonical composer
-# (hooks/session-start) is copied to a durable root and HOOK_SCRIPT becomes a
-# thin exec shim of it — one source of truth (bead bb6x).
-# The npx tier has no checkout to copy from: HOOK_SCRIPT becomes a policy-free
-# minimal fallback — skill injection plus static bd pointers only. All
-# composition policy (bd prime capture, memory selection) lives ONLY in
-# hooks/session-start.
+# Installs an inert runtime asset beside project-init. The skill copies this
+# asset into a project when the user opts that project in.
 write_hook_script() {
   local source_root="${1:-}"
+  mkdir -p "$(dirname "$HOOK_SCRIPT")"
 
   if [ -n "$source_root" ] && [ -f "$source_root/hooks/session-start" ]; then
-    local canon_root="$HOOKS_DIR/superbeads"
-    mkdir -p "$canon_root/hooks"
-    cp -f "$source_root/hooks/session-start" "$canon_root/hooks/session-start"
-    chmod +x "$canon_root/hooks/session-start"  # direct exec relies on the bash shebang
-    # The canonical hook resolves skills relative to its own root
-    # (<root>/skills/using-superpowers/SKILL.md) — point <root>/skills at SKILLS_DIR.
-    rm -rf "$canon_root/skills"
-    ln -s "$SKILLS_DIR" "$canon_root/skills"
-
-    # Unquoted heredoc: $canon_root is substituted at install time (same
-    # mechanism as register_hook's PYEOF); runtime expansions are escaped.
-    cat > "$HOOK_SCRIPT" << HOOKEOF
-#!/usr/bin/env bash
-# superbeads hook shim — canonical logic lives in hooks/session-start.
-# The CLAUDE_PLUGIN_ROOT default preserves the hookSpecificOutput envelope this
-# registration has always emitted (settings.json / codex_hooks consumers).
-BSP_ROOT="$canon_root"
-export CLAUDE_PLUGIN_ROOT="\${CLAUDE_PLUGIN_ROOT:-\$BSP_ROOT}"
-exec "\$BSP_ROOT/hooks/session-start" "\$@"
-HOOKEOF
+    cp -f "$source_root/hooks/session-start" "$HOOK_SCRIPT"
   else
     cat > "$HOOK_SCRIPT" << 'HOOKEOF'
 #!/usr/bin/env bash
-# superbeads SessionStart hook — minimal fallback (npx tier).
+# superbeads project-local SessionStart runtime — minimal fallback (npx tier).
 # npx installs skills only (no repo checkout), so the canonical
 # hooks/session-start composer is not available to exec. This fallback is
 # policy-free by design: skill injection plus static bd pointers — no bd prime
 # capture, no memory selection. That logic lives in hooks/session-start.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SKILL_CONTENT=""
-for dir in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
+for dir in "$PLUGIN_ROOT/skills" "$HOME/.claude/skills" "$HOME/.codex/skills" \
+  "$HOME/.config/opencode/skills" "$HOME/.agents/skills"; do
   if [ -f "$dir/using-superpowers/SKILL.md" ]; then
     SKILL_CONTENT=$(cat "$dir/using-superpowers/SKILL.md" 2>/dev/null || true)
     break
@@ -834,36 +770,6 @@ HOOKEOF
 }
 
 
-register_hook() {
-  python3 << PYEOF
-import json, os
-
-sf = "$SETTINGS_FILE"
-hs = "$HOOK_SCRIPT"
-
-if os.path.exists(sf):
-    with open(sf) as f:
-        settings = json.load(f)
-else:
-    os.makedirs(os.path.dirname(sf), exist_ok=True)
-    settings = {}
-
-hooks = settings.setdefault("hooks", {})
-
-# SessionStart hook
-ss = hooks.setdefault("SessionStart", [])
-if not any("superbeads" in json.dumps(e) for e in ss):
-    ss.append({
-        "matcher": "startup|clear|compact",
-        "hooks": [{"type": "command", "command": f"bash {hs}"}]
-    })
-
-with open(sf, "w") as f:
-    json.dump(settings, f, indent=2)
-    f.write("\n")
-PYEOF
-}
-
 cleanup_stale_reminder() {
   # ADR-0039 migration: remove UserPromptSubmit entries whose command references
   # superpowers-reminder. Structured parser only; narrow match; backup; foreign
@@ -903,6 +809,51 @@ PYEOF
   success "Removed stale UserPromptSubmit (superpowers-reminder) entry from ${settings/$HOME/\~}"
 }
 
+cleanup_legacy_sessionstart() {
+  local settings="$1"
+  [ -f "$settings" ] || return 0
+  grep -q "superbeads" "$settings" 2>/dev/null || return 0
+  [ "$HAS_PYTHON3" = 1 ] || { warn "python3 unavailable — cannot remove legacy global SessionStart hook"; return 0; }
+  cp -f "$settings" "${settings}.bak-$(date +%Y%m%d-%H%M%S)"
+  python3 - "$settings" <<'PYEOF'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, encoding="utf-8") as handle:
+    data = json.load(handle)
+hooks = data.get("hooks", {})
+session_start = hooks.get("SessionStart")
+if isinstance(session_start, list):
+    kept_groups = []
+    for entry in session_start:
+        if not isinstance(entry, dict):
+            kept_groups.append(entry)
+            continue
+        handlers = entry.get("hooks")
+        if not isinstance(handlers, list):
+            if "superbeads" not in json.dumps(entry):
+                kept_groups.append(entry)
+            continue
+        kept_handlers = [
+            handler
+            for handler in handlers
+            if "superbeads" not in json.dumps(handler)
+        ]
+        if kept_handlers:
+            entry["hooks"] = kept_handlers
+            kept_groups.append(entry)
+    if kept_groups:
+        hooks["SessionStart"] = kept_groups
+    else:
+        hooks.pop("SessionStart", None)
+with open(path, "w", encoding="utf-8") as handle:
+    json.dump(data, handle, indent=2)
+    handle.write("\n")
+PYEOF
+  success "Removed legacy global Superbeads SessionStart entry from ${settings/$HOME/\~}"
+}
+
 # --- Phase 4: Verify ---
 do_verify() {
   local count md
@@ -914,21 +865,21 @@ do_verify() {
     warn "Skill dir/SKILL.md mismatch: $count dirs vs $md SKILL.md files"
   fi
 
-  # Hook checks only for non-plugin tiers (plugin manages its own hooks)
+  # Scripted tiers install an inert runtime asset for project-init to copy.
   if [ "$INSTALL_TIER" != "plugin" ]; then
     if [ -f "$HOOK_SCRIPT" ] && bash "$HOOK_SCRIPT" 2>/dev/null | python3 -m json.tool > /dev/null 2>&1; then
-      success "Hook produces valid JSON"
+      success "Project hook runtime produces valid JSON"
     else
-      warn "Hook did not produce valid JSON — check $HOOK_SCRIPT"
+      warn "Project hook runtime did not produce valid JSON — check $HOOK_SCRIPT"
     fi
 
     if [ -f "$SETTINGS_FILE" ] && python3 -c "
 import json; d=json.load(open('$SETTINGS_FILE'))
 assert any('superbeads' in json.dumps(e) for e in d.get('hooks',{}).get('SessionStart',[]))
 " 2>/dev/null; then
-      success "Hook registered in settings.json"
+      warn "Legacy global Superbeads SessionStart entry remains in settings.json"
     else
-      warn "Hook not found in settings.json"
+      success "No global Superbeads SessionStart entry"
     fi
   fi
 
@@ -954,18 +905,8 @@ print_next_steps() {
     echo "       npm install -g @beads/bd   # any platform (npm)"
     echo "  4. In each project: bd init"
   fi
-  if [ "$HAS_CODEX" = 1 ]; then
-    echo
-    printf '  %bCodex CLI:%b\n' "${BOLD}" "${NC}"
-    echo "    Add to ~/.codex/config.toml:"
-    echo "      [features]"
-    echo "      codex_hooks = true"
-  fi
-  if [ "$HAS_OPENCODE" = 1 ]; then
-    echo
-    printf '  %bOpenCode:%b\n' "${BOLD}" "${NC}"
-    echo "    Plugin installed — skills and hooks are active automatically."
-  fi
+  echo
+  echo "  In each Beads project, invoke project-init to install local SessionStart support."
   echo
   if [ "$HAS_COPILOT" = 1 ]; then info "Copilot CLI detected — native install: copilot plugin marketplace add the-inconvenience-store/superbeads && copilot plugin install superbeads@superbeads-marketplace"; fi
   if [ "$HAS_CURSOR" = 1 ]; then info "Cursor detected — native install: /add-plugin superbeads (in Cursor Agent)"; fi
@@ -1011,28 +952,14 @@ do_uninstall() {
       rm -rf "$HOOKS_DIR/superbeads"
       info "Removed hook scripts"
 
-      if [ -f "$SETTINGS_FILE" ] && command -v python3 >/dev/null 2>&1; then
-        cp -f "$SETTINGS_FILE" "${SETTINGS_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
-        python3 << PYEOF
-import json
-sf = "$SETTINGS_FILE"
-with open(sf) as f:
-    settings = json.load(f)
-hooks = settings.get("hooks", {})
-for key in ["SessionStart", "UserPromptSubmit"]:
-    if key in hooks:
-        hooks[key] = [e for e in hooks[key] if "superbeads" not in json.dumps(e)]
-with open(sf, "w") as f:
-    json.dump(settings, f, indent=2)
-    f.write("\n")
-PYEOF
-        info "Removed hooks from settings.json"
-      fi
+      cleanup_stale_reminder "$SETTINGS_FILE"
+      cleanup_legacy_sessionstart "$SETTINGS_FILE"
       ;;
   esac
 
   # ADR-0039 migration: clean up any stale reminder registration/file, regardless of tier
   cleanup_stale_reminder "$SETTINGS_FILE"
+  cleanup_legacy_sessionstart "$SETTINGS_FILE"
   rm -f "$HOOKS_DIR/superbeads-reminder.sh"
 
   uninstall_codex_support
@@ -1057,7 +984,7 @@ print_dry_run() {
     echo "  + Codex CLI skills"
   fi
   if [ "$HAS_OPENCODE" = 1 ]; then
-    echo "  + OpenCode skills + plugin"
+    echo "  + OpenCode skills"
   fi
   echo
   echo "No files were modified."
@@ -1092,11 +1019,11 @@ do_test() {
     error "Skills installed: $count (expected >= 20)"; fail=$((fail + 1))
   fi
 
-  # Check SessionStart hook
-  if bash "$test_home/.claude/hooks/superbeads-session-start.sh" 2>/dev/null | python3 -m json.tool > /dev/null 2>&1; then
-    success "SessionStart hook: valid JSON"; pass=$((pass + 1))
+  # Check the inert runtime that project-init copies into opted-in projects.
+  if bash "$test_home/skills/project-init/assets/session-start" 2>/dev/null | python3 -m json.tool > /dev/null 2>&1; then
+    success "Project SessionStart runtime: valid JSON"; pass=$((pass + 1))
   else
-    error "SessionStart hook: invalid JSON"; fail=$((fail + 1))
+    error "Project SessionStart runtime: invalid JSON"; fail=$((fail + 1))
   fi
 
   # ADR-0039: fresh install must not write a reminder script or register UserPromptSubmit
@@ -1106,16 +1033,11 @@ do_test() {
     success "Fresh install: no reminder script"; pass=$((pass + 1))
   fi
 
-  # Check settings.json
-  if python3 -c "
-import json
-d=json.load(open('$test_home/.claude/settings.json'))
-assert d['hooks']['SessionStart']
-assert 'UserPromptSubmit' not in d.get('hooks', {})
-" 2>/dev/null; then
-    success "settings.json: SessionStart registered, no UserPromptSubmit"; pass=$((pass + 1))
+  # Global install must not create project activation in user settings.
+  if [ ! -e "$test_home/.claude/settings.json" ]; then
+    success "settings.json: no global SessionStart registration"; pass=$((pass + 1))
   else
-    error "settings.json: SessionStart missing or UserPromptSubmit present"; fail=$((fail + 1))
+    error "settings.json: global configuration was created"; fail=$((fail + 1))
   fi
 
   # Check agents — default: NOT installed; --with-yegge: installed (opt-in)

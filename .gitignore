@@ -64,3 +64,4 @@ issues.jsonl
 # cache
 .cache/
 npx-testing/
+update.sh

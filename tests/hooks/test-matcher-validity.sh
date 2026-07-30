@@ -1,24 +1,18 @@
 #!/usr/bin/env bash
-# Asserts Claude/Codex hook manifests have SessionStart matchers containing all
-# four sources, and Cursor's distinct manifest points at the checked-in hook shim.
+# Global plugin manifests must not auto-register SessionStart.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 fail=0
 for f in hooks/hooks.json hooks/codex-hooks.json; do
-  m=$(jq -r '.hooks.SessionStart[0].matcher' "$ROOT/$f")
-  for src in startup resume clear compact; do
-    if echo "$m" | grep -q "$src"; then
-      echo "PASS: $f contains '$src'"
-    else
-      echo "FAIL: $f missing '$src' (matcher: $m)"; fail=1
-    fi
-  done
+  if [ -e "$ROOT/$f" ]; then
+    echo "FAIL: global hook manifest still ships: $f"; fail=1
+  else
+    echo "PASS: global hook manifest absent: $f"
+  fi
 done
-cursor_cmd=$(jq -r '.hooks.sessionStart[0].command' "$ROOT/hooks/hooks-cursor.json")
-if [ "$cursor_cmd" = "./hooks/run-hook.cmd session-start" ] && [ -f "$ROOT/hooks/run-hook.cmd" ]; then
-  echo "PASS: hooks/hooks-cursor.json command targets hooks/run-hook.cmd"
+if jq -e 'has("hooks") | not' "$ROOT/.cursor-plugin/plugin.json" >/dev/null; then
+  echo "PASS: Cursor plugin has no global hook registration"
 else
-  echo "FAIL: hooks/hooks-cursor.json unexpected command: $cursor_cmd"
-  fail=1
+  echo "FAIL: Cursor plugin still registers global hooks"; fail=1
 fi
 exit $fail

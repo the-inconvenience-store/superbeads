@@ -85,8 +85,8 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harn
 - `.codex-plugin/` — Codex CLI plugin manifest (`plugin.json`) and marketplace config (`marketplace.json`). Mirrors `.claude-plugin/` for Codex compatibility. The repo-root `.agents/plugins/marketplace.json` (version-less) is the Codex marketplace source manifest — without it, Codex marketplace sources find zero installable plugins.
 - `skills/` — one skill per `skills/<name>/SKILL.md` directory. Some include prompt templates (`implementer-prompt.md`, `researcher-prompt.md`) or helper scripts. Auto-discovered by Claude Code — do NOT declare in `plugin.json`.
 - `agents/` — Removed in v0.6.0. Code-reviewer is now dispatched via `skills/requesting-code-review/code-reviewer.md` prompt template. Subagents (implementer, researcher) use prompt templates inside their skills, not standalone agent files.
-- `hooks/` — `session-start` (SessionStart: injects `using-superpowers` + composed beads context — curated memories + a `bd prime` pointer), the single recurring hook. Multi-format output supports Claude Code, Codex, Cursor, and generic CLIs. Registered in `hooks/hooks.json` (Claude Code) and `hooks/codex-hooks.json` (Codex). Auto-discovered.
-- `opencode/` — Native OpenCode TypeScript plugin (`superbeads-plugin.ts`). Two in-process hooks: a once-per-session bootstrap and a compaction re-injection. Distributed via `install.sh`.
+- `hooks/` — `session-start` is the canonical multi-format runtime. It is not globally registered; `project-init` copies it into opted-in repositories.
+- `opencode/` — OpenCode adapter source and fixtures. Global installation provides skills only; `project-init` generates the project-local adapter.
 - `example-workflow/` — Ready-to-use project template: `CLAUDE.md` (Karpathy behavioral principles + beads integration) and `agents/yegge.md` (lean router — triages requests and routes to skills). `install.sh --with-yegge` installs `yegge.md` globally (opt-in; not installed by default).
 - `docs/` — Working knowledge base, not a website source tree. Research, graph plans, ADRs, and release audits live under `docs/research/`, `docs/plans/`, `docs/decisions/`, and `docs/audits/` respectively.
 - `.internal/` — Local session scratch (gitignored), including handoff inbox/archive docs and transient agent/server artifacts. Do not put durable user-facing docs here.
@@ -117,7 +117,7 @@ A plugin for Claude Code, Codex, and OpenCode (verified) plus 6 best-effort harn
 - **Worktree detection** — Use `git rev-parse --is-inside-work-tree`, NOT `[ -d .git ]`. In a worktree, `.git` is a file, not a directory.
 - **Plugin cache goes stale** — After modifying skills, the installed plugin cache is outdated. Symlink the cache to this repo while developing; `claude plugin update` has a [cache bug](https://github.com/anthropics/claude-code/issues/14061).
 - **Skill `description` field trap** — Putting workflow descriptions in skill `description` frontmatter causes Claude to follow the description instead of reading the full skill body (SDO problem). Descriptions should state trigger conditions only.
-- **Codex plugin channel doesn't register hooks** — codex-cli (verified 0.142.5) rejects a populated `hooks` object in the plugin manifest ("ignoring hooks: … found object") and auto-discovers nothing usable, so plugin/marketplace installs get skills but NO SessionStart hook. `install.sh` wires the hook explicitly — it is the supported Codex hook path.
+- **SessionStart is project-local** — Global installs provide skills only. Run `project-init` in a Beads repository; its default Codex setup creates `.codex/hooks.json` and hides it through the repository-local Git exclude file. Tracked setup requires an explicit request.
 
 ## Non-Interactive Shell Commands
 
@@ -156,12 +156,10 @@ example-workflow/
   CLAUDE.md                # Karpathy behavioral principles + beads integration (generic project template)
   agents/yegge.md          # Orchestrator agent — lean router (triage + skill routing)
 hooks/
-  hooks.json               # Claude Code hook registration
-  codex-hooks.json         # Codex CLI hook registration (refs same scripts)
-  session-start            # Bash: injects using-superpowers + composed beads context (multi-format output)
+  session-start            # Canonical runtime copied by project-init into opted-in projects
   run-hook.cmd             # Windows polyglot wrapper
 opencode/
-  superbeads-plugin.ts  # Native OpenCode TypeScript plugin (2 hooks)
+  superbeads-plugin.ts  # Adapter source retained for deterministic fixtures
   package.json             # Plugin dependencies
 scripts/
   bump-version.sh          # Sync version across package.json + plugin manifests

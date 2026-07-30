@@ -179,8 +179,9 @@ assert_file_exists "$HOME/.claude/skills/brainstorming/SKILL.md" "skill has SKIL
 # Agent
 assert_file_not_exists "$HOME/.claude/agents/yegge.md" "agent: yegge NOT installed by default (opt-in)"
 
-# Hooks
-assert_file_executable "$HOME/.claude/hooks/superbeads-session-start.sh" "hook: session-start executable"
+# Project-init runtime; global install must not register it.
+assert_file_executable "$HOME/.claude/skills/project-init/assets/session-start" "project hook runtime executable"
+assert_file_not_exists "$HOME/.claude/hooks/superbeads-session-start.sh" "global session-start hook absent"
 assert_file_not_exists "$HOME/.claude/hooks/superbeads-reminder.sh" "hook: reminder NOT installed (ADR-0039)"
 
 # Version file
@@ -188,13 +189,10 @@ assert_file_exists "$HOME/.claude/skills/.superbeads-version" "version file exis
 assert_file_contains "$HOME/.claude/skills/.superbeads-version" "$VERSION" "version matches"
 
 # settings.json
-assert_json_valid "$HOME/.claude/settings.json" "settings.json valid JSON"
-assert_file_contains "$HOME/.claude/settings.json" "superbeads" "settings has superbeads"
-assert_file_contains "$HOME/.claude/settings.json" "SessionStart" "settings has SessionStart"
-assert_file_not_contains "$HOME/.claude/settings.json" "UserPromptSubmit" "settings has no UserPromptSubmit (ADR-0039)"
+assert_file_not_exists "$HOME/.claude/settings.json" "global settings not created"
 
 # Hook output
-assert_command_output_valid_json "bash $HOME/.claude/hooks/superbeads-session-start.sh" "session-start hook output valid JSON"
+assert_command_output_valid_json "bash $HOME/.claude/skills/project-init/assets/session-start" "project hook runtime output valid JSON"
 
 # ============================================================
 echo "=== Group 1b: Multi-CLI Install Verification ==="
@@ -222,8 +220,8 @@ if command -v opencode >/dev/null 2>&1; then
   assert_count_gte "$oc_skill_count" 23 "OpenCode skill count >= 23"
   assert_dir_exists "$HOME/.config/opencode/skills/using-superpowers" "OpenCode skill: using-superpowers"
 
-  # OpenCode plugin installed
-  assert_file_exists "$HOME/.config/opencode/plugins/superbeads-plugin.ts" "OpenCode plugin installed"
+  assert_file_exists "$HOME/.config/opencode/skills/project-init/assets/session-start" "OpenCode project hook runtime installed"
+  assert_file_not_exists "$HOME/.config/opencode/plugins/superbeads-plugin.ts" "OpenCode global plugin absent"
 else
   echo "  [SKIP] OpenCode not in container — skipping OpenCode assertions"
 fi
@@ -233,13 +231,13 @@ echo "=== Group 1c: Hook Format Validation ==="
 # ============================================================
 
 # Test session-start with CLAUDE_PLUGIN_ROOT (existing behavior)
-assert_command_output_valid_json "CLAUDE_PLUGIN_ROOT=/src bash $HOME/.claude/hooks/superbeads-session-start.sh" "session-start CC format valid JSON"
+assert_command_output_valid_json "CLAUDE_PLUGIN_ROOT=/src bash $HOME/.claude/skills/project-init/assets/session-start" "session-start CC format valid JSON"
 
 # Test session-start with CODEX_PLUGIN_ROOT
-assert_command_output_valid_json "CODEX_PLUGIN_ROOT=/src bash $HOME/.claude/hooks/superbeads-session-start.sh" "session-start Codex format valid JSON"
+assert_command_output_valid_json "CODEX_PLUGIN_ROOT=/src bash $HOME/.claude/skills/project-init/assets/session-start" "session-start Codex format valid JSON"
 
 # Test session-start generic (no env var)
-assert_command_output_valid_json "bash $HOME/.claude/hooks/superbeads-session-start.sh" "session-start generic format valid JSON"
+assert_command_output_valid_json "bash $HOME/.claude/skills/project-init/assets/session-start" "session-start generic format valid JSON"
 
 # ============================================================
 echo "=== Group 2: Idempotent Re-Install ==="
@@ -267,9 +265,7 @@ assert_file_not_exists "$HOME/.claude/hooks/superbeads-reminder.sh" "reminder re
 assert_file_not_exists "$HOME/.claude/agents/yegge.md" "agent removed"
 assert_file_not_exists "$HOME/.claude/skills/.superbeads-version" "version file removed"
 
-# settings.json should still be valid but cleaned
-assert_json_valid "$HOME/.claude/settings.json" "settings.json still valid after uninstall"
-assert_file_not_contains "$HOME/.claude/settings.json" "superbeads" "settings cleaned of superbeads"
+assert_file_not_exists "$HOME/.claude/settings.json" "global settings remain absent after uninstall"
 
 # All skill directories should be gone
 remaining=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
@@ -299,6 +295,12 @@ echo "$VERSION:plugin" > "$HOME/.claude/skills/.superbeads-version"
 cat > "$HOME/.claude/settings.json" << 'EOF'
 {
   "hooks": {
+    "SessionStart": [
+      {"hooks": [
+        {"type": "command", "command": "bash /home/user/.claude/hooks/superbeads-session-start.sh"},
+        {"type": "command", "command": "bash /home/user/.claude/hooks/somebody-elses-session-hook.sh"}
+      ]}
+    ],
     "UserPromptSubmit": [
       {"matcher": "", "hooks": [
         {"type": "command", "command": "bash /home/user/.claude/hooks/superbeads-reminder.sh"},
@@ -312,7 +314,9 @@ EOF
 bash /src/install.sh --uninstall >/dev/null 2>&1 || true
 
 assert_file_not_contains "$HOME/.claude/settings.json" "superpowers-reminder" "cleanup: stale entry removed"
+assert_file_not_contains "$HOME/.claude/settings.json" "superbeads-session-start" "cleanup: global SessionStart removed"
 assert_file_contains "$HOME/.claude/settings.json" "somebody-elses-hook" "cleanup: foreign hook preserved"
+assert_file_contains "$HOME/.claude/settings.json" "somebody-elses-session-hook" "cleanup: foreign SessionStart preserved"
 
 backup_count=$(find "$HOME/.claude" -maxdepth 1 -name 'settings.json.bak-*' 2>/dev/null | wc -l | tr -d ' ')
 assert_count_gte "$backup_count" 1 "cleanup: timestamped backup written"
@@ -460,7 +464,7 @@ stop_http_server
 
 # Test that session-start hook handles bd in PATH
 if command -v bd >/dev/null 2>&1; then
-  assert_command_output_valid_json "bash $HOME/.claude/hooks/superbeads-session-start.sh" "bd: session-start with bd produces valid JSON"
+  assert_command_output_valid_json "bash $HOME/.claude/skills/project-init/assets/session-start" "bd: project runtime with bd produces valid JSON"
 else
   echo "  [SKIP] bd not in container — skipping bd integration"
 fi

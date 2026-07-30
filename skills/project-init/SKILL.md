@@ -1,11 +1,9 @@
 ---
 name: project-init
-description: Use when Beads initialization, a missing database, remote bootstrap, or diverged Dolt history blocks tracker use.
+description: Use when Beads initialization, a missing database, remote bootstrap, diverged Dolt history, or project-local Superbeads SessionStart activation is needed.
 ---
 
 # Project Init: Beads/Dolt Database Setup and Recovery
-
-> **Source:** Based on [gastownhall/beads SYNC_SETUP.md](https://github.com/gastownhall/beads/blob/main/docs/SYNC_SETUP.md)
 
 **Announce at start:** "I'm using the project-init skill to set up or recover the beads database."
 
@@ -63,6 +61,27 @@ Based on diagnostic results, follow the appropriate path:
 | .beads/ exists, `bd list` works, no remote | Add remote | → Path E |
 | .beads/ exists, push fails "no common ancestor" | Fix diverged history | → Path C |
 | .beads/ exists but empty/corrupt, remote has data | Export + re-bootstrap | → Path F |
+
+## Activate Superbeads for This Project
+
+After the selected path verifies that Beads works, install SessionStart support for the
+current harness by running the bundled helper resolved relative to this `SKILL.md`:
+
+```bash
+python3 <project-init-skill-dir>/scripts/install-session-hook.py \
+  --project "$PWD" \
+  --harness <claude|codex|opencode>
+```
+
+The default is machine-local: generated project files are added to the repository's
+Git exclude file and must leave `git status --short` unchanged. If the user explicitly
+asks to share or track the hook configuration, add `--tracked`; never infer tracked
+mode from ordinary initialization.
+
+If the active harness is unclear, ask which supported harness to configure. The helper
+must finish with an `Installed local-only` or `Installed tracked` message. Start a fresh
+session in this repository to verify activation; a repository that has not run this
+step receives no Superbeads SessionStart injection.
 
 ## Path A: Fresh Initialization (New Project)
 

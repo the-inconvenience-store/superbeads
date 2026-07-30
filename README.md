@@ -104,15 +104,19 @@ claude plugin install superbeads@superbeads-marketplace
 bd init                               # 2. Bootstrap the Dolt database for this project
 ```
 
-Start a new Claude Code session and type "where are we" — the agent will load your `bd` context and pick up where you left off.
+Ask the agent to run `project-init` once in the repository. It installs local-only
+SessionStart support by default; ask for tracked setup if the repository should share it.
+Then start a new session and type "where are we."
 
 Using a different agent? See [Installation](#installation) for native install on Codex, OpenCode, Cursor, GitHub Copilot CLI, Kimi Code, Antigravity, Factory Droid, and Pi.
 
 ## Prerequisites
 
-**Install `bd` before the plugin.** Its hooks call `bd` on every session start; without it they fail silently and you lose persistent memory. The Quickstart above uses Homebrew, or `npm install -g @beads/bd` on any platform. Verify with `bd version`.
+Install `bd` before running `project-init`. The Quickstart above uses Homebrew, or
+`npm install -g @beads/bd` on any platform. Verify with `bd version`.
 
-**Note:** Native plugin install (Tier 1) installs skills and hooks, but not `bd init` — run that yourself per project.
+**Note:** Native plugin install provides global skills but does not activate a global
+SessionStart hook. Activation is an explicit per-project `project-init` step.
 
 ## Installation
 
@@ -138,14 +142,8 @@ codex plugin marketplace add the-inconvenience-store/superbeads
 codex plugin add superbeads@superbeads
 ```
 
-After installing, enable hooks in `~/.codex/config.toml`:
-
-```toml
-[features]
-codex_hooks = true
-```
-
-To get the SessionStart hook under Codex, use the scripted installer (`install.sh`) rather than the plugin channel — the plugin channel installs the skills but does not wire the hook.
+Run `project-init` in each Beads repository that should receive SessionStart context.
+It creates an ignored `.codex/hooks.json` by default.
 
 #### OpenCode
 
@@ -153,7 +151,8 @@ To get the SessionStart hook under Codex, use the scripted installer (`install.s
 curl -fsSL https://raw.githubusercontent.com/the-inconvenience-store/superbeads/main/install.sh | bash
 ```
 
-The installer detects OpenCode and copies skills to `~/.config/opencode/skills/` and the TypeScript plugin to `~/.config/opencode/plugins/` (active automatically).
+The installer detects OpenCode and copies skills to `~/.config/opencode/skills/`.
+Run `project-init` in a Beads repository to create its local OpenCode plugin.
 
 ### Tier 2 — Best-effort
 
@@ -180,7 +179,8 @@ Update:
 copilot plugin update superbeads
 ```
 
-Note: rides the Claude-plugin fallback (skills + session-start via the shared `hooks/hooks.json`), the same mechanism upstream ships; requires Copilot CLI v1.0.11+ for session-start context injection.
+This best-effort integration installs skills only; project-local SessionStart activation
+is currently verified for Claude Code, Codex, and OpenCode.
 
 #### Kimi Code
 
@@ -228,7 +228,8 @@ Installs the skills only — no hooks. Skill activation relies on your harness's
 npx skills add the-inconvenience-store/superbeads -g --copy -y
 ```
 
-For the full experience (session-start injection of skill context + a composed beads context), use the plugin install (Claude Code / Codex / OpenCode above) or the install script. To get beads context on an npx install, run `bd setup claude` (beads' own hook installer).
+The standalone `npx` fallback does not bundle the SessionStart runtime. Use the native
+plugin or scripted installer before invoking `project-init` for project-local context.
 
 ### Alternative: scripted install (`curl | bash`)
 
@@ -239,7 +240,7 @@ curl -fsSL https://raw.githubusercontent.com/the-inconvenience-store/superbeads/
 The script's role is broader than just copying files. Use it when you need any of:
 
 - **Beads/Dolt bootstrap** — auto-detects whether `bd` is installed and guides setup
-- **Hook registration** — writes the SessionStart entry to settings.json (required when using the install-script path)
+- **Project hook runtime** — installs the inert runtime that `project-init` copies into opted-in repositories
 - **`yegge.md` orchestrator** — optional add-on: installed only when you pass `--with-yegge`. The flag forces the scripted tarball/git install tier (the plugin and npx tiers are skipped for that run), so it can't be combined with a plugin-managed install in one command
 - **Version pinning** — `--version X.Y.Z` for reproducible CI installs
 - **CI environments** — use `--yes --skip-checksum` for unattended runs

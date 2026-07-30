@@ -6,22 +6,21 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 
 shape_sandbox_setup claude
 trap 'shape_sandbox_teardown' EXIT
+mkdir -p "$SANDBOX/.claude"
+printf '%s\n' \
+  '{"hooks":{"SessionStart":[{"hooks":[' \
+  '{"type":"command","command":"bash /tmp/superbeads-session-start.sh"},' \
+  '{"type":"command","command":"bash /tmp/foreign-session-start.sh"}' \
+  ']}]}}' > "$SANDBOX/.claude/settings.json"
 shape_install
 
 assert_all_skills "$SANDBOX/skills"
-assert_file "$SANDBOX/.claude/hooks/superbeads-session-start.sh"
-# Written hook must be a thin exec shim of the canonical composer (bead bb6x),
-# and the canonical copy must land where the shim points.
-assert_file "$SANDBOX/.claude/hooks/superbeads/hooks/session-start"
-# shellcheck disable=SC2016  # the '$BSP_ROOT' exec line is matched literally, not expanded
-if grep -qF 'exec "$BSP_ROOT/hooks/session-start"' "$SANDBOX/.claude/hooks/superbeads-session-start.sh" 2>/dev/null; then
-  _pass "written hook execs the canonical composer"
-else
-  _fail "written hook is not an exec shim of hooks/session-start"
-fi
+assert_file "$SANDBOX/skills/project-init/assets/session-start"
+assert_no_file "$SANDBOX/.claude/hooks/superbeads-session-start.sh"
+assert_no_file "$SANDBOX/.claude/hooks/superbeads"
 assert_file "$SANDBOX/.claude/settings.json"
-assert_json "$SANDBOX/.claude/settings.json" "'SessionStart' in d.get('hooks', {})"
-assert_json "$SANDBOX/.claude/settings.json" "'UserPromptSubmit' not in d.get('hooks', {})"
+assert_json "$SANDBOX/.claude/settings.json" "'superbeads' not in json.dumps(d)"
+assert_json "$SANDBOX/.claude/settings.json" "'foreign-session-start' in json.dumps(d)"
 assert_no_file "$SANDBOX/.claude/hooks/superbeads-reminder.sh"
 # Default install must NOT place the yegge agent (opt-in via --with-yegge, bead 3krn)
 assert_no_file "$SANDBOX/.claude/agents/yegge.md"
@@ -38,11 +37,6 @@ assert_no_file "$SANDBOX/.claude/hooks/superbeads"
 assert_no_file "$SANDBOX/skills/.superbeads-version"
 if [ -f "$SANDBOX/.claude/settings.json" ]; then
   assert_json "$SANDBOX/.claude/settings.json" "'superbeads' not in json.dumps(d)"
-fi
-if compgen -G "$SANDBOX/.claude/settings.json.backup-*" > /dev/null; then
-  _pass "designed settings backup present"
-else
-  _fail "designed settings.json.backup-* missing after uninstall"
 fi
 
 # Opt-in round-trip: --with-yegge installs the agent; uninstall removes it (bead 3krn)

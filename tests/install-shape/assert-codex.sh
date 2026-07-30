@@ -9,9 +9,10 @@ trap 'shape_sandbox_teardown' EXIT
 shape_install
 
 assert_all_skills "$SANDBOX/.codex/skills"
+assert_file "$SANDBOX/.codex/skills/project-init/assets/session-start"
 assert_in_log "Codex: installed"
-# Codex activation guidance printed (config.toml features block)
-assert_in_log "codex_hooks = true"
+assert_not_in_log "codex_hooks = true"
+assert_no_file "$SANDBOX/.codex/hooks.json"
 assert_shims_never_invoked
 
 shape_uninstall

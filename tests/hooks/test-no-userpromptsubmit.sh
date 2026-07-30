@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 fail=0
 for f in hooks/hooks.json hooks/codex-hooks.json; do
-  if grep -q "UserPromptSubmit" "$ROOT/$f"; then
+  if [ -f "$ROOT/$f" ] && grep -q "UserPromptSubmit" "$ROOT/$f"; then
     echo "FAIL: UserPromptSubmit registered in $f"; fail=1
   fi
 done
