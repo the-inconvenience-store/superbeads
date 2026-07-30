@@ -5,6 +5,9 @@ description: Use when an unfamiliar, stale, compacted, or unclear project sessio
 
 # Getting Up to Speed
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to summaries, reports, questions, and user updates.
+
 Orient on the current project before doing any work. Run beads context commands, deep-dive the codebase, and produce a structured "current state" summary so you (and the user) know exactly where things stand.
 
 **Announce at start:** "I'm using the getting-up-to-speed skill to orient on the project."

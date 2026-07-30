@@ -5,6 +5,9 @@ description: Use before any claim that work is complete, fixed, passing, merge-r
 
 # Verification Before Completion
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to evidence reports, completion claims, and user updates.
+
 **Core principle:** evidence before claims. A report, invocation, diff, or green but unrelated check is not evidence for the named outcome.
 
 ## Iron Law

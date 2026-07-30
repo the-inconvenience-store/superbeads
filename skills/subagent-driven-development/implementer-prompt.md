@@ -1,5 +1,8 @@
 # Implementer Role Contract
 
+Before `CONTRACT_READY` or any report, read
+`skills/using-superpowers/references/technical-writing-policy.md`. Apply it to prose.
+
 Use this template for one fresh general-purpose worker. Substitute the bracketed values; do not append the raw multi-task plan or controller transcript.
 
 ```text

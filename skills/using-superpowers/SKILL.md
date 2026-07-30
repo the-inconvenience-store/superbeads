@@ -13,7 +13,9 @@ If there is even a 1% chance a skill applies, invoke it. Applicable skills are m
 
 ## The Rule
 
-**Invoke relevant or requested skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If it turns out wrong for the situation, you don't have to use it.
+Read [the technical writing policy](references/technical-writing-policy.md). Then
+invoke relevant or requested skills before any response or action, including a skill
+announcement, question, progress update, or technical artifact.
 
 **Before entering plan mode:** if you haven't already brainstormed, invoke the brainstorming skill first.
 

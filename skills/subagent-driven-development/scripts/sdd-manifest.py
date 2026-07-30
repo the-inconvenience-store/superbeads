@@ -13,9 +13,11 @@ from pathlib import Path
 from typing import Any
 
 
-WORKFLOW_VERSION = "0.14.0"
+WORKFLOW_VERSION = "0.15.0"
 FIELDS = {
     "task_id", "contract_hash", "workflow_version", "graph_hash",
+    "execution_epoch", "design_seams", "risk_boundaries",
+    "integration_owner", "integration_seam_id",
     "governing_artifacts", "outcome_ids", "base_commit",
     "reviewed_dependency_commits", "speculative_dependency_commits", "worktree", "allowed_write_set",
     "generated_write_set", "write_scope_hash", "write_scope_amendments",
@@ -25,6 +27,8 @@ FIELDS = {
 }
 CONTRACT_FIELDS = (
     "task_id", "workflow_version", "graph_hash", "governing_artifacts",
+    "execution_epoch", "design_seams", "risk_boundaries",
+    "integration_owner", "integration_seam_id",
     "outcome_ids", "base_commit", "reviewed_dependency_commits", "speculative_dependency_commits", "worktree",
     "allowed_write_set", "generated_write_set", "write_scope_hash",
     "write_scope_amendments", "prohibited_paths", "allocated_resources",
@@ -37,7 +41,16 @@ IDENTITY_FIELDS = (
 HEX40 = re.compile(r"[0-9a-f]{40}")
 HEX64 = re.compile(r"[0-9a-f]{64}")
 STABLE_ID = re.compile(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+){1,}\b")
-VERIFICATION_TIERS = {"focused", "task", "integration", "release"}
+VERIFICATION_TIERS = {"focused", "sensitivity", "task", "integration", "release"}
+HIGH_RISK_BOUNDARIES = {
+    "authority", "parsing", "persistence", "concurrency",
+    "recovery", "protocol", "security", "evidence",
+}
+RECEIPT_FIELDS = {
+    "schema_version", "task_id", "contract_hash", "worker_kind",
+    "transport", "argv_model", "model_effective", "context_mode", "session_id",
+    "events_sha256",
+}
 
 
 class ManifestError(ValueError):
@@ -119,6 +132,33 @@ def validate(manifest: dict[str, Any]) -> None:
         raise ManifestError(f"workflow_version: must be {WORKFLOW_VERSION}")
     if not isinstance(manifest["graph_hash"], str) or not HEX64.fullmatch(manifest["graph_hash"]):
         raise ManifestError("graph_hash: expected lowercase SHA-256")
+    epoch = manifest["execution_epoch"]
+    if (
+        not isinstance(epoch, dict)
+        or set(epoch) != {"epoch_id", "status", "graph_sha256"}
+        or not all(isinstance(epoch.get(field), str) for field in epoch)
+        or not HEX64.fullmatch(epoch["epoch_id"])
+        or not HEX64.fullmatch(epoch["graph_sha256"])
+    ):
+        raise ManifestError("execution_epoch: invalid approved epoch identity")
+    if epoch["status"] != "approved" or epoch["graph_sha256"] != manifest["graph_hash"]:
+        raise ManifestError("DESIGN_DIRTY: execution epoch is dirty or graph hash differs")
+    seams = require_string_array(manifest, "design_seams", nonempty=True)
+    risks = require_string_array(manifest, "risk_boundaries", nonempty=False)
+    if set(risks) - HIGH_RISK_BOUNDARIES or len(risks) > 2:
+        raise ManifestError("risk_boundaries: derived seam risk exceeds the task limit")
+    if manifest["integration_owner"] not in {"task", "controller"}:
+        raise ManifestError("integration_owner: expected task or controller")
+    integration_seam = manifest["integration_seam_id"]
+    if manifest["integration_owner"] == "task":
+        if not isinstance(integration_seam, str) or integration_seam not in seams:
+            raise ManifestError(
+                "integration_seam_id: task-owned integration requires a consumed seam"
+            )
+    elif integration_seam is not None:
+        raise ManifestError(
+            "integration_seam_id: controller-owned integration must remain outside the task"
+        )
     if not isinstance(manifest["base_commit"], str) or not HEX40.fullmatch(manifest["base_commit"]):
         raise ManifestError("base_commit: expected full Git commit SHA")
     if not isinstance(manifest["contract_hash"], str) or not HEX64.fullmatch(manifest["contract_hash"]):
@@ -235,12 +275,31 @@ def validate(manifest: dict[str, Any]) -> None:
         tier, command = entry["tier"], entry["command"]
         if tier not in VERIFICATION_TIERS:
             raise ManifestError(f"verification_commands[{index}].tier: invalid verification tier")
+        if tier == "release":
+            raise ManifestError(
+                "verification_commands: release verification belongs to the epic controller"
+            )
         if not isinstance(command, str) or not command.strip():
             raise ManifestError(f"verification_commands[{index}].command: required")
         identity = (tier, command)
         if identity in seen_verification:
             raise ManifestError("verification_commands: duplicate tier and command")
         seen_verification.add(identity)
+    sensitive = {"authority", "security", "recovery", "protocol"} & set(
+        manifest["risk_boundaries"]
+    )
+    if sensitive and not any(item["tier"] == "sensitivity" for item in verification):
+        raise ManifestError(
+            "verification_commands: sensitivity verification is required for "
+            f"{', '.join(sorted(sensitive))}"
+        )
+    if any(item["tier"] == "integration" for item in verification) and (
+        manifest["integration_owner"] != "task"
+        or manifest["integration_seam_id"] not in manifest["design_seams"]
+    ):
+        raise ManifestError(
+            "verification_commands: integration requires a task-owned integration seam"
+        )
     conflicts = manifest["known_conflicts"]
     if not isinstance(conflicts, list):
         raise ManifestError("known_conflicts: expected array")
@@ -388,6 +447,42 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     context = body.get("Context", "")
     outcome_match = re.search(r"(?im)^\s*-\s*Outcome IDs:\s*(.+)$", context)
     outcomes = sorted(set(STABLE_ID.findall(outcome_match.group(1)))) if outcome_match else []
+    epoch = read_json(args.epoch)
+    graph_sha = hashlib.sha256(args.graph.read_bytes()).hexdigest()
+    if (
+        epoch.get("schema_version") != 1
+        or epoch.get("status") != "approved"
+        or not isinstance(epoch.get("graph"), dict)
+        or epoch["graph"].get("sha256") != graph_sha
+    ):
+        raise ManifestError("DESIGN_DIRTY: graph does not match an approved execution epoch")
+    seam_match = re.search(r"(?im)^\s*-\s*Design seams consumed:\s*(.+)$", context)
+    design_seams = sorted(set(STABLE_ID.findall(seam_match.group(1)))) if seam_match else []
+    approved_seams = {
+        item.get("id"): item.get("high_risk_boundaries")
+        for item in epoch.get("seams", [])
+        if isinstance(item, dict)
+    }
+    if not design_seams or any(item not in approved_seams for item in design_seams):
+        raise ManifestError("DESIGN_DIRTY: task references absent or unknown design seams")
+    risk_boundaries = sorted({
+        risk
+        for seam_id in design_seams
+        for risk in approved_seams[seam_id]
+    })
+    integration = body.get("Integration Checkpoint", "")
+    owner_match = re.search(r"(?im)^\s*-\s*Owner:\s*(task|controller)\.?\s*$", integration)
+    seam_owner_match = re.search(r"(?im)^\s*-\s*Seam ID:\s*([A-Z][A-Z0-9-]+)\.?\s*$", integration)
+    if not owner_match:
+        raise ManifestError("graph: Integration Checkpoint requires Owner: task | controller")
+    integration_owner = owner_match.group(1).lower()
+    integration_seam_id = seam_owner_match.group(1) if seam_owner_match else None
+    if integration_owner == "task" and integration_seam_id not in design_seams:
+        raise ManifestError(
+            "graph: task-owned Integration Checkpoint requires a consumed Seam ID"
+        )
+    if integration_owner == "controller":
+        integration_seam_id = None
     exclusive_text = resource_values(body.get("Resources", ""), "Exclusive resources")
     exclusive = [] if exclusive_text.lower() == "none" else [
         item.strip().strip("`") for item in exclusive_text.split(",") if item.strip()
@@ -397,7 +492,16 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         "task_id": args.task_id,
         "contract_hash": "0" * 64,
         "workflow_version": WORKFLOW_VERSION,
-        "graph_hash": hashlib.sha256(args.graph.read_bytes()).hexdigest(),
+        "graph_hash": graph_sha,
+        "execution_epoch": {
+            "epoch_id": epoch.get("epoch_id"),
+            "status": epoch.get("status"),
+            "graph_sha256": epoch["graph"].get("sha256"),
+        },
+        "design_seams": design_seams,
+        "risk_boundaries": risk_boundaries,
+        "integration_owner": integration_owner,
+        "integration_seam_id": integration_seam_id,
         "governing_artifacts": [artifact_record(value) for value in args.governing_artifact],
         "outcome_ids": outcomes,
         "base_commit": args.base_commit,
@@ -455,6 +559,74 @@ def check_diff(manifest: dict[str, Any], repo: Path, base: str, head: str) -> li
     return changed
 
 
+def check_receipt(
+    manifest: dict[str, Any],
+    receipt: dict[str, Any],
+    events_path: Path,
+    expected_worker: str,
+) -> None:
+    if set(receipt) != RECEIPT_FIELDS:
+        raise ManifestError(
+            "launch receipt: fields differ: "
+            f"missing={sorted(RECEIPT_FIELDS - set(receipt))}, "
+            f"extra={sorted(set(receipt) - RECEIPT_FIELDS)}"
+        )
+    if receipt["schema_version"] != 1:
+        raise ManifestError("launch receipt: schema_version must be 1")
+    expected = {
+        "task_id": manifest.get("task_id"),
+        "contract_hash": manifest.get("contract_hash"),
+        "model_effective": manifest.get("model_effective"),
+        "context_mode": manifest.get("context_mode"),
+    }
+    for field, value in expected.items():
+        if receipt[field] != value:
+            raise ManifestError(f"launch receipt.{field}: does not match manifest")
+    if receipt["worker_kind"] != expected_worker:
+        raise ManifestError(
+            f"launch receipt.worker_kind: expected {expected_worker}, "
+            f"got {receipt['worker_kind']}"
+        )
+    if not isinstance(receipt["session_id"], str) or not receipt["session_id"]:
+        raise ManifestError("launch receipt.session_id: non-empty value required")
+    if receipt["transport"] != "codex_exec":
+        raise ManifestError("launch receipt.transport: expected codex_exec")
+    if receipt["argv_model"] != manifest.get("model_effective"):
+        raise ManifestError("launch receipt.argv_model: does not match effective model")
+    try:
+        events_bytes = events_path.read_bytes()
+    except OSError as exc:
+        raise ManifestError(f"launch receipt.events: cannot read events: {exc}") from exc
+    actual_digest = hashlib.sha256(events_bytes).hexdigest()
+    if receipt["events_sha256"] != actual_digest:
+        raise ManifestError("launch receipt.events_sha256: transport evidence changed")
+    session_ids: set[str] = set()
+    for line_number, raw in enumerate(events_bytes.decode("utf-8").splitlines(), 1):
+        try:
+            event = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise ManifestError(
+                f"launch receipt.events line {line_number}: invalid JSON"
+            ) from exc
+        payload = event.get("payload") if isinstance(event, dict) else None
+        if not isinstance(payload, dict):
+            continue
+        if event.get("type") == "session_meta":
+            if payload.get("source") != "exec" or payload.get("originator") != "codex_exec":
+                raise ManifestError("launch receipt.transport: session is not codex_exec")
+            session_id = payload.get("session_id") or payload.get("id")
+            if isinstance(session_id, str):
+                session_ids.add(session_id)
+        name = payload.get("name")
+        arguments = payload.get("arguments")
+        if name in {"spawn_agent", "followup_task", "send_message"}:
+            raise ManifestError("launch receipt.events: nested agent attempt detected")
+        if isinstance(arguments, str) and re.search(r"(?i)\bcodex\s+exec\b", arguments):
+            raise ManifestError("launch receipt.events: nested codex exec attempt detected")
+    if session_ids != {receipt["session_id"]}:
+        raise ManifestError("launch receipt.session_id: does not match transport evidence")
+
+
 def amend(manifest: dict[str, Any], graph_path: Path, task_key: str, path: str, rationale: str) -> dict[str, Any]:
     validate(manifest)
     safe_repo_path(path, "amend.add_path")
@@ -494,6 +666,7 @@ def parser() -> argparse.ArgumentParser:
     bind_parser.add_argument("--manifest", type=Path, required=True)
     prepare_parser = commands.add_parser("prepare")
     prepare_parser.add_argument("--graph", type=Path, required=True)
+    prepare_parser.add_argument("--epoch", type=Path, required=True)
     prepare_parser.add_argument("--task-key", required=True)
     prepare_parser.add_argument("--task-id", required=True)
     prepare_parser.add_argument("--base-commit", required=True)
@@ -522,6 +695,11 @@ def parser() -> argparse.ArgumentParser:
     amend_parser.add_argument("--add-path", required=True)
     amend_parser.add_argument("--rationale", required=True)
     amend_parser.add_argument("--output", type=Path, required=True)
+    receipt_parser = commands.add_parser("check-receipt")
+    receipt_parser.add_argument("--manifest", type=Path, required=True)
+    receipt_parser.add_argument("--receipt", type=Path, required=True)
+    receipt_parser.add_argument("--events", type=Path, required=True)
+    receipt_parser.add_argument("--expected-worker", required=True)
     return root
 
 
@@ -543,12 +721,20 @@ def main() -> int:
         elif args.command == "check-diff":
             changed = check_diff(read_json(args.manifest), args.repo, args.base, args.head)
             print(f"valid diff: {len(changed)} authorized paths")
-        else:
+        elif args.command == "amend":
             manifest = amend(
                 read_json(args.manifest), args.graph, args.task_key, args.add_path, args.rationale
             )
             write_manifest(args.output, manifest)
             print(f"amended manifest: {manifest['task_id']} {manifest['contract_hash']}")
+        else:
+            check_receipt(
+                read_json(args.manifest),
+                read_json(args.receipt),
+                args.events,
+                args.expected_worker,
+            )
+            print("PASS worker launch receipt")
     except ManifestError as exc:
         print(f"sdd manifest error: {exc}", file=sys.stderr)
         return 1

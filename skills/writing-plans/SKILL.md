@@ -5,6 +5,15 @@ description: Use when an approved product contract and solution design need a va
 
 # Writing Plans
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to graph prose, review digests, plans, and execution handoffs.
+
+Before import, create an approved execution epoch with
+`scripts/execution-epoch.py approve`. The epoch binds the product contract, technical
+design, graph, and resolved seam catalog by content hash. Validate the graph with
+`scripts/validate.sh GRAPH --epoch EPOCH`. A governing artifact change makes the epoch
+`DESIGN_DIRTY` and blocks execution until the user approves a new epoch.
+
 Compile approved product outcomes into one graph producer whose tasks are independently rejectable vertical Slice Contracts.
 
 ## Artifact Ownership

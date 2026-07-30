@@ -373,6 +373,45 @@ def validate_lineage(value: dict[str, Any]) -> dict[str, Any]:
 def check_dispatch(ledger: dict[str, Any], lineage: dict[str, Any]) -> tuple[bool, list[str]]:
     validate_ledger(ledger)
     lineage = validate_lineage(lineage)
+    known_outcomes = set(ledger["task_gate"]["required_acceptance"]) | set(
+        ledger["epic_gate"]["required_acceptance"]
+    )
+    if not (set(lineage["outcome_ids"]) & known_outcomes):
+        return False, [
+            "FAIL dispatch",
+            "- canonical outcome lineage does not match this evidence ledger; "
+            "a new task or graph cannot reset the budget",
+        ]
+    contract_gaps = [
+        finding
+        for round_record in ledger["review_rounds"]
+        for finding in round_record["findings"]
+        if finding["classification"] == "contract-gap"
+    ]
+    if contract_gaps:
+        return False, [
+            "FAIL dispatch",
+            "- DESIGN_DIRTY: a contract-gap returns the affected outcome to design "
+            "and requires a new approved execution epoch",
+        ]
+    ledger_failed_rounds = sum(
+        round_record["result"] == "FAIL" for round_record in ledger["review_rounds"]
+    )
+    ledger_findings = {
+        finding_id
+        for round_record in ledger["review_rounds"]
+        for finding in round_record["findings"]
+        for finding_id in finding["finding_ancestry"]
+    }
+    if (
+        lineage["failed_rounds"] < ledger_failed_rounds
+        or not ledger_findings.issubset(lineage["finding_ancestry"])
+    ):
+        return False, [
+            "FAIL dispatch",
+            "- canonical outcome lineage underreports review rounds or finding ancestry; "
+            "a replacement identity cannot reset the budget",
+        ]
     failed_rounds = lineage["failed_rounds"]
     if failed_rounds >= 2:
         return False, [

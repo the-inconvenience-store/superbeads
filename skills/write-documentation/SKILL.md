@@ -5,6 +5,10 @@ description: Use when writing or substantially revising human-facing documentati
 
 # Write Documentation
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to technical, product, operational, instructional, and workflow prose. Its sentence
+rules take precedence over advice below to combine short sentences or use semicolons.
+
 > **Source:** Adapted from [Anbeeld/WRITING.md](https://github.com/Anbeeld/WRITING.md) v1.3.1 (MIT)
 > <!-- Upstream v1.3.1 verified current as of 2026-06-26 (repo static since 2026-04-29). -->
 

@@ -8,6 +8,7 @@ import json
 import re
 import sys
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -27,7 +28,9 @@ TASK_FIELDS = {
     "current_contract_hash", "write_set", "exclusive_resources",
     "capacity_resources", "phase", "review_result", "speculation", "commit",
 }
-OPTIONAL_TASK_FIELDS = {"speculative_dependency_commits"}
+OPTIONAL_TASK_FIELDS = {
+    "speculative_dependency_commits", "phase_started_at", "phase_budget_seconds",
+}
 SPECULATION_FIELDS = {
     "enabled", "frozen_interface", "disjoint_resources",
     "discard_files", "rebase_commits",
@@ -83,16 +86,33 @@ def validate_path(value: str, field: str) -> None:
 
 def validate_state(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
     required = {
-        "graph_revision", "capability_tier", "capacity", "acceptance_gates",
+        "graph_revision", "approval_epoch", "capability_tier", "capacity", "acceptance_gates",
         "speculation_limits", "tasks",
     }
-    if set(state) != required:
+    if not required <= set(state) or set(state) - required - {"observed_at"}:
         raise SchedulerError(
             f"state: fields differ: missing={sorted(required - set(state))}, "
             f"extra={sorted(set(state) - required)}"
         )
+    if "observed_at" in state:
+        try:
+            datetime.fromisoformat(str(state["observed_at"]).replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise SchedulerError("observed_at: expected ISO-8601 timestamp") from exc
     if not isinstance(state["graph_revision"], str) or not HEX64.fullmatch(state["graph_revision"]):
         raise SchedulerError("graph_revision: expected lowercase SHA-256")
+    epoch = state["approval_epoch"]
+    epoch_fields = {"epoch_id", "revision", "current_revision", "status"}
+    if not isinstance(epoch, dict) or set(epoch) != epoch_fields:
+        raise SchedulerError("approval_epoch: invalid shape")
+    if any(not isinstance(epoch[field], str) or not HEX64.fullmatch(epoch[field]) for field in ("epoch_id", "revision", "current_revision")):
+        raise SchedulerError("approval_epoch: identities must be lowercase SHA-256")
+    if (
+        epoch["status"] != "approved"
+        or epoch["revision"] != epoch["current_revision"]
+        or epoch["revision"] != state["graph_revision"]
+    ):
+        raise SchedulerError("DESIGN_DIRTY: approved epoch is dirty or its graph revision changed")
     if state["capability_tier"] not in {"isolated", "host-limited"}:
         raise SchedulerError("capability_tier: expected isolated or host-limited")
     if state["acceptance_gates"] not in {"pending", "passing", "blocked", "human-gated"}:
@@ -121,9 +141,32 @@ def validate_state(state: dict[str, Any]) -> dict[str, dict[str, Any]]:
     by_id: dict[str, dict[str, Any]] = {}
     for index, task in enumerate(tasks):
         prefix = f"tasks[{index}]"
-        if not isinstance(task, dict) or frozenset(task) not in {frozenset(TASK_FIELDS), frozenset(TASK_FIELDS | OPTIONAL_TASK_FIELDS)}:
+        if (
+            not isinstance(task, dict)
+            or not TASK_FIELDS <= set(task)
+            or set(task) - TASK_FIELDS - OPTIONAL_TASK_FIELDS
+        ):
             raise SchedulerError(f"{prefix}: fields differ")
         task.setdefault("speculative_dependency_commits", {})
+        monitoring = {"phase_started_at", "phase_budget_seconds"} & set(task)
+        if monitoring and monitoring != {"phase_started_at", "phase_budget_seconds"}:
+            raise SchedulerError(f"{prefix}: phase monitoring fields must appear together")
+        if monitoring:
+            try:
+                datetime.fromisoformat(
+                    str(task["phase_started_at"]).replace("Z", "+00:00")
+                )
+            except ValueError as exc:
+                raise SchedulerError(
+                    f"{prefix}.phase_started_at: expected ISO-8601 timestamp"
+                ) from exc
+            budget = task["phase_budget_seconds"]
+            if isinstance(budget, bool) or not isinstance(budget, int) or budget < 1:
+                raise SchedulerError(
+                    f"{prefix}.phase_budget_seconds: expected positive integer"
+                )
+            if "observed_at" not in state:
+                raise SchedulerError("observed_at: required with phase monitoring fields")
         task_id = task["id"]
         if not isinstance(task_id, str) or not task_id or task_id in by_id:
             raise SchedulerError(f"{prefix}.id: expected unique non-empty identity")
@@ -467,6 +510,24 @@ def decide(state: dict[str, Any]) -> dict[str, Any]:
         for name, amount in by_id[task_id]["capacity_resources"].items():
             selected_capacity[name] += amount
 
+    wait_for_completion: list[str] = []
+    inspect_overdue: list[str] = []
+    if "observed_at" in state:
+        observed = datetime.fromisoformat(str(state["observed_at"]).replace("Z", "+00:00"))
+        for task in tasks:
+            if (
+                task["phase"] not in {"implementing", "reviewing", "merging"}
+                or "phase_started_at" not in task
+            ):
+                continue
+            started = datetime.fromisoformat(
+                str(task["phase_started_at"]).replace("Z", "+00:00")
+            )
+            if (observed - started).total_seconds() > task["phase_budget_seconds"]:
+                inspect_overdue.append(task["id"])
+            else:
+                wait_for_completion.append(task["id"])
+
     return {
         "dispatch": dispatch,
         "dispatch_modes": dispatch_modes,
@@ -474,6 +535,8 @@ def decide(state: dict[str, Any]) -> dict[str, Any]:
         "merges": merges,
         "blocked": sorted(blocked),
         "mode": mode,
+        "wait_for_completion": wait_for_completion,
+        "inspect_overdue": inspect_overdue,
         "reasons": {
             "completion": completion,
             "graph_revision": state["graph_revision"],

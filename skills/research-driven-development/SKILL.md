@@ -5,6 +5,9 @@ description: Use when a decision or plan needs persistent repository, external, 
 
 # Research-Driven Development
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to research questions, reports, and user updates.
+
 Research produces a durable evidence artifact before a decision or plan. The process may run inline or through bounded workers; the evidence contract is the same.
 
 **Announce at start:** "I'm using the research-driven-development skill to investigate this topic."

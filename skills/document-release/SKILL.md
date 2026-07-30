@@ -5,6 +5,9 @@ description: Use when committed code is awaiting merge and its project documenta
 
 # Document Release: Post-Ship Documentation Update
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to release notes, change logs, pull request summaries, and user updates.
+
 **Announce at start:** "I'm using the document-release skill to audit and update project documentation."
 
 Run after code changes are committed but before PR merge. Ensures all project documentation accurately reflects shipped code.

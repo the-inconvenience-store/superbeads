@@ -8,7 +8,7 @@ The controller supplies one authoritative task bead and one Context Manifest. Th
 
 Do not give the worker the whole graph, full planning transcript, brainstorming transcript, or unrelated task reports. Supporting history is pull-based: the worker opens a named artifact only when a current task decision depends on it.
 
-## Manifest v0.14.0
+## Manifest v0.15.0
 
 Required fields:
 
@@ -16,7 +16,7 @@ Required fields:
 |---|---|
 | `task_id` | One authoritative bead |
 | `contract_hash` | SHA-256 of the canonical contract fields below |
-| `workflow_version` | Exact SDD contract version (`0.14.0`) |
+| `workflow_version` | Exact SDD contract version (`0.15.0`) |
 | `graph_hash` | Dispatch-time graph SHA-256 |
 | `governing_artifacts[path,revision]` | Trusted repo-relative path and content SHA-256 |
 | `outcome_ids` | Non-empty outcomes owned by the slice |
@@ -30,7 +30,8 @@ Required fields:
 | `write_scope_amendments` | Resolved path, rationale, overlap evidence, and status records |
 | `prohibited_paths` | Explicit denial boundary, including hidden paths when relevant |
 | `allocated_resources` | `exclusive` names and positive integer `capacity` allocations |
-| `verification_commands` | Non-empty `{tier,command}` records; tier is `focused`, `task`, `integration`, or `release` |
+| `verification_commands` | Non-empty `{tier,command}` records; a task uses `focused`, `sensitivity`, `task`, or an explicitly task-owned `integration` check. Authority, security, protocol, and recovery seams require a sensitivity command that proves the test can fail. Release verification belongs to the epic controller. |
+| `integration_owner`, `integration_seam_id` | Derived from the graph Integration Checkpoint. A task can run integration verification only for a consumed seam that the graph assigns to that task. |
 | `known_conflicts` | Resolved conflict records only |
 | `model_requested`, `model_effective`, `model_control` | Model-control truth |
 | `capability_tier`, `context_mode` | Isolation truth |

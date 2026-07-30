@@ -48,7 +48,11 @@ if python3 "$CHECKER" check-dispatch "$FIXTURES/pass.json" --lineage "$FIXTURES/
 fi
 grep -Fq "outcome lineage" "$TMP/exhausted-lineage.out"
 grep -Fq "task-replacement" "$TMP/exhausted-lineage.out"
-python3 "$CHECKER" check-dispatch "$FIXTURES/pass.json" --lineage "$FIXTURES/lineage-new-outcome.json" | grep -Fq "PASS dispatch"
+if python3 "$CHECKER" check-dispatch "$FIXTURES/pass.json" \
+  --lineage "$FIXTURES/lineage-new-outcome.json" >"$TMP/reset-lineage.out" 2>&1; then
+  echo "FAIL: unrelated task identity reset canonical outcome lineage" >&2; exit 1
+fi
+grep -Fq "canonical outcome lineage" "$TMP/reset-lineage.out"
 python3 "$CHECKER" check-reuse "$FIXTURES/pass.json" --acceptance-id TASK-A --evidence-class unit --command-or-flow "bash tests/unit.sh" | grep -Fq "PASS reuse"
 if python3 "$CHECKER" check-reuse "$FIXTURES/stale.json" --acceptance-id TASK-A --evidence-class unit --command-or-flow "bash tests/unit.sh" >"$TMP/stale-reuse.out" 2>&1; then
   echo "FAIL: stale evidence was reused" >&2; exit 1
@@ -109,6 +113,26 @@ contradictory=json.loads(Path("tests/fixtures/sdd-evidence/pass.json").read_text
 conflict=json.loads(json.dumps(contradictory["evidence"][0])); conflict["result"]="FAIL"
 contradictory["evidence"].append(conflict)
 Path(sys.argv[2],"contradictory.json").write_text(json.dumps(contradictory))
+contract_gap=json.loads(Path("tests/fixtures/sdd-evidence/pass.json").read_text())
+contract_gap["review_rounds"]=[{
+  "round":1,"result":"FAIL","reviewer_context_id":"fresh-contract-gap-reviewer",
+  "findings":[{
+    "finding_id":"F-GAP","finding_ancestry":["F-GAP"],"severity":"Important",
+    "acceptance_ids":["TASK-A"],"classification":"contract-gap",
+    "evidence":"authority source is absent","invalidated_assumption":"authority was available",
+    "correction":"return the outcome to design","counterexample":"no caller can prove authority",
+    "contract_hash":"b"*64,"review_round":1
+  }]
+}]
+contract_gap["diagnostic"]={
+  "result":"amend-contract","strategy":"close the authority seam in design",
+  "next_task_id":"task-authority-design","next_contract_hash":None,"dispatch_allowed":False
+}
+Path(sys.argv[2],"contract-gap.json").write_text(json.dumps(contract_gap))
+reset_budget=json.loads(json.dumps(contract_gap))
+reset_budget["review_rounds"][0]["findings"][0]["classification"]="implementation-defect"
+reset_budget["diagnostic"]=None
+Path(sys.argv[2],"reset-budget.json").write_text(json.dumps(reset_budget))
 PY
 python3 "$CHECKER" check-task "$TMP/diagnosed.json" | grep -Fq "PASS task"
 if python3 "$CHECKER" check-task "$TMP/reused-reviewer.json" >"$TMP/reused.out" 2>&1; then
@@ -127,6 +151,16 @@ if python3 "$CHECKER" check-task "$TMP/contradictory.json" >"$TMP/contradictory.
   echo "FAIL: contradictory current evidence passed" >&2; exit 1
 fi
 grep -Fq "conflicting current results" "$TMP/contradictory.out"
+if python3 "$CHECKER" check-dispatch "$TMP/contract-gap.json" \
+  --lineage "$FIXTURES/lineage-pass.json" >"$TMP/contract-gap.out" 2>&1; then
+  echo "FAIL: contract-gap diagnosis allowed another execution dispatch" >&2; exit 1
+fi
+grep -Fq "DESIGN_DIRTY" "$TMP/contract-gap.out"
+if python3 "$CHECKER" check-dispatch "$TMP/reset-budget.json" \
+  --lineage "$FIXTURES/lineage-pass.json" >"$TMP/reset-budget.out" 2>&1; then
+  echo "FAIL: lineage record underreported the ledger review budget" >&2; exit 1
+fi
+grep -Fq "canonical outcome lineage" "$TMP/reset-budget.out"
 
 for text in MANIFEST_FILE REPORT_FILE BASE_SHA HEAD_SHA DOMAIN_CAPSULE "acceptance_matrix" "review wave" \
   finding_id finding_ancestry severity acceptance_ids classification evidence invalidated_assumption correction counterexample contract_hash review_round \

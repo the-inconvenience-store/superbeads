@@ -69,30 +69,68 @@ def instance(
 
 
 def corpus_metrics(events: list[dict[str, Any]]) -> dict[str, Any]:
-    session_keys = {
-        (event.get("platform"), event.get("source_path"), event.get("session_id"), event.get("agent_id"))
-        for event in events
-    }
-    main = {key for key in session_keys if any(
-        event.get("agent_role") == "main"
-        and (event.get("platform"), event.get("source_path"), event.get("session_id"), event.get("agent_id")) == key
-        for event in events
-    )}
-    subagents = session_keys - main
-    wait_events = sum(
-        event.get("tool_name") in {"wait_agent", "wait", "write_stdin"}
-        or bool(re.search(r"\b(wait_agent|write_stdin)\b", event.get("command") or ""))
-        for event in events
+    session_roles: dict[tuple[Any, ...], str] = {}
+    unavailable = 0
+    wait_events = 0
+    completion_wait_events = 0
+    poll_events = 0
+    requested_sleep_seconds = 0.0
+    poll_session_keys: set[tuple[Any, ...]] = set()
+    shell_poll = re.compile(
+        r"(?is)\b(?:sleep|usleep)\b.*(?:\bps\b|\bpgrep\b|\btail\b|\bhead\b|"
+        r"\bstatus\b|\bjobs\b|events?\.jsonl|last-message|output)"
     )
+    for event in events:
+        key = (
+            event.get("platform"), event.get("source_path"),
+            event.get("session_id"), event.get("agent_id"),
+        )
+        if event.get("agent_role") == "main":
+            session_roles[key] = "main"
+        else:
+            session_roles.setdefault(key, "subagent")
+        if event.get("content_available") is False:
+            unavailable += 1
+        tool_name = event.get("tool_name")
+        command = event.get("command") or ""
+        is_shell_poll = bool(shell_poll.search(command))
+        is_write_poll = tool_name == "write_stdin" or bool(
+            re.search(r"\bwrite_stdin\b", command)
+        )
+        is_completion_wait = tool_name in {"wait_agent", "wait"} or bool(
+            re.search(r"\bwait_agent\b", command)
+        )
+        if is_shell_poll or is_write_poll:
+            poll_events += 1
+            poll_session_keys.add(key)
+        if is_shell_poll:
+            for amount, unit in re.findall(
+                r"(?i)\bsleep\s+([0-9]+(?:\.[0-9]+)?)([smh]?)\b", command
+            ):
+                requested_sleep_seconds += float(amount) * {
+                    "": 1.0, "s": 1.0, "m": 60.0, "h": 3600.0,
+                }[unit.lower()]
+        if is_completion_wait:
+            completion_wait_events += 1
+        if is_shell_poll or is_write_poll or is_completion_wait:
+            wait_events += 1
+    main = {key for key, role in session_roles.items() if role == "main"}
+    subagents = set(session_roles) - main
+    session_keys = set(session_roles)
     sessions = len(session_keys)
     return {
         "sessions": sessions,
         "main_sessions": len(main),
         "subagent_sessions": len(subagents),
         "events": len(events),
-        "unavailable_content": sum(event.get("content_available") is False for event in events),
+        "unavailable_content": unavailable,
         "wait_events": wait_events,
         "wait_events_per_session": wait_events / sessions if sessions else 0.0,
+        "completion_wait_events": completion_wait_events,
+        "poll_events": poll_events,
+        "poll_sessions": len(poll_session_keys),
+        "poll_events_per_session": poll_events / sessions if sessions else 0.0,
+        "requested_sleep_seconds": requested_sleep_seconds,
     }
 
 
@@ -269,6 +307,9 @@ def render(args: argparse.Namespace) -> None:
         "## Coverage and limitations", "",
         f"- Normalized events: {corpus['events']}.",
         f"- Unavailable-content events: {corpus['unavailable_content']}.",
+        f"- Shell polling requested {corpus.get('requested_sleep_seconds', 0):g} "
+        "seconds of sleep. Requested sleep can overlap external work and is not "
+        "elapsed waste.",
         *[f"- {item}" for item in data.get("limitations", [])], "",
         "## Failure summary", "",
         "| Pattern ID | Title | Status | Count | Per 100 sessions | Previous rate | Trend | Confidence |",

@@ -68,10 +68,18 @@ Codex processes run concurrently only when [scheduling.md](scheduling.md) select
 - Run at most 10 Codex agents concurrently. The repository's lower five-worktree cap still limits simultaneous writing agents.
 - Before spawning, count live background processes and task worktrees. When either applicable limit is full, wait for completion and backfill the freed slot.
 
+Wait for the process completion signal. Do not use shell sleep to poll the process,
+event file, output file, or status. Record a phase budget before launch. A
+`phase-overrun` permits one diagnostic inspection.
+
 ## Result and Correction Handling
 
 Before using a result, the controller verifies all of the following:
 
+- a launch receipt binds the task, contract hash, `codex_exec` transport, command-line
+  model, context mode, Codex session, and `events.jsonl` SHA-256; run
+  `sdd-manifest.py check-receipt --manifest MANIFEST --receipt RECEIPT --events
+  EVENTS --expected-worker codex-cli`;
 - the process exited successfully and `last-message.md` is non-empty;
 - `events.jsonl` belongs to the recorded session and contains no nested-agent or nested-`codex exec` attempt;
 - the worker emitted the required handshake before edits;

@@ -112,7 +112,7 @@ Recovery is complete only when:
 - No normalized event was marked unavailable. This does not prove that every host surface or encrypted representation was captured.
 - The command-evidence selector may miss semantic Superbeads use that never produced a `bd` or skill-path command.
 - The full scanner stalled in `corpus_metrics` on 1.65 million in-window events. Detection therefore used a signal-preserving 14,065-event projection containing one event per conversation plus every registered command/wait signal. Exact totals above came from the full 504,314-event selected corpus. Follow-up: `beads-superpowers-gkw`.
-- RU-AP-005's deterministic detector sees normalized wait tools, not Claude Bash commands that combine `sleep` with state inspection. The four Gateway Claude instances were counted manually. The 457-command and 66,953-requested-second totals describe command shape; they do not establish that every wait was avoidable or that requested sleeps ran serially to completion.
+- At review time, RU-AP-005's deterministic detector saw normalized wait tools, not Claude Bash commands that combined `sleep` with state inspection. The four Gateway Claude instances were counted manually. The implemented detector now recognizes that command shape and reports requested sleep separately. Requested sleep does not prove that every wait was avoidable or that sleeps ran serially to completion.
 - There is no prior completed JSON companion under `docs/reviews/`. Rates are a baseline, not evidence of rising or falling frequency.
 - Failure counts are per confirmed behavior instance, not raw regex match. All deterministic leads were context-vetted.
 
@@ -180,6 +180,39 @@ Constrain:
 4. The review-use maintainer should make `corpus_metrics` linear before the next broad review and tighten RU-AP-007 command anchoring. Track in `beads-superpowers-gkw` and `beads-superpowers-hpj`.
 5. Run the same selector and date-normalization method in the next review so rates remain comparable. A second review can show direction; retirement still requires three reviews spanning at least 21 days.
 6. The planning/SDD workflow owner should add an immutable approved artifact epoch, machine-checked design-seam ledger, and contract-gap return-to-design gate. Track in `beads-superpowers-9cw`.
+
+## Skill changes implemented from both reviews
+
+The workflow now uses transition controls instead of longer prompts.
+
+1. `writing-plans` creates an approved execution epoch. The epoch binds the product
+   contract, technical design, graph, and resolved seam catalog by content hash.
+   A governing change makes the epoch `DESIGN_DIRTY`.
+2. Graph tasks name approved design-seam IDs. The validator derives each task's risk
+   union from those seams. A task cannot hide semantic width with self-declared labels.
+3. SDD manifests carry the epoch identity, consumed seam IDs, and derived risk.
+   Manifest preparation rejects a dirty or mismatched epoch.
+4. The scheduler checks the approved epoch before it selects work. It also records a
+   phase budget. The controller waits for a completion signal until a
+   `phase-overrun` permits one diagnostic inspection.
+5. A contract-gap returns the complete affected outcome to design. A replacement task
+   or graph cannot reset canonical outcome lineage.
+6. Ordinary task manifests cannot own release verification. An integration command
+   requires a graph-assigned task owner and a consumed seam ID. Authority, security,
+   protocol, and recovery work requires a sensitivity check that proves the test can
+   detect the targeted failure.
+7. Codex mode requires a launch receipt. The receipt binds the task, contract hash,
+   worker kind, model, context mode, and worker session.
+8. `review-use` computes corpus metrics in one pass. It distinguishes completion waits
+   from polling, detects shell sleep-and-inspect loops, and classifies `codex exec`
+   sessions as leaf workers.
+9. One shared technical-writing policy governs specifications, product contracts,
+   plans, handoffs, reports, reviews, technical documentation, and user workflow
+   updates. The policy derives from ASD-STE100 Issue 9. It uses active voice, explicit
+   actors, short sentences, consistent terms, and condition-first instructions.
+   Exact code, commands, identifiers, paths, quotes, raw evidence, and machine tokens
+   remain unchanged. The project does not claim full ASD-STE100 compliance without a
+   complete dictionary, grammar, and terminology review.
 
 ## Registry changes
 

@@ -131,6 +131,43 @@ if "$VALIDATOR" "$TMP/dense-acceptance.json" >"$TMP/dense.out" 2>&1; then
 fi
 grep -Fq "acceptance density" "$TMP/dense.out" || { cat "$TMP/dense.out" >&2; exit 1; }
 
+mkdir -p "$TMP/epoch-repo/docs/product" "$TMP/epoch-repo/docs/specs" "$TMP/epoch-repo/docs/plans"
+printf '%s\n' '# Product' >"$TMP/epoch-repo/docs/product/approval.md"
+printf '%s\n' '# Design' >"$TMP/epoch-repo/docs/specs/approval.md"
+python3 - "$TMP/oversized-slice.json" "$TMP/epoch-repo/docs/plans/approval.graph.json" <<'PY'
+import json, sys
+from pathlib import Path
+graph=json.loads(Path(sys.argv[1]).read_text())
+graph["nodes"][1]["description"]=graph["nodes"][1]["description"].replace(
+    "- Complexity boundaries: authority, parsing, persistence.",
+    "- Complexity boundaries: authority, parsing, persistence.\n- Design seams consumed: SEAM-AUTH, SEAM-PARSE.",
+)
+graph["nodes"][2]["description"]=graph["nodes"][2]["description"].replace(
+    "- Complexity boundaries: evidence.",
+    "- Complexity boundaries: evidence.\n- Design seams consumed: SEAM-EVIDENCE.",
+)
+Path(sys.argv[2]).write_text(json.dumps(graph))
+PY
+cat >"$TMP/epoch-repo/docs/specs/approval-seams.json" <<'JSON'
+{"schema_version":1,"seams":[
+  {"id":"SEAM-AUTH","high_risk_boundaries":["authority","security"],"acceptance_surface":"approve","journey":{}},
+  {"id":"SEAM-PARSE","high_risk_boundaries":["parsing"],"acceptance_surface":"parse","journey":{}},
+  {"id":"SEAM-EVIDENCE","high_risk_boundaries":["evidence"],"acceptance_surface":"verify","journey":{}}
+]}
+JSON
+python3 "$ROOT/skills/writing-plans/scripts/execution-epoch.py" approve \
+  --repo "$TMP/epoch-repo" --graph docs/plans/approval.graph.json \
+  --artifact docs/product/approval.md --artifact docs/specs/approval.md \
+  --seams docs/specs/approval-seams.json --approved-at 2026-07-30T00:00:00Z \
+  --output "$TMP/epoch-repo/docs/plans/approval.epoch.json"
+if "$VALIDATOR" "$TMP/epoch-repo/docs/plans/approval.graph.json" \
+  --epoch "$TMP/epoch-repo/docs/plans/approval.epoch.json" \
+  >"$TMP/derived-risk.out" 2>&1; then
+  echo "FAIL: task hid three derived boundaries behind declared labels" >&2
+  exit 1
+fi
+grep -Fq "derived seam risk" "$TMP/derived-risk.out" || { cat "$TMP/derived-risk.out" >&2; exit 1; }
+
 for section in Context Outcome "Domain Contract" Files Resources Interfaces "Acceptance Criteria" "Integration Checkpoint" "Implementation Notes"; do
   grep -Fq "## $section" "$TEMPLATE" || { echo "FAIL: template missing $section" >&2; exit 1; }
 done
@@ -139,6 +176,9 @@ grep -Fq "first consumer" "$SKILL"
 grep -Fq "resource conflicts are not dependency edges" "$SKILL"
 grep -Fq "edge deletion test" "$SKILL"
 grep -Fq "Complexity boundaries" "$TEMPLATE"
+grep -Fq "Design seams consumed" "$TEMPLATE"
+grep -Fq "Owner: task | controller" "$TEMPLATE"
+grep -Fq "Seam ID:" "$TEMPLATE"
 grep -Fq "Acceptance surface" "$TEMPLATE"
 grep -Fq "full-code snippets" "$SKILL"
 grep -Fq "creates issues, including duplicate epics" "$SKILL"

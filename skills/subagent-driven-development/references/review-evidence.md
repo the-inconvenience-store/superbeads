@@ -47,6 +47,12 @@ python3 "$PWD/skills/subagent-driven-development/scripts/sdd-evidence.py" check-
 
 A nonzero result forbids another ordinary correction in that lineage; checking only at closure is too late.
 
+A `contract-gap`, `amend-contract`, or `resolve-product-decision` result marks the
+approved execution epoch `DESIGN_DIRTY`. Return the complete affected outcome to
+design. Do not dispatch a successor task until the seam catalog, graph, stress test,
+and approval produce a new epoch. A `split-slice` can remain in the epoch only when it
+uses approved seams without changing their risk union or governing artifacts.
+
 Round 2 failure: stop normal correction. Record exactly one diagnostic before any new dispatch:
 
 - `amend-contract` — governing acceptance or interface is incomplete/wrong;

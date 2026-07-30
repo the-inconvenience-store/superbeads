@@ -6,6 +6,9 @@ disable-model-invocation: true
 
 # Session Handoff
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to the handoff and its user-facing summary.
+
 Write a grounded handoff document — and a one-line continuation memory — so a fresh
 session can resume exactly where this one left off.
 

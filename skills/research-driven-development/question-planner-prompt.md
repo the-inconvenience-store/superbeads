@@ -1,5 +1,8 @@
 # Repository Question Planner
 
+Before any report, read
+`skills/using-superpowers/references/technical-writing-policy.md`. Apply it to prose.
+
 Use this prompt in the decision-aware controller before dispatching repository current-state research. The planner sees the request; repository observers do not.
 
 ```text

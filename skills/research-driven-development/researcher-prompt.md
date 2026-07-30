@@ -1,5 +1,8 @@
 # Researcher Worker Prompt
 
+Before any report, read
+`skills/using-superpowers/references/technical-writing-policy.md`. Apply it to prose.
+
 Use this template only for one bounded research brief. The worker returns evidence; it does not write files or mutate tracker state.
 
 ```text

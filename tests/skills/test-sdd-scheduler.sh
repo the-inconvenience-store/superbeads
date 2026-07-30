@@ -149,6 +149,18 @@ stale["capacity"]["workers"]=10
 stale["tasks"][0]["current_contract_hash"]="c"*64
 (target/"stale.json").write_text(json.dumps(stale))
 
+dirty=json.loads(json.dumps(source))
+dirty["approval_epoch"]["status"]="dirty"
+(target/"dirty-epoch.json").write_text(json.dumps(dirty))
+
+mismatched=json.loads(json.dumps(source))
+mismatched["approval_epoch"]["current_revision"]="f"*64
+(target/"mismatched-epoch.json").write_text(json.dumps(mismatched))
+
+unknown_state=json.loads(json.dumps(source))
+unknown_state["controller_guess"]=True
+(target/"unknown-state.json").write_text(json.dumps(unknown_state))
+
 review=json.loads(json.dumps(source))
 review["capacity"]["reviews"]=1
 for task in review["tasks"]:
@@ -166,7 +178,7 @@ for task in merge["tasks"]:
 
 base=source["tasks"][0]
 def state(name, tasks, gates="pending"):
-    value={k:json.loads(json.dumps(source[k])) for k in ("graph_revision","capability_tier","capacity","speculation_limits")}
+    value={k:json.loads(json.dumps(source[k])) for k in ("graph_revision","approval_epoch","capability_tier","capacity","speculation_limits")}
     value["tasks"]=tasks; value["acceptance_gates"]=gates
     (target/f"completion-{name}.json").write_text(json.dumps(value))
 
@@ -185,9 +197,30 @@ state("closed-unmerged", [closed_unmerged], "passing")
 c1=json.loads(json.dumps(base)); c2=json.loads(json.dumps(base))
 c1.update(id="c1", dependencies=["c2"]); c2.update(id="c2", dependencies=["c1"], write_set=["src/c2.py"])
 state("cyclic", [c1,c2])
+
+monitor=json.loads(json.dumps(source))
+monitor["observed_at"]="2026-07-30T00:01:00Z"
+monitor_task=monitor["tasks"][0]
+monitor_task["phase"]="implementing"
+monitor_task["phase_started_at"]="2026-07-30T00:00:00Z"
+monitor_task["phase_budget_seconds"]=120
+(target/"monitor-before.json").write_text(json.dumps(monitor))
+overdue=json.loads(json.dumps(monitor))
+overdue["observed_at"]="2026-07-30T00:03:00Z"
+(target/"monitor-overdue.json").write_text(json.dumps(overdue))
 PY
 
 for name in stale review-capacity merge-capacity; do decide "$TMP/$name.json" "$TMP/$name-out.json"; done
+for name in dirty-epoch mismatched-epoch; do
+  if decide "$TMP/$name.json" "$TMP/$name-out.json" 2>"$TMP/$name.err"; then
+    echo "FAIL: $name allowed scheduling" >&2; exit 1
+  fi
+  grep -Fq "DESIGN_DIRTY" "$TMP/$name.err"
+done
+if decide "$TMP/unknown-state.json" "$TMP/unknown-state-out.json" 2>"$TMP/unknown-state.err"; then
+  echo "FAIL: scheduler accepted unknown controller state" >&2; exit 1
+fi
+grep -Fq "fields differ" "$TMP/unknown-state.err"
 python3 - "$TMP/stale-out.json" "$TMP/review-capacity-out.json" "$TMP/merge-capacity-out.json" <<'PY'
 import json, sys
 from pathlib import Path
@@ -223,6 +256,18 @@ if decide "$TMP/completion-closed-unmerged.json" "$TMP/completion-closed-unmerge
 fi
 grep -Fq "closed task must have a passing merged commit" "$TMP/closed-unmerged.err"
 
+decide "$TMP/monitor-before.json" "$TMP/monitor-before-out.json"
+decide "$TMP/monitor-overdue.json" "$TMP/monitor-overdue-out.json"
+python3 - "$TMP/monitor-before-out.json" "$TMP/monitor-overdue-out.json" <<'PY'
+import json, sys
+from pathlib import Path
+before, overdue=(json.loads(Path(path).read_text()) for path in sys.argv[1:])
+assert before["wait_for_completion"] == ["t1"]
+assert before["inspect_overdue"] == []
+assert overdue["wait_for_completion"] == []
+assert overdue["inspect_overdue"] == ["t1"]
+PY
+
 python3 - "$SCHEDULER" <<'PY'
 import importlib.util, sys
 from copy import deepcopy
@@ -238,7 +283,7 @@ template={"status":"open","dependency_commits":{},"contract_hash":"b"*64,"curren
 tasks=[]
 for i,(task_id, dependencies) in enumerate(deps.items(), 1):
     task=deepcopy(template); task.update(id=task_id, dependencies=dependencies, write_set=[f"slice/{task_id}.md"]); tasks.append(task)
-state={"graph_revision":"a"*64,"capability_tier":"isolated","capacity":{"workers":12,"reviews":12,"merges":12,"resources":{}},"acceptance_gates":"pending","speculation_limits":{"max_discard_files":3,"max_rebase_commits":2},"tasks":tasks}
+state={"graph_revision":"a"*64,"approval_epoch":{"epoch_id":"e"*64,"revision":"a"*64,"current_revision":"a"*64,"status":"approved"},"capability_tier":"isolated","capacity":{"workers":12,"reviews":12,"merges":12,"resources":{}},"acceptance_gates":"pending","speculation_limits":{"max_discard_files":3,"max_rebase_commits":2},"tasks":tasks}
 expected=[{"t1"},{"t2"},{"t2p"},{"t3","t4"},{"t5"},{"t6","t7"},{"t8"},{"t8b"},{"t9"},{"t10"}]
 observed=[]
 for wave in expected:

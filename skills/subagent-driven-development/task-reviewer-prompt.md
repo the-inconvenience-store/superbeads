@@ -1,5 +1,8 @@
 # Task Reviewer Role Contract
 
+Before a verdict or report, read
+`skills/using-superpowers/references/technical-writing-policy.md`. Apply it to prose.
+
 Dispatch this template in a fresh reviewer context for every round. The reviewer is read-only and does not own Beads mutation.
 
 ```text

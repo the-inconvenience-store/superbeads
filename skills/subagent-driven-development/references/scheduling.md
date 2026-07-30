@@ -4,7 +4,11 @@ Load this reference when a validated task graph has more than one unfinished tas
 
 ## Decision Interface
 
-Create a state snapshot containing the graph revision, capability tier, worker/review/merge capacity, named capacity resources, acceptance-gate state, speculation limits, and current tasks. Each task records:
+Create a state snapshot containing the graph revision, approved execution epoch,
+capability tier, worker/review/merge capacity, named capacity resources,
+acceptance-gate state, speculation limits, and current tasks. The epoch status must be
+`approved`. Its recorded and current graph revisions must match. Otherwise, the
+scheduler returns `DESIGN_DIRTY` before it selects any action. Each task records:
 
 - status and phase;
 - dependencies plus disjoint maps of exact reviewed commits and explicit speculative input commits;
@@ -30,6 +34,11 @@ The deterministic result has `dispatch`, `reviews`, `merges`, `blocked`, `mode`,
 5. Dispatch selected implementations in fresh task worktrees using their Context Manifests.
 6. Persist blocked reasons instead of retrying unsafe work.
 7. After any implementation, review, merge, correction, contract revision, capacity change, or human decision, rebuild state and recompute readiness.
+
+Each dispatch records `phase_started_at` and `phase_budget_seconds`. Wait for a
+completion signal while the phase is within that budget. A `phase-overrun` permits one
+status inspection and a new scheduling decision. It does not permit repeated polling.
+Do not combine shell sleep with process, event, output, or status inspection.
 
 The output is a decision over the supplied snapshot, not permission to act on stale state. Before executing a decision, confirm the graph revision and task contract hash still match.
 

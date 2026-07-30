@@ -5,6 +5,9 @@ description: Use when executing a validated implementation graph with independen
 
 # Subagent-Driven Development
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to human-readable manifest text, reports, reviews, handoffs, and user updates.
+
 Execute each graph task in one fresh context, bound to a trusted Context Manifest. The controller owns coordination, Beads state, merges, reviews, and acceptance. A worker owns exactly one task identity.
 
 **Core principle:** minimal context must still be complete context. Give the worker the authoritative task, immutable governing revisions, outcome IDs, resources, write boundaries, and verification—not the whole planning history.
@@ -44,7 +47,11 @@ The **default mode** is the execution spine below and applies whenever `codex` m
 
 For each ready task:
 
-1. **Controller claims and prepares.** Claim the bead, create or select its isolated worktree, reserve declared resources, and create the manifest. The controller owns Beads; workers only read the task bead.
+1. **Controller claims and prepares.** Check the approved execution epoch. A dirty
+   epoch blocks every prepare and dispatch. Claim the bead, create or select its
+   isolated worktree, reserve declared resources, and create the manifest with the
+   epoch ID and consumed seam IDs. The controller owns Beads; workers only read the
+   task bead.
 2. **Choose a fresh worker.** Never reuse a context that has served another task identity. Record requested/effective model control and capability/context isolation truthfully.
 3. **Dispatch only the role contract.** Provide `./implementer-prompt.md`, manifest path, task ID, and worktree. Do not paste the raw graph, entire product contract, design history, or previous task transcripts. The worker may pull a named governing artifact or reviewed dependency only when needed.
 4. **Require a pre-edit handshake.** The worker validates and binds the manifest, reads the task bead and named artifacts, then emits one of:
@@ -55,6 +62,11 @@ For each ready task:
 7. **Integrate approved work.** Merge approved task commits one at a time, run the integration checkpoint, release resources, close the task with its commit range and review evidence, then recompute ready work.
 
 When more than one task is ready, route through [references/scheduling.md](references/scheduling.md). Do not load that reference for a single ready task.
+
+Wait on the worker's completion signal. Do not poll a healthy worker. Record a phase
+budget at dispatch. Inspect worker state only after a `phase-overrun` event or a failed
+completion signal. At a stable slice boundary, hand off before context pressure makes
+the controller lose transition state.
 
 ## Identity and Corrections
 

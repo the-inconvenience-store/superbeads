@@ -5,6 +5,9 @@ description: Use when code-review feedback must be evaluated before changing the
 
 # Code Review Reception
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to review analysis, replies, correction notes, and user updates.
+
 ## Overview
 
 Code review requires technical evaluation, not emotional performance.

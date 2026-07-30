@@ -1,5 +1,8 @@
 # Outcome Reviewer Role Contract
 
+Before a verdict or report, read
+`skills/using-superpowers/references/technical-writing-policy.md`. Apply it to prose.
+
 Dispatch a fresh reviewer on the integrated artifact. It is read-only and does not own Beads mutation.
 
 ```text

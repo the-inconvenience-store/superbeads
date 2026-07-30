@@ -5,6 +5,10 @@ description: Use when facing 2+ independent tasks that can be worked on without 
 
 # Dispatching Parallel Agents
 
+Every dynamic worker prompt must include the resolved path to
+`skills/using-superpowers/references/technical-writing-policy.md`. Require the worker
+to read the policy before its first report.
+
 ## Overview
 
 You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
@@ -90,6 +94,10 @@ When agents return:
 - Verify fixes don't conflict
 - Run full test suite
 - Integrate all changes
+
+Use each worker's completion signal. Do not poll healthy workers. Record a phase budget
+for long work. A `phase-overrun` permits one status inspection and a revised decision.
+Do not use shell sleep with process, event, output, or status inspection.
 
 ## Agent Prompt Structure
 

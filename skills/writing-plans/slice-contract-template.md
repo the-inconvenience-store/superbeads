@@ -17,7 +17,7 @@ Required fields: `key`, `title`, `type: task`, integer `priority`, the epic `par
 
 ## Context
 
-Record Product contract path+revision, Spec path, Outcome IDs, External ref, Why this slice exists, `Complexity boundaries:`, `Acceptance surface:`, and constraints that must not be rediscovered. Use `None` or at most two of authority, parsing, persistence, concurrency, recovery, protocol, security, and evidence. The acceptance surface is one coherent behavior or operable capability; more than six independently asserted acceptance results indicates the slice needs decomposition before SDD. Repository artifacts are evidence, not permission.
+Record Product contract path+revision, Spec path, Outcome IDs, External ref, Why this slice exists, `Design seams consumed:`, `Complexity boundaries:`, `Acceptance surface:`, and constraints that must not be rediscovered. Reference only seam IDs from the approved seam catalog. The validator derives the complexity boundaries from those seams. Use `None` or at most two of authority, parsing, persistence, concurrency, recovery, protocol, security, and evidence. The acceptance surface is one coherent behavior or operable capability; more than six independently asserted acceptance results indicates the slice needs decomposition before SDD. Repository artifacts are evidence, not permission.
 
 ## Outcome
 
@@ -60,7 +60,11 @@ Use observable results with named evidence classes. Cover success plus material 
 
 ## Integration Checkpoint
 
-Name the real seam, command or user flow exercised in this task. “Later,” “downstream,” and “final integration” are not checkpoints.
+Name the real seam, command or user flow exercised in this task. Add
+`Owner: task | controller`. Add `Seam ID:` when the task owns the check. A task-owned
+seam ID must appear in `Design seams consumed`. “Later,” “downstream,” and “final
+integration” are not checkpoints. A task manifest can carry integration verification
+only when the graph gives that task ownership of the named seam.
 
 ## Implementation Notes
 

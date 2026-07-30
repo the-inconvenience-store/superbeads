@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import hashlib
 import json
 import re
 import sys
@@ -187,7 +189,13 @@ def outcome_ids(text: str) -> set[str]:
     return set(OUTCOME_ID.findall(text))
 
 
-def validate_contracts(by_key: dict[str, dict[str, Any]], parsed: dict[str, dict[str, str]], prerequisites: dict[str, set[str]], errors: list[str]) -> set[str]:
+def validate_contracts(
+    by_key: dict[str, dict[str, Any]],
+    parsed: dict[str, dict[str, str]],
+    prerequisites: dict[str, set[str]],
+    errors: list[str],
+    seams: dict[str, set[str]] | None = None,
+) -> set[str]:
     epic_key = next((key for key, node in by_key.items() if node.get("type") == "epic"), "epic")
     epic_outcomes = {
         match.group(1)
@@ -208,21 +216,46 @@ def validate_contracts(by_key: dict[str, dict[str, Any]], parsed: dict[str, dict
             if field.lower() not in context.lower():
                 error(errors, key, "Context", f"missing field {field}")
         complexity = re.search(r"(?im)^\s*-\s*Complexity boundaries:\s*(.+)$", context)
+        declared: set[str] = set()
         if complexity:
-            values = {
+            declared = {
                 value.strip().lower().rstrip(".")
                 for value in complexity.group(1).split(",")
                 if value.strip() and value.strip().lower().rstrip(".") != "none"
             }
-            unknown = values - COMPLEXITY_BOUNDARIES
+            unknown = declared - COMPLEXITY_BOUNDARIES
             if unknown:
                 error(errors, key, "Context", f"unknown complexity boundaries: {', '.join(sorted(unknown))}")
-            if len(values) > 2:
+            if len(declared) > 2:
                 error(
                     errors,
                     key,
                     "Context",
                     "slice complexity spans more than two high-risk boundaries; split the slice before SDD",
+                )
+        if seams is not None:
+            seam_match = re.search(r"(?im)^\s*-\s*Design seams consumed:\s*(.+)$", context)
+            seam_ids = set(OUTCOME_ID.findall(seam_match.group(1))) if seam_match else set()
+            if not seam_ids:
+                error(errors, key, "Context", "Design seams consumed must name approved seam IDs")
+            unknown_seams = seam_ids - set(seams)
+            if unknown_seams:
+                error(errors, key, "Context", f"unknown design seams: {', '.join(sorted(unknown_seams))}")
+            derived = set().union(*(seams[item] for item in seam_ids if item in seams))
+            if derived != declared:
+                error(
+                    errors,
+                    key,
+                    "Context",
+                    "declared complexity boundaries do not match derived seam risk "
+                    f"{', '.join(sorted(derived)) or 'none'}",
+                )
+            if len(derived) > 2:
+                error(
+                    errors,
+                    key,
+                    "Context",
+                    "derived seam risk spans more than two high-risk boundaries; split the slice before SDD",
                 )
         outcome = body.get("Outcome", "")
         for field in (
@@ -249,6 +282,29 @@ def validate_contracts(by_key: dict[str, dict[str, Any]], parsed: dict[str, dict
             if field.lower() not in resources.lower():
                 error(errors, key, "Resources", f"missing field {field}")
         integration = body.get("Integration Checkpoint", "")
+        if seams is not None:
+            owner = re.search(
+                r"(?im)^\s*-\s*Owner:\s*(task|controller)\.?\s*$", integration
+            )
+            seam_owner = re.search(
+                r"(?im)^\s*-\s*Seam ID:\s*([A-Z][A-Z0-9-]+)\.?\s*$", integration
+            )
+            if not owner:
+                error(
+                    errors,
+                    key,
+                    "Integration Checkpoint",
+                    "missing Owner: task | controller",
+                )
+            elif owner.group(1).lower() == "task" and (
+                not seam_owner or seam_owner.group(1) not in seam_ids
+            ):
+                error(
+                    errors,
+                    key,
+                    "Integration Checkpoint",
+                    "task owner requires a Seam ID from Design seams consumed",
+                )
         if DEFERRED_SEAM.search(integration) or DEFERRED_SEAM.search(outcome):
             exception = "Integration-risk exception:" in body.get("Domain Contract", "")
             link = "Downstream acceptance link:" in body.get("Domain Contract", "")
@@ -424,13 +480,16 @@ def constrained_width(fronts: list[list[str]], conflicts: set[frozenset[str]]) -
     return widest
 
 
-def validate(document: dict[str, Any]) -> tuple[list[str], int, int, int, int, int]:
+def validate(
+    document: dict[str, Any],
+    seams: dict[str, set[str]] | None = None,
+) -> tuple[list[str], int, int, int, int, int]:
     errors: list[str] = []
     nodes, edges = graph_shape(document, errors)
     by_key, parsed = validate_nodes(nodes, errors)
     tasks = {key for key, node in by_key.items() if node.get("type") == "task"}
     prerequisites = validate_edges(edges, tasks, errors)
-    outcomes = validate_contracts(by_key, parsed, prerequisites, errors)
+    outcomes = validate_contracts(by_key, parsed, prerequisites, errors, seams)
     validate_edge_semantics(tasks, parsed, prerequisites, errors)
     conflicts = resource_conflicts(tasks, parsed, prerequisites)
     fronts = ready_fronts(tasks, prerequisites)
@@ -438,17 +497,37 @@ def validate(document: dict[str, Any]) -> tuple[list[str], int, int, int, int, i
     return errors, len(tasks), len(outcomes), len(fronts), semantic_width, constrained_width(fronts, conflicts)
 
 
+def epoch_seams(path: Path, graph_path: Path) -> dict[str, set[str]]:
+    value = read_graph(path)
+    if value.get("schema_version") != 1 or value.get("status") != "approved":
+        raise GraphError("DESIGN_DIRTY: execution epoch is not approved")
+    graph = value.get("graph")
+    if not isinstance(graph, dict) or graph.get("sha256") != hashlib.sha256(graph_path.read_bytes()).hexdigest():
+        raise GraphError("DESIGN_DIRTY: graph does not match the approved execution epoch")
+    seams = value.get("seams")
+    if not isinstance(seams, list):
+        raise GraphError("DESIGN_DIRTY: epoch has no resolved seam ledger")
+    result: dict[str, set[str]] = {}
+    for item in seams:
+        if not isinstance(item, dict) or set(item) != {"id", "high_risk_boundaries"}:
+            raise GraphError("DESIGN_DIRTY: malformed resolved seam record")
+        result[item["id"]] = set(item["high_risk_boundaries"])
+    return result
+
+
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("usage: validate-graph-plan.py GRAPH", file=sys.stderr)
-        return 2
-    path = Path(sys.argv[1])
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("graph", type=Path)
+    parser.add_argument("--epoch", type=Path)
+    args = parser.parse_args()
+    path = args.graph
     try:
         document = read_graph(path)
+        seams = epoch_seams(args.epoch, path) if args.epoch else None
     except GraphError as exc:
         print(f"graph: File: {exc}")
         return 1
-    errors, tasks, outcomes, fronts, semantic_width, resource_width = validate(document)
+    errors, tasks, outcomes, fronts, semantic_width, resource_width = validate(document, seams)
     if errors:
         print("\n".join(errors))
         return 1

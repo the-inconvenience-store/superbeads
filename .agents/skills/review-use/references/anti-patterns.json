@@ -73,7 +73,7 @@
       "description": "The controller repeatedly polls healthy workers instead of using completion signals and phase overrun thresholds.",
       "detector": {
         "config": {
-          "metric": "wait_events_per_session",
+          "metric": "poll_events_per_session",
           "operator": ">",
           "value": 10
         },
@@ -113,7 +113,7 @@
       "detector": {
         "config": {
           "field": "command",
-          "pattern": "(?i)(^|[;&|]\\s*|\\s)(open|code)\\s+[^\\n]*(docs/(plans|specs|product)|product-contract)"
+          "pattern": "(?i)(?:^|[;&|]\\s*)(?:command\\s+)?(?:open|code)\\s+[^\\n]*(?:docs/(?:plans|specs|product)|product-contract)"
         },
         "kind": "command-regex"
       },

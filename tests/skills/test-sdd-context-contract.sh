@@ -21,7 +21,16 @@ import sys
 from pathlib import Path
 
 manifest = json.loads(Path(sys.argv[1]).read_text())
-manifest["workflow_version"] = "0.14.0"
+manifest["workflow_version"] = "0.15.0"
+manifest["execution_epoch"] = {
+    "epoch_id": "e" * 64,
+    "status": "approved",
+    "graph_sha256": manifest["graph_hash"],
+}
+manifest["design_seams"] = ["SEAM-CONTEXT"]
+manifest["risk_boundaries"] = ["evidence"]
+manifest["integration_owner"] = "controller"
+manifest["integration_seam_id"] = None
 manifest["verification_commands"] = [
     {"tier":"task", "command":"bash tests/skills/test-sdd-context-contract.sh"}
 ]
@@ -37,6 +46,8 @@ manifest["write_scope_hash"] = hashlib.sha256(
 ).hexdigest()
 contract_fields = (
     "task_id", "workflow_version", "graph_hash", "governing_artifacts",
+    "execution_epoch", "design_seams", "risk_boundaries",
+    "integration_owner", "integration_seam_id",
     "outcome_ids", "base_commit", "reviewed_dependency_commits", "speculative_dependency_commits", "worktree",
     "allowed_write_set", "generated_write_set", "write_scope_hash",
     "write_scope_amendments", "prohibited_paths", "allocated_resources",
@@ -60,6 +71,17 @@ conflicting_authority["governing_artifacts"].append({
 invalid_tier = json.loads(json.dumps(manifest))
 invalid_tier["verification_commands"] = [{"tier":"broad", "command":"bash tests/all.sh"}]
 (target.parent / "invalid-tier.json").write_text(json.dumps(invalid_tier))
+release_tier = json.loads(json.dumps(manifest))
+release_tier["verification_commands"] = [{"tier":"release", "command":"bash tests/all.sh"}]
+(target.parent / "release-tier.json").write_text(json.dumps(release_tier))
+missing_sensitivity = json.loads(json.dumps(manifest))
+missing_sensitivity["risk_boundaries"] = ["authority"]
+(target.parent / "missing-sensitivity.json").write_text(json.dumps(missing_sensitivity))
+controller_integration = json.loads(json.dumps(manifest))
+controller_integration["verification_commands"] = [
+    {"tier":"integration", "command":"bash tests/integration.sh"}
+]
+(target.parent / "controller-integration.json").write_text(json.dumps(controller_integration))
 false_reviewed = json.loads(json.dumps(manifest))
 false_reviewed["speculative_dependency_commits"] = [{"task_id":"dep-a","commit":"2"*40,"frozen_interface":"API-A","disjoint_resources":True,"discard_files":1,"rebase_commits":1}]
 false_reviewed["reviewed_dependency_commits"] = ["2"*40]
@@ -95,6 +117,12 @@ expect_failure conflicting-authority governing_artifacts \
   python3 "$VALIDATOR" validate "$TMP/conflicting-authority.json"
 expect_failure invalid-tier verification_commands \
   python3 "$VALIDATOR" validate "$TMP/invalid-tier.json"
+expect_failure release-tier "release verification belongs to the epic controller" \
+  python3 "$VALIDATOR" validate "$TMP/release-tier.json"
+expect_failure missing-sensitivity "sensitivity verification" \
+  python3 "$VALIDATOR" validate "$TMP/missing-sensitivity.json"
+expect_failure controller-integration "task-owned integration seam" \
+  python3 "$VALIDATOR" validate "$TMP/controller-integration.json"
 expect_failure false-reviewed "reviewed and speculative" \
   python3 "$VALIDATOR" validate "$TMP/false-reviewed.json"
 
@@ -128,7 +156,7 @@ changes = {
     "contract_hash": "f" * 64,
     "base_commit": "3" * 40,
     "worktree": "/tmp/superbeads-task-other",
-    "workflow_version": "0.15.0",
+    "workflow_version": "0.16.0",
     "graph_hash": "d" * 64,
 }
 for field, value in changes.items():
@@ -179,8 +207,39 @@ for platform in codex claude opencode; do
 done
 
 PREPARED="$TMP/prepared.json"
+python3 - "$ROOT/tests/fixtures/graph-plans/valid-vertical.json" "$TMP/prepared.graph.json" "$TMP/prepared.epoch.json" <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+source=json.loads(Path(sys.argv[1]).read_text())
+for node in source["nodes"]:
+    if node.get("type") != "task":
+        continue
+    seam = "SEAM-APPROVAL" if node["key"] == "t1" else "SEAM-EVIDENCE"
+    risks = "authority, persistence" if node["key"] == "t1" else "evidence"
+    node["description"]=node["description"].replace(
+        "- Why this slice exists:",
+        f"- Design seams consumed: {seam}.\n- Complexity boundaries: {risks}.\n- Why this slice exists:",
+    )
+    node["description"]=node["description"].replace(
+        "## Implementation Notes",
+        f"- Owner: task.\n- Seam ID: {seam}.\n\n## Implementation Notes",
+    )
+graph_path=Path(sys.argv[2])
+graph_path.write_text(json.dumps(source))
+graph_sha=hashlib.sha256(graph_path.read_bytes()).hexdigest()
+epoch={
+  "schema_version":1,"epoch_id":"e"*64,"status":"approved","approved_at":"2026-07-30T00:00:00Z",
+  "dirty_reason":None,"graph":{"path":"prepared.graph.json","sha256":graph_sha},
+  "artifacts":[],"seam_catalog":{"path":"seams.json","sha256":"f"*64},
+  "seams":[
+    {"id":"SEAM-APPROVAL","high_risk_boundaries":["authority","persistence"]},
+    {"id":"SEAM-EVIDENCE","high_risk_boundaries":["evidence"]}
+  ],"unresolved_decisions":[]
+}
+Path(sys.argv[3]).write_text(json.dumps(epoch))
+PY
 python3 "$VALIDATOR" prepare \
-  --graph "$ROOT/tests/fixtures/graph-plans/valid-vertical.json" --task-key t1 \
+  --graph "$TMP/prepared.graph.json" --epoch "$TMP/prepared.epoch.json" --task-key t1 \
   --task-id beads-superpowers-prepared \
   --base-commit 1111111111111111111111111111111111111111 \
   --worktree "$TMP/worktree" \
@@ -189,6 +248,8 @@ python3 "$VALIDATOR" prepare \
   --reviewed-dependency 2222222222222222222222222222222222222222 \
   --speculative-dependency '{"task_id":"dep-b","commit":"3333333333333333333333333333333333333333","frozen_interface":"APPROVAL-API","disjoint_resources":true,"discard_files":1,"rebase_commits":1}' \
   --prohibited .env --verify "focused::pytest tests/test_approval.py" \
+  --verify "sensitivity::pytest tests/test_approval.py -k denied" \
+  --verify "integration::pytest tests/test_approval.py" \
   --model-requested codex-5 --model-effective codex-5 --model-control explicit \
   --capability-tier isolated --context-mode isolated \
   --report-path .internal/sdd/prepared-report.md --output "$PREPARED"
@@ -197,13 +258,22 @@ python3 - "$PREPARED" <<'PY'
 import json, sys
 from pathlib import Path
 manifest=json.loads(Path(sys.argv[1]).read_text())
-assert manifest["workflow_version"] == "0.14.0"
+assert manifest["workflow_version"] == "0.15.0"
+assert manifest["execution_epoch"]["status"] == "approved"
+assert manifest["design_seams"] == ["SEAM-APPROVAL"]
+assert manifest["risk_boundaries"] == ["authority", "persistence"]
+assert manifest["integration_owner"] == "task"
+assert manifest["integration_seam_id"] == "SEAM-APPROVAL"
 assert manifest["allowed_write_set"] == ["src/approval.py", "tests/test_approval.py"]
 assert manifest["generated_write_set"] == [".internal/sdd/prepared-report.md"]
 assert len(manifest["write_scope_hash"]) == 64
 assert manifest["write_scope_amendments"] == []
 assert manifest["allocated_resources"]["exclusive"] == ["approval command contract"]
-assert manifest["verification_commands"] == [{"tier":"focused","command":"pytest tests/test_approval.py"}]
+assert manifest["verification_commands"] == [
+  {"tier":"focused","command":"pytest tests/test_approval.py"},
+  {"tier":"sensitivity","command":"pytest tests/test_approval.py -k denied"},
+  {"tier":"integration","command":"pytest tests/test_approval.py"}
+]
 assert manifest["speculative_dependency_commits"] == [{"task_id":"dep-b","commit":"3"*40,"frozen_interface":"APPROVAL-API","disjoint_resources":True,"discard_files":1,"rebase_commits":1}]
 PY
 

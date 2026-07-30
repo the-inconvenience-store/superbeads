@@ -5,6 +5,9 @@ description: Use when substantial product-affecting work lacks an adequate appro
 
 # Product Definition
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to product-contract prose. Preserve approved actors, domain terms, and outcome IDs.
+
 Establish product truth before solution design. The product contract owns actors, authority, vocabulary, lifecycle, journeys, examples, decisions, and stable outcomes. Brainstorming owns the technical solution.
 
 ## Artifact Ownership

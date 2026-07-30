@@ -23,6 +23,17 @@ for text in "Use when" "Claude" "Codex" "main agent" "subagent" "docs/reviews/" 
 done
 
 python3 "$REGISTRY_TOOL" validate --registry "$REGISTRY"
+python3 - "$REGISTRY" <<'PY'
+import json, re, sys
+from pathlib import Path
+registry=json.loads(Path(sys.argv[1]).read_text())
+pattern=next(item for item in registry["patterns"] if item["id"]=="RU-AP-007")
+expression=re.compile(pattern["detector"]["config"]["pattern"])
+assert expression.search("open docs/specs/feature.md")
+assert expression.search("git status; open docs/plans/feature.md")
+assert not expression.search("echo 'please open docs/specs/feature.md'")
+assert not expression.search("rg open docs/specs/feature.md")
+PY
 python3 "$COLLECT" discover \
   --claude-root "$FIXTURES/claude" --codex-root "$FIXTURES/codex" \
   --output "$TMP/manifest.json"
@@ -45,6 +56,42 @@ assert ("claude","claude-main","subagent") in sessions
 assert ("codex","codex-main","main") in sessions
 assert ("codex","codex-child","subagent") in sessions
 assert sum(event["content_available"] is False for event in events) == 1
+PY
+
+python3 - "$ANALYZE" <<'PY'
+import importlib.util
+import sys
+from pathlib import Path
+
+spec=importlib.util.spec_from_file_location("review_analyze", Path(sys.argv[1]))
+module=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+
+class CountingList(list):
+    iterations=0
+    def __iter__(self):
+        type(self).iterations += 1
+        return super().__iter__()
+
+events=CountingList([
+  {
+    "platform":"claude","source_path":"session.jsonl","session_id":"controller",
+    "agent_id":None,"agent_role":"main","tool_name":"Bash",
+    "command":"sleep 1; ps -ef; tail -n 20 worker.out","content_available":True,
+  }
+  for _ in range(11)
+])
+events.append({
+  "platform":"codex","source_path":"worker.jsonl","session_id":"leaf",
+  "agent_id":"leaf","agent_role":"subagent","tool_name":"wait_agent",
+  "command":None,"content_available":True,
+})
+metrics=module.corpus_metrics(events)
+assert CountingList.iterations <= 2, CountingList.iterations
+assert metrics["poll_events"] == 11, metrics
+assert metrics["poll_sessions"] == 1, metrics
+assert metrics["completion_wait_events"] == 1, metrics
+assert metrics["requested_sleep_seconds"] == 11.0, metrics
 PY
 
 cat >"$TMP/prior.json" <<'JSON'
@@ -91,6 +138,8 @@ grep -Fq "## Failure summary" "$TMP/docs/reviews/2026-07-23-fixture-superbeads-u
 grep -Fq "Pattern ID | Title | Status | Count | Per 100 sessions | Previous rate | Trend | Confidence" \
   "$TMP/docs/reviews/2026-07-23-fixture-superbeads-usage-review.md"
 grep -Fq "## Failure instances" "$TMP/docs/reviews/2026-07-23-fixture-superbeads-usage-review.md"
+grep -Fq "Requested sleep can overlap external work" \
+  "$TMP/docs/reviews/2026-07-23-fixture-superbeads-usage-review.md"
 grep -Fq "| RU-AP-006 | Episodic memory capture | active | 1 | 25.0 | 50.0 | falling | high |" \
   "$TMP/docs/reviews/2026-07-23-fixture-superbeads-usage-review.md"
 if python3 "$ANALYZE" render --data "$TMP/review.json" \

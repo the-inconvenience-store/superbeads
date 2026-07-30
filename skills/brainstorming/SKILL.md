@@ -5,6 +5,9 @@ description: Use when shaping a feature, component, or behavior change into an a
 
 # Brainstorming Ideas Into Designs
 
+Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
+to questions, design specifications, and workflow updates.
+
 Turn approved product truth into an approved solution design through grounded, economical dialogue.
 
 ## Artifact Ownership

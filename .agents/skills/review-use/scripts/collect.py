@@ -113,7 +113,15 @@ def codex_events(path: Path, records: Iterable[tuple[int, dict[str, Any]]]) -> I
         payload = record.get("payload") if isinstance(record.get("payload"), dict) else {}
         session_id = str(payload.get("session_id") or payload.get("id") or session_id)
         parent_id = str(payload.get("parent_thread_id")) if payload.get("parent_thread_id") else None
-        role = "subagent" if parent_id or payload.get("agent_role") not in {None, "controller", "main"} else "main"
+        codex_leaf = (
+            payload.get("source") == "exec"
+            or payload.get("originator") == "codex_exec"
+        )
+        role = "subagent" if (
+            parent_id
+            or codex_leaf
+            or payload.get("agent_role") not in {None, "controller", "main"}
+        ) else "main"
         break
     for line, record in buffered:
         payload = record.get("payload") if isinstance(record.get("payload"), dict) else {}
