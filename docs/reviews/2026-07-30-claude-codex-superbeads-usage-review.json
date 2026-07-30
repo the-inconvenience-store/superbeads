@@ -1,0 +1,296 @@
+{
+  "corpus": {
+    "coverage_by_host_role": [
+      {
+        "agent_role": "main",
+        "events": 28427,
+        "platform": "claude",
+        "sessions": 10,
+        "unavailable_content": 0
+      },
+      {
+        "agent_role": "subagent",
+        "events": 11489,
+        "platform": "claude",
+        "sessions": 51,
+        "unavailable_content": 0
+      },
+      {
+        "agent_role": "main",
+        "events": 216081,
+        "platform": "codex",
+        "sessions": 206,
+        "unavailable_content": 0
+      },
+      {
+        "agent_role": "subagent",
+        "events": 248317,
+        "platform": "codex",
+        "sessions": 170,
+        "unavailable_content": 0
+      }
+    ],
+    "discovery_files": {
+      "claude": 108,
+      "codex": 1232,
+      "total": 1340
+    },
+    "events": 504314,
+    "in_window_source_files": 1339,
+    "main_sessions": 216,
+    "selected_source_files": 437,
+    "sessions": 437,
+    "subagent_sessions": 221,
+    "unavailable_content": 0,
+    "wait_events": 13622,
+    "wait_events_per_session": 31.171625
+  },
+  "date": "2026-07-30",
+  "failures": [
+    {
+      "confidence": "high",
+      "count": 2,
+      "delta_previous": null,
+      "pattern_id": "RU-AP-001",
+      "previous_rate": null,
+      "rate_per_100_sessions": 0.4577,
+      "status": "active",
+      "title": "Recursive correction parenting",
+      "trend": "new"
+    },
+    {
+      "confidence": "high",
+      "count": 2,
+      "delta_previous": null,
+      "pattern_id": "RU-AP-002",
+      "previous_rate": null,
+      "rate_per_100_sessions": 0.4577,
+      "status": "active",
+      "title": "Outcome-lineage retry reset",
+      "trend": "new"
+    },
+    {
+      "confidence": "high",
+      "count": 1,
+      "delta_previous": null,
+      "pattern_id": "RU-AP-003",
+      "previous_rate": null,
+      "rate_per_100_sessions": 0.2288,
+      "status": "active",
+      "title": "Release verification in ordinary task work",
+      "trend": "new"
+    },
+    {
+      "confidence": "none",
+      "count": 0,
+      "delta_previous": null,
+      "pattern_id": "RU-AP-004",
+      "previous_rate": null,
+      "rate_per_100_sessions": 0.0,
+      "status": "active",
+      "title": "Unreviewed dependency represented as reviewed",
+      "trend": "new"
+    },
+    {
+      "confidence": "high",
+      "count": 4,
+      "delta_previous": null,
+      "pattern_id": "RU-AP-005",
+      "previous_rate": null,
+      "rate_per_100_sessions": 0.9153,
+      "status": "active",
+      "title": "Excessive controller polling",
+      "trend": "new"
+    },
+    {
+      "confidence": "none",
+      "count": 0,
+      "delta_previous": null,
+      "pattern_id": "RU-AP-006",
+      "previous_rate": null,
+      "rate_per_100_sessions": 0.0,
+      "status": "active",
+      "title": "Episodic memory capture",
+      "trend": "new"
+    },
+    {
+      "confidence": "none",
+      "count": 0,
+      "delta_previous": null,
+      "pattern_id": "RU-AP-007",
+      "previous_rate": null,
+      "rate_per_100_sessions": 0.0,
+      "status": "active",
+      "title": "Editor opened for finished artifact",
+      "trend": "new"
+    },
+    {
+      "confidence": "none",
+      "count": 0,
+      "delta_previous": null,
+      "pattern_id": "RU-AP-008",
+      "previous_rate": null,
+      "rate_per_100_sessions": 0.0,
+      "status": "active",
+      "title": "Long interval without stable slice closure",
+      "trend": "new"
+    }
+  ],
+  "instances": [
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "2f9eae6e6cf8a3b1a0afe60353ebe188c57248354b96f38e20bc8f77340ad48c",
+      "instance_id": "RU-AP-001-2f9eae6e6cf8",
+      "note": "A split-slice successor was attached beneath the corrective child rather than to a stable outcome/root.",
+      "pattern_id": "RU-AP-001",
+      "platform": "codex",
+      "session_id": "019f8d57-99d8-7e52-960a-104b054bf262",
+      "source_line": 1458,
+      "source_path": "/Users/samstevens/.codex/sessions/2026/07/23/rollout-2026-07-23T14-59-16-019f8d57-99d8-7e52-960a-104b054bf262.jsonl",
+      "timestamp": "2026-07-23T06:46:53.468Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "d175f01d63ba4f3dad587ad8e905341e9dfcea9aaecb6345e929b4445c79d35c",
+      "instance_id": "RU-AP-001-d175f01d63ba",
+      "note": "A separate one-file dependency repair was parented beneath an already seven-level-deep implementation lineage.",
+      "pattern_id": "RU-AP-001",
+      "platform": "codex",
+      "session_id": "019f8d57-99d8-7e52-960a-104b054bf262",
+      "source_line": 1211,
+      "source_path": "/Users/samstevens/.codex/sessions/2026/07/23/rollout-2026-07-23T14-59-16-019f8d57-99d8-7e52-960a-104b054bf262.jsonl",
+      "timestamp": "2026-07-23T06:30:21.502Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "34b2dc443a5f7cbaefa6133907a46c4784682f38228a168fefc0f0b9f3567f7e",
+      "instance_id": "RU-AP-002-34b2dc443a5f",
+      "note": "After six failed review rounds, a fresh bead and immutable review identity re-baselined the same unresolved inference-atomicity outcome.",
+      "pattern_id": "RU-AP-002",
+      "platform": "codex",
+      "session_id": "019f92b2-8581-7812-885c-25967a7072f8",
+      "source_line": 11075,
+      "source_path": "/Users/samstevens/.codex/sessions/2026/07/24/rollout-2026-07-24T15-56-40-019f92b2-8581-7812-885c-25967a7072f8.jsonl",
+      "timestamp": "2026-07-27T14:58:21.317Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "dcdae99be9ff39bbcff682df98b4afaf301c6599e07fd2d2fed6d8021889263e",
+      "instance_id": "RU-AP-002-dcdae99be9ff",
+      "note": "After the original slice exhausted its correction budget, a new slice identity carried forward the same user-only admission outcome.",
+      "pattern_id": "RU-AP-002",
+      "platform": "claude",
+      "session_id": "7a32b082-77dc-4baa-af73-18a81b102580",
+      "source_line": 906,
+      "source_path": "/Users/samstevens/.claude/projects/-Users-samstevens-labs-juno/7a32b082-77dc-4baa-af73-18a81b102580.jsonl",
+      "timestamp": "2026-07-29T14:37:27.844Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "f61012eb992ca07e7e4f2b190d7be274ac360b65abd965a8c11d42c0b5ce83da",
+      "instance_id": "RU-AP-003-f61012eb992c",
+      "note": "A one-file restore-enumeration correction ran the repository-wide unit gate and then the repository-wide integration gate.",
+      "pattern_id": "RU-AP-003",
+      "platform": "codex",
+      "session_id": "019f8d57-99d8-7e52-960a-104b054bf262",
+      "source_line": 1735,
+      "source_path": "/Users/samstevens/.codex/sessions/2026/07/23/rollout-2026-07-23T14-59-16-019f8d57-99d8-7e52-960a-104b054bf262.jsonl",
+      "timestamp": "2026-07-23T07:13:11.929Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "1c9aa6c615c3f7433255a1a31b7083b9cd06e19c5f2125349fe392345d431bca",
+      "instance_id": "RU-AP-005-1c9aa6c615c3",
+      "note": "Controller issued 25 dense wait calls over about 14 minutes during an active acceptance run.",
+      "pattern_id": "RU-AP-005",
+      "platform": "codex",
+      "session_id": "019fab77-9a09-7b12-bdab-98cd772b8c66",
+      "source_line": 21536,
+      "source_path": "/Users/samstevens/.codex/sessions/2026/07/29/rollout-2026-07-29T11-22-50-019fab77-9a09-7b12-bdab-98cd772b8c66.jsonl",
+      "timestamp": "2026-07-29T16:22:35.377Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "25bcf3577504c61e4e7594dcd3327b39d61e91900071e20e3080d19a21874032",
+      "instance_id": "RU-AP-005-25bcf3577504",
+      "note": "Controller issued 20 dense wait calls over about 11 minutes while the worker remained active.",
+      "pattern_id": "RU-AP-005",
+      "platform": "codex",
+      "session_id": "019f919b-79eb-73f2-b9d8-faf3142d7ba2",
+      "source_line": 50249,
+      "source_path": "/Users/samstevens/.codex/sessions/2026/07/24/rollout-2026-07-24T10-51-53-019f919b-79eb-73f2-b9d8-faf3142d7ba2.jsonl",
+      "timestamp": "2026-07-28T02:40:21.320Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "54633592517bf7d681cc7f62bbf28002d2252aa90805fb745f4b610743bfc0e8",
+      "instance_id": "RU-AP-005-54633592517b",
+      "note": "Controller issued 37 dense wait calls over about 36 minutes while workers and test gates remained active.",
+      "pattern_id": "RU-AP-005",
+      "platform": "codex",
+      "session_id": "019f92b2-8581-7812-885c-25967a7072f8",
+      "source_line": 5468,
+      "source_path": "/Users/samstevens/.codex/sessions/2026/07/24/rollout-2026-07-24T15-56-40-019f92b2-8581-7812-885c-25967a7072f8.jsonl",
+      "timestamp": "2026-07-24T13:08:35.668Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "b31a5aa1d6bc78c9c0bef74ba5cf54075d5f2a25db69033e27a82f13755ed2b0",
+      "instance_id": "RU-AP-005-b31a5aa1d6bc",
+      "note": "Controller issued 58 dense wait calls over about 38 minutes while implementation and tests were progressing.",
+      "pattern_id": "RU-AP-005",
+      "platform": "codex",
+      "session_id": "019f9784-fe79-79e0-a7a2-2e009e9b9fa7",
+      "source_line": 4679,
+      "source_path": "/Users/samstevens/.codex/sessions/2026/07/25/rollout-2026-07-25T14-25-03-019f9784-fe79-79e0-a7a2-2e009e9b9fa7.jsonl",
+      "timestamp": "2026-07-26T15:07:37.256Z"
+    }
+  ],
+  "limitations": [
+    "Discovery used file modification dates, then analysis retained only events timestamped from 2026-07-23T00:00:00Z through 2026-07-30T23:59:59Z.",
+    "The Superbeads selector required direct command evidence: a bd lifecycle command or a Superbeads skill/cache path; semantic use without such command evidence may be missed.",
+    "2,280 normalized events without timestamps and 67,458 events outside the event-time window were excluded.",
+    "No normalized event had unavailable content, but absence of unavailable markers does not prove every host surface was captured.",
+    "The detector used a signal-preserving 14,065-event projection because the full scanner stalls on this corpus; exact session, event, unavailable-content, and wait totals were restored from the full 504,314-event selected corpus.",
+    "No prior completed docs/reviews JSON companion exists, so this review is a baseline and cannot establish longitudinal direction."
+  ],
+  "previous_review_id": null,
+  "registry_changes": [],
+  "registry_revision": "60895f7ff02c2e1e3879ae67ea2db4cf5923e6104932179867602070ac33d14d",
+  "related_beads": [
+    "beads-superpowers-wrn",
+    "beads-superpowers-gkw",
+    "beads-superpowers-hpj",
+    "beads-superpowers-4zk",
+    "beads-superpowers-wls",
+    "beads-superpowers-bab"
+  ],
+  "review_id": "2026-07-30-claude-codex-superbeads-8d",
+  "schema_version": 1,
+  "scope": "claude-codex-2026-07-23-to-2026-07-30",
+  "status": "complete",
+  "vetting": {
+    "manual_review_scope": "Decisive source context for every retained instance plus all deterministic detector leads.",
+    "rejected_detector_leads": [
+      {
+        "count": 6,
+        "pattern_id": "RU-AP-007",
+        "reason": "All matches used open as prose or an argument; none invoked open(1) or code(1)."
+      },
+      {
+        "count": 1,
+        "pattern_id": "RU-AP-005",
+        "reason": "The synthetic corpus-level threshold instance was replaced by four source-addressable, manually confirmed controller-session instances."
+      }
+    ]
+  }
+}
