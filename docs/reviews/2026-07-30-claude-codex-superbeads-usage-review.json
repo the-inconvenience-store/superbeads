@@ -45,6 +45,94 @@
     "wait_events": 13622,
     "wait_events_per_session": 31.171625
   },
+  "gateway_postmortem": {
+    "artifact_evolution": {
+      "design_amendment_commits_after_execution_started": 19,
+      "graph_commits_after_approval": 15,
+      "initial_task_nodes": 12,
+      "later_install_reslice_tasks": 4,
+      "task_nodes_at_cutoff": 22
+    },
+    "cutoff": "2026-07-30T08:31:14.831Z",
+    "focused_corpus": {
+      "events": 134594,
+      "source_files": 300,
+      "coverage_by_host_role": [
+        {
+          "agent_role": "main",
+          "events": 24519,
+          "platform": "claude",
+          "source_files": 7
+        },
+        {
+          "agent_role": "subagent",
+          "events": 607,
+          "platform": "claude",
+          "source_files": 5
+        },
+        {
+          "agent_role": "main",
+          "events": 84819,
+          "platform": "codex",
+          "source_files": 257
+        },
+        {
+          "agent_role": "subagent",
+          "events": 24649,
+          "platform": "codex",
+          "source_files": 31
+        }
+      ],
+      "role_attribution_caveat": "Codex CLI leaf workers often lack parent_thread_id and therefore normalize as main; aggregate and host attribution are reliable, but the Codex role split undercounts leaf workers."
+    },
+    "juno_revision": "0b5993346614e1dcf76940645df26e4f51b57ac3",
+    "operational_amplifiers": {
+      "claude_gateway_controller_poll_commands": 457,
+      "handoff_files": 5,
+      "requested_sleep_seconds": 66953,
+      "reversion_passing_tests": 13
+    },
+    "root_causes": [
+      {
+        "confidence": "high",
+        "finding": "Procedural approval overstated operational closure at authority, proof-bearing caller, production composition, cross-process identity, state-ownership, and recovery seams."
+      },
+      {
+        "confidence": "high",
+        "finding": "Task manifests declared at most two risk labels while several acceptance surfaces consumed four to seven independently rejectable design seams."
+      },
+      {
+        "confidence": "high",
+        "finding": "Post-approval design and graph edits did not invalidate the live execution epoch or block further dispatch."
+      },
+      {
+        "confidence": "high",
+        "finding": "Contract-gap diagnoses became new implementation slices and identities instead of returning the affected outcome to design."
+      }
+    ],
+    "recovery_exit_criteria": [
+      "Unfinished server and standalone install outcomes have no unresolved user-owned design decisions and pass production-journey readiness traces.",
+      "A replacement graph rooted at the frozen green commit validates, and every task consumes no more than two independently verified high-risk seams.",
+      "No governing design or graph change occurs after the replacement execution epoch begins.",
+      "Built-binary server and supported standalone journeys pass end-to-end restart and revocation evidence.",
+      "The remaining t9 through t12 outcome closes without resetting task, graph, outcome, or finding lineage."
+    ],
+    "state_at_cutoff": {
+      "merged_original_slices": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8"
+      ],
+      "open_critical_path": "C,D -> t9 -> t10 || t11 -> t12",
+      "status": "materially implemented but not closeable"
+    },
+    "verdict": "Gateway was extensively planned, but its governing technical design and graph were not operationally closed. Execution review became architecture discovery, and the workflow lacked a binding transition that returned contract gaps to design."
+  },
   "date": "2026-07-30",
   "failures": [
     {
@@ -93,11 +181,11 @@
     },
     {
       "confidence": "high",
-      "count": 4,
+      "count": 8,
       "delta_previous": null,
       "pattern_id": "RU-AP-005",
       "previous_rate": null,
-      "rate_per_100_sessions": 0.9153,
+      "rate_per_100_sessions": 1.8307,
       "status": "active",
       "title": "Excessive controller polling",
       "trend": "new"
@@ -133,6 +221,17 @@
       "rate_per_100_sessions": 0.0,
       "status": "active",
       "title": "Long interval without stable slice closure",
+      "trend": "new"
+    },
+    {
+      "confidence": "high",
+      "count": 1,
+      "delta_previous": null,
+      "pattern_id": "RU-AP-009",
+      "previous_rate": null,
+      "rate_per_100_sessions": 0.2288,
+      "status": "active",
+      "title": "Execution over an unclosed governing design",
       "trend": "new"
     }
   ],
@@ -253,6 +352,71 @@
       "source_line": 4679,
       "source_path": "/Users/samstevens/.codex/sessions/2026/07/25/rollout-2026-07-25T14-25-03-019f9784-fe79-79e0-a7a2-2e009e9b9fa7.jsonl",
       "timestamp": "2026-07-26T15:07:37.256Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "18489206d208f440bcc7a42af4874685bb7d289a2f0b8fbf5d8ce9c21b7105fb",
+      "instance_id": "RU-AP-005-18489206d208",
+      "note": "The Gateway controller issued 378 poll-like shell sleep calls, requesting 44,975 seconds, while checking worker, event, output, or process state.",
+      "pattern_id": "RU-AP-005",
+      "platform": "claude",
+      "session_id": "32175a3a-f3ee-4039-82ff-c57b069adfb8",
+      "source_line": 261,
+      "source_path": "/Users/samstevens/.claude/projects/-Users-samstevens-labs-juno/32175a3a-f3ee-4039-82ff-c57b069adfb8.jsonl",
+      "timestamp": "2026-07-24T10:09:42.429Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "3ddefddcd4ea043a25b35b76f92898405348bd4354ce933d257770dd8266c4f7",
+      "instance_id": "RU-AP-005-3ddefddcd4ea",
+      "note": "The Gateway controller issued 47 poll-like shell sleep calls, requesting 12,101 seconds, while checking worker, event, output, or process state.",
+      "pattern_id": "RU-AP-005",
+      "platform": "claude",
+      "session_id": "f5b42cf8-c212-415a-a247-2fb16ecd606a",
+      "source_line": 387,
+      "source_path": "/Users/samstevens/.claude/projects/-Users-samstevens-labs-juno/f5b42cf8-c212-415a-a247-2fb16ecd606a.jsonl",
+      "timestamp": "2026-07-29T06:14:28.870Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "f3c0f3da825699e3d48a5c762cf776c75679c0fa09d1a31522e32bc2d1eca6c6",
+      "instance_id": "RU-AP-005-f3c0f3da8256",
+      "note": "The Gateway controller issued 20 poll-like shell sleep calls, requesting 8,770 seconds, while checking worker, event, output, or process state.",
+      "pattern_id": "RU-AP-005",
+      "platform": "claude",
+      "session_id": "7a32b082-77dc-4baa-af73-18a81b102580",
+      "source_line": 326,
+      "source_path": "/Users/samstevens/.claude/projects/-Users-samstevens-labs-juno/7a32b082-77dc-4baa-af73-18a81b102580.jsonl",
+      "timestamp": "2026-07-29T12:10:00.534Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "0743f22d6d204be8a91fe3f8704af8502a78036b055bf203b6130ef4cf4ce2b9",
+      "instance_id": "RU-AP-005-0743f22d6d20",
+      "note": "The Gateway controller issued 12 poll-like shell sleep calls, requesting 1,107 seconds, while checking worker, event, output, or process state.",
+      "pattern_id": "RU-AP-005",
+      "platform": "claude",
+      "session_id": "091c7594-4386-4db6-abe6-7d956b9bb5d3",
+      "source_line": 632,
+      "source_path": "/Users/samstevens/.claude/projects/-Users-samstevens-labs-juno/091c7594-4386-4db6-abe6-7d956b9bb5d3.jsonl",
+      "timestamp": "2026-07-30T00:56:59.909Z"
+    },
+    {
+      "agent_id": null,
+      "confidence": "high",
+      "evidence_hash": "a37774c5671ca3e8d60916f925b348181b06bf0cba500fe1f78f33d9281d5fcc",
+      "instance_id": "RU-AP-009-a37774c5671c",
+      "note": "Six days after formal approval and repeated implementation amendments, the remaining standalone slice still required genuine user-owned decisions about the authority root, profile enrollment, migration, and OS-identity threat model.",
+      "pattern_id": "RU-AP-009",
+      "platform": "claude",
+      "session_id": "091c7594-4386-4db6-abe6-7d956b9bb5d3",
+      "source_line": 2710,
+      "source_path": "/Users/samstevens/.claude/projects/-Users-samstevens-labs-juno/091c7594-4386-4db6-abe6-7d956b9bb5d3.jsonl",
+      "timestamp": "2026-07-30T08:27:30.376Z"
     }
   ],
   "limitations": [
@@ -261,18 +425,28 @@
     "2,280 normalized events without timestamps and 67,458 events outside the event-time window were excluded.",
     "No normalized event had unavailable content, but absence of unavailable markers does not prove every host surface was captured.",
     "The detector used a signal-preserving 14,065-event projection because the full scanner stalls on this corpus; exact session, event, unavailable-content, and wait totals were restored from the full 504,314-event selected corpus.",
+    "RU-AP-005's deterministic detector sees normalized wait tools, not Claude Bash commands that combine sleep with state inspection. The four Gateway Claude instances and their session-level totals were manually reviewed; requested sleep does not establish serial elapsed waste or that every wait was avoidable.",
+    "The focused Gateway cutoff is 2026-07-30T08:31:14.831Z. Later resolution of the open C/D decisions cannot be inferred.",
     "No prior completed docs/reviews JSON companion exists, so this review is a baseline and cannot establish longitudinal direction."
   ],
   "previous_review_id": null,
-  "registry_changes": [],
-  "registry_revision": "60895f7ff02c2e1e3879ae67ea2db4cf5923e6104932179867602070ac33d14d",
+  "registry_changes": [
+    {
+      "action": "added",
+      "pattern_id": "RU-AP-009",
+      "reason": "The Gateway campaign exposed a phase-transition defect distinct from correction topology, retry identity, and closure interval: execution continued while governing design changes invalidated the approved execution basis."
+    }
+  ],
+  "registry_revision": "96b6779a1025683437a4820af1f4da70d672664d15a22c8341ece69be959ce71",
   "related_beads": [
     "beads-superpowers-wrn",
     "beads-superpowers-gkw",
     "beads-superpowers-hpj",
     "beads-superpowers-4zk",
     "beads-superpowers-wls",
-    "beads-superpowers-bab"
+    "beads-superpowers-bab",
+    "beads-superpowers-gg7",
+    "beads-superpowers-9cw"
   ],
   "review_id": "2026-07-30-claude-codex-superbeads-8d",
   "schema_version": 1,
@@ -289,7 +463,7 @@
       {
         "count": 1,
         "pattern_id": "RU-AP-005",
-        "reason": "The synthetic corpus-level threshold instance was replaced by four source-addressable, manually confirmed controller-session instances."
+        "reason": "The synthetic corpus-level threshold instance was replaced by four source-addressable Codex controller instances; the focused Gateway extension then added four manually confirmed Claude shell-polling instances."
       }
     ]
   }
