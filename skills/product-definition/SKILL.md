@@ -1,6 +1,6 @@
 ---
 name: product-definition
-description: Use when substantial product-affecting work lacks an adequate approved product contract, or the existing contract is incomplete, conflicting, or needs product discovery.
+description: Use when the user asks to establish, repair, or revise a formal product contract or explicitly requests product discovery before solution design.
 ---
 
 # Product Definition
@@ -8,7 +8,7 @@ description: Use when substantial product-affecting work lacks an adequate appro
 Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
 to product-contract prose. Preserve approved actors, domain terms, and outcome IDs.
 
-Establish product truth before solution design. The product contract owns actors, authority, vocabulary, lifecycle, journeys, examples, decisions, and stable outcomes. Brainstorming owns the technical solution.
+Create an optional supporting artifact for product truth. The product contract owns actors, authority, vocabulary, lifecycle, journeys, examples, decisions, and stable outcomes. Brainstorming owns the technical solution and does not require this artifact.
 
 ## Artifact Ownership
 
@@ -20,9 +20,8 @@ The product contract owns **what must be true for actors and the product**: auth
 
 - If an adequate approved product contract already covers the request, **do not invoke this skill**; the existing contract routes to brainstorming after its path and revision are recorded.
 - If complete requirements are already supplied, normalize them into the contract. **Do not ask the user to repeat** resolved facts.
-- Small work that needs no formal specification or plan does not require a contract.
+- A missing contract never blocks a technical spec. Invoke this skill only when the user wants the product-contract artifact or product-discovery workflow.
 - A deterministic internal change may bypass only when it changes **no user-visible behavior, durable business rule, workflow, terminology, or external interface**. Use the exact bypass form in the template and validate it.
-- Otherwise, use this skill. A contract artifact may be required even though invoking this skill is conditional.
 
 ## Required Inputs
 

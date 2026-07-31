@@ -76,7 +76,8 @@ for heading in \
   }
 done
 
-grep -Fq "adequate approved product contract" "$SKILL"
+grep -Fq "Use when the user asks to establish" "$SKILL"
+grep -Fq "optional supporting artifact" "$SKILL"
 grep -Fq "do not invoke this skill" "$SKILL"
 grep -Fq "Do not ask the user to repeat" "$SKILL"
 grep -Fq "routes to brainstorming" "$SKILL"

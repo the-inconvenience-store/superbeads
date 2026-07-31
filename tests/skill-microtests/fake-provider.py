@@ -93,14 +93,29 @@ def main() -> int:
                 "no_repeat": 1.0,
                 "evidence_questions": 1.0,
                 "safe_batching": 0.75 if args.sample_index % 2 else 1.0,
-                "narrow_product_route": 1.0,
+                "optional_product_definition": 1.0,
             }
         else:
             scores = {
                 "no_repeat": 0.0,
                 "evidence_questions": 0.25,
                 "safe_batching": 0.0,
-                "narrow_product_route": 0.0,
+                "optional_product_definition": 0.0,
+            }
+    elif "brainstorming-contract-optional-v1" in prompt:
+        if args.variant == "candidate":
+            scores = {
+                "continues_without_contract": 1.0,
+                "uses_supplied_requirements": 1.0,
+                "records_assumptions": 1.0,
+                "no_product_definition_detour": 1.0,
+            }
+        else:
+            scores = {
+                "continues_without_contract": 0.0,
+                "uses_supplied_requirements": 0.25,
+                "records_assumptions": 0.0,
+                "no_product_definition_detour": 0.0,
             }
     elif "stress-test-novelty-v1" in prompt:
         if args.variant == "candidate":

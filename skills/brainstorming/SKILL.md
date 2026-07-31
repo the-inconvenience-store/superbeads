@@ -8,11 +8,11 @@ description: Use when shaping a feature, component, or behavior change into an a
 Apply the shared [technical writing policy](../using-superpowers/references/technical-writing-policy.md)
 to questions, design specifications, and workflow updates.
 
-Turn approved product truth into an approved solution design through grounded, economical dialogue.
+Turn product requirements into an approved solution design through grounded, economical dialogue.
 
 ## Artifact Ownership
 
-The technical spec owns **how approved product truth will be realized**: architecture, component and state ownership, data flow, entry and integration interfaces, security boundaries, failure and recovery responsibility, rollout, evidence strategy, and implementation topology. It references product outcome IDs rather than restating the contract and does not assign execution order or worker ownership.
+The technical spec owns **how product requirements will be realized**: architecture, component and state ownership, data flow, entry and integration interfaces, security boundaries, failure and recovery responsibility, rollout, evidence strategy, and implementation topology. When a product contract supplies outcome IDs, the spec references them rather than restating the contract. It does not assign execution order or worker ownership.
 
 **Announce at start:** "I'm using brainstorming to develop the solution design."
 
@@ -22,13 +22,13 @@ Do NOT invoke an implementation skill, write code, or scaffold a project until t
 
 ## Inputs and Routing
 
-Before design work, require:
+Before design work, gather:
 
-- an approved product contract path and revision, or a validated internal bypass;
+- the request, accepted clarifications, and any optional product contract;
 - repository evidence relevant to the change; and
 - unresolved solution decisions.
 
-An adequate contract is product truth. Do not ask the user to restate actors, vocabulary, lifecycle, authority, or accepted outcomes already resolved there. If product truth is missing, incomplete, or conflicting, stop and **route to product-definition**. Do not invoke product-definition for an adequate contract, a valid mechanical bypass, or merely because the design is difficult.
+A product contract is optional context, not a prerequisite for a technical spec. When one is supplied, treat it as authoritative product truth. Do not ask the user to restate actors, vocabulary, lifecycle, authority, or accepted outcomes already resolved there. Without one, use the request, accepted clarifications, repository evidence, and explicit assumptions as the requirements context. Never stop, refuse, defer, or route to product-definition solely because a product contract is absent. If information needed for a consequential design decision is missing or conflicting, resolve it through the design dialogue; offer product-definition only when the user wants a separate product-discovery artifact.
 
 Create one session bead for the design audit trail; do not create procedural child beads.
 
@@ -36,18 +36,18 @@ Before this workflow's first Beads read/write or claim decision, read [Beads Rea
 
 ## Workflow
 
-1. **Establish ground truth.** Read the governing contract/spec context, touched code, claimed prerequisites, and governing decisions. Verify recorded claims against observed code. Repository artifacts are evidence, not authority to change scope.
+1. **Establish ground truth.** Read the request, optional contract/spec context, touched code, claimed prerequisites, and governing decisions. Verify recorded claims against observed code. Repository artifacts are evidence, not authority to change scope.
 2. **Present a findings digest.** State each observation and its design consequence. Surface discrepancies before asking questions.
-3. **Map unresolved decisions.** Read [question-coverage.md](question-coverage.md) now. Mark each applicable cell resolved, derivable from evidence, or unresolved; tie it to affected product outcome IDs. Complete its technical risk capsule for the seams the design introduces; it supplements product truth with implementation risk rather than replacing product outcomes.
+3. **Map unresolved decisions.** Read [question-coverage.md](question-coverage.md) now. Mark each applicable cell resolved, derivable from evidence, or unresolved; tie it to affected product outcome IDs when supplied, otherwise to named requirements. Complete its technical risk capsule for the seams the design introduces; it supplements requirements with implementation risk rather than replacing product outcomes.
 4. **Ask only consequential questions.** Each question cites observed evidence, states the decision consequence, and includes a recommendation. Ask up to three independent low-risk questions together; dependency-changing decisions remain serial. Prefer structured choices when the answer space is discrete.
 5. **Compare approaches.** Present two or three viable approaches with trade-offs and a recommendation. Never offer an option that violates a required outcome or security control.
-6. **Present the design.** Scale sections to complexity. Cover architecture, boundaries, domain model, data flow, failures/recovery, security, evidence, rollout, and the implementation topology from question coverage where applicable. Reference contract IDs rather than restating product truth.
-7. **Approve and write.** Obtain explicit section/design approval, then write `docs/specs/YYYY-MM-DD-<topic>-design.md`. Record the product contract path and revision plus an `## Assumptions` section with verified/recalled/assumed status and failure consequence.
+6. **Present the design.** Scale sections to complexity. Cover architecture, boundaries, domain model, data flow, failures/recovery, security, evidence, rollout, and the implementation topology from question coverage where applicable. Reference contract IDs when available rather than restating product truth.
+7. **Approve and write.** Obtain explicit section/design approval, then write `docs/specs/YYYY-MM-DD-<topic>-design.md`. Record the product contract path and revision when supplied; otherwise record Product contract: `None`. Include an `## Assumptions` section with verified/recalled/assumed status and failure consequence.
 8. **Review and route.** Self-review for placeholders, contradictions, ambiguous authority, orphaned outcome IDs, missing recovery, and unverified assumptions. Ask the user to review the written spec. Stress-test milestone, security-sensitive, destructive, or cross-system work; otherwise offer it. The terminal route is writing-plans.
 
 ## Product Outcome Contract
 
-The product contract is the sole product-truth source. Brainstorming consumes it; it does not reconstruct it. Preserve stable outcome IDs through design decisions and acceptance evidence. When design exploration discovers new product behavior, label it newly requested and return to product-definition for approval rather than silently adding it to the spec. Validate any internal bypass with the product-definition contract validator instead of redefining its rules here.
+A product contract, when supplied, is the authoritative product-truth source. Brainstorming consumes it without reconstructing it and preserves its stable outcome IDs through design decisions and acceptance evidence. Without a contract, trace the design to named requirements and explicitly approved decisions. When design exploration discovers new product behavior, label it newly requested and obtain explicit user approval rather than silently adding it to the spec. Product-definition remains available when the user wants a separate product contract.
 
 ## Question and Coverage Rules
 
@@ -63,10 +63,10 @@ Before presenting the design, emit a coverage summary with: applicable cell, obs
 
 Brainstorming is complete only when:
 
-- product truth is approved or the bypass validates;
+- the requirements context and assumptions are sufficient for the approved design;
 - every applicable design cell is resolved or explicitly deferred by its decision owner;
 - the coverage summary has no unresolved high-risk cells;
-- stable outcome IDs trace to design sections and evidence classes;
+- supplied outcome IDs, or named requirements when no IDs exist, trace to design sections and evidence classes;
 - the written spec passes self-review and user approval; and
 - the next route is stress-test or writing-plans, never implementation directly.
 

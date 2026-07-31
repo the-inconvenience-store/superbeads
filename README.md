@@ -14,7 +14,7 @@ A plugin for Claude Code, Codex, OpenCode, and 6 more AI coding agents that make
 
 ## How it works
 
-For substantial product work, the agent first establishes an approved **product-definition** contract: actors, authority, lifecycle, invariants, counterexamples, and stable outcome IDs. **Brainstorming** explores the solution against that product truth, **stress-test** searches systematically for complications, and **writing-plans** compiles the result into a dependency graph of vertical slices. This product-definition step is conditional, not mandatory for small fixes or already-complete requirements.
+For product work, **brainstorming** develops the technical spec from supplied requirements, repository evidence, and explicit assumptions. A **product-definition** contract—actors, authority, lifecycle, invariants, counterexamples, and stable outcome IDs—is optional supporting context when the user wants a separate product-discovery artifact. Its absence never blocks a spec. **Stress-test** searches systematically for complications, and **writing-plans** compiles the result into a dependency graph of vertical slices.
 
 During implementation, **subagent-driven-development** gives each worker one bounded Context Manifest, one task, and an isolated worktree. A rolling resource-aware scheduler starts newly unblocked work while fresh task reviews run, then merges approved slices and recomputes readiness. Unsupported hosts declare a host-limited serial fallback instead of claiming parallel isolation. Current acceptance evidence—not a completion claim—controls task and epic closure. `bd` stores tasks, decisions, and notes in a local Dolt database so work can resume without relying on chat history.
 
@@ -50,7 +50,7 @@ Underneath all of it is a production-grade standard: the agent treats every task
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `brainstorming`                  | Socratic design session before any code — produces a spec bead                                                       |
 | `stress-test`                    | Adversarial interrogation of plans with recommended answers                                                          |
-| `product-definition`             | Conditionally establishes approved product truth before solution design                                               |
+| `product-definition`             | Creates an optional product-truth contract when the user requests one                                                  |
 | `writing-plans`                  | Compiles approved outcomes into a validated dependency graph of working vertical slices                              |
 | `executing-plans`                | Executes a validated graph inline with evidence checkpoints                                                          |
 | `using-git-worktrees`            | Isolated development branches per task                                                                               |

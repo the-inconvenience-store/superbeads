@@ -1,0 +1,23 @@
+{
+  "id": "brainstorming-contract-optional",
+  "control_prompt": "brainstorming-contract-optional-v1 control: Tell the maintainer whether the technical spec can proceed without the product contract, and take the next workflow action.",
+  "candidate_prompt": "brainstorming-contract-optional-v1 candidate: Write the technical spec from the supplied requirements and repository evidence even though no product contract exists. Record the missing contract as None, make assumptions explicit, and do not stop or route to product-definition solely because the contract is absent.",
+  "candidate_skill_paths": [
+    "skills/brainstorming/SKILL.md",
+    "skills/brainstorming/question-coverage.md"
+  ],
+  "rubric": {
+    "version": "1",
+    "pass_score": 0.9,
+    "criteria": [
+      {"id": "continues_without_contract", "weight": 0.25},
+      {"id": "uses_supplied_requirements", "weight": 0.25},
+      {"id": "records_assumptions", "weight": 0.25},
+      {"id": "no_product_definition_detour", "weight": 0.25}
+    ]
+  },
+  "output_schema": "tests/skill-microtests/schemas/result.schema.json",
+  "fixture_paths": [
+    "design-coverage/no-contract-request.md"
+  ]
+}

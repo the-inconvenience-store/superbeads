@@ -20,9 +20,11 @@ require_text() {
 
 require_text "$BRAIN" "product contract path and revision"
 require_text "$BRAIN" "Do not ask the user to restate"
+require_text "$BRAIN" "A product contract is optional context, not a prerequisite for a technical spec."
+require_text "$BRAIN" "Never stop, refuse, defer, or route to product-definition solely because a product contract is absent."
+require_text "$BRAIN" 'Product contract: `None`'
 require_text "$BRAIN" "up to three independent"
 require_text "$BRAIN" "dependency-changing decisions remain serial"
-require_text "$BRAIN" "route to product-definition"
 require_text "$BRAIN" "coverage summary"
 require_text "$BRAIN" "unresolved high-risk"
 require_text "$BRAIN" "Agent-Filed Bead Discipline"
@@ -31,8 +33,9 @@ require_text "$QUESTIONS" "Affected outcome IDs"
 require_text "$QUESTIONS" "Known product fact"
 require_text "$QUESTIONS" "Technical Risk Capsule"
 require_text "$QUESTIONS" "Acceptance surface"
+require_text "$QUESTIONS" "with or without a product contract"
 require_text "$BRAIN" "technical risk capsule"
-require_text "$BRAIN" "supplements product truth"
+require_text "$BRAIN" "supplements requirements"
 
 for column in Applicable Evidence "Question / recommendation" "Falsifying example" Resolution "Affected outcome IDs"; do
   require_text "$MATRIX" "$column"
@@ -76,7 +79,8 @@ shutil.rmtree(Path(raw_line.split("=", 1)[1]))
 PY
 }
 
-run_scenario brainstorming-product-aware "no_repeat,evidence_questions,safe_batching,narrow_product_route"
+run_scenario brainstorming-product-aware "no_repeat,evidence_questions,safe_batching,optional_product_definition"
+run_scenario brainstorming-contract-optional "continues_without_contract,uses_supplied_requirements,records_assumptions,no_product_definition_detour"
 run_scenario stress-test-novelty "applicability_matrix,novel_complication,falsifying_case,outcome_trace,security_evidence"
 
 echo "PASS: product-aware design coverage contract"
